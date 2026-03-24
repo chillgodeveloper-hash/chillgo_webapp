@@ -81,7 +81,7 @@ export default function FeedPage() {
               onClick={() => setCategory('all')}
               className={`px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 ${
                 category === 'all'
-                  ? 'bg-dark-DEFAULT text-white shadow-md scale-105'
+                  ? 'bg-dark-DEFAULT text-primary shadow-md scale-105'
                   : 'bg-primary-light text-tmain border border-primary/30 hover:bg-primary/20'
               }`}
             >
@@ -91,7 +91,7 @@ export default function FeedPage() {
               onClick={() => setCategory('guide')}
               className={`px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 flex items-center gap-1.5 ${
                 category === 'guide'
-                  ? 'bg-secondary text-white shadow-md scale-105'
+                  ? 'bg-secondary text-tmain shadow-md scale-105'
                   : 'bg-primary-light text-tmain border border-primary/30 hover:bg-primary/20'
               }`}
             >
@@ -101,7 +101,7 @@ export default function FeedPage() {
               onClick={() => setCategory('car_rental')}
               className={`px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 flex items-center gap-1.5 ${
                 category === 'car_rental'
-                  ? 'bg-info text-white shadow-md scale-105'
+                  ? 'bg-info text-tmain shadow-md scale-105'
                   : 'bg-primary-light text-tmain border border-primary/30 hover:bg-primary/20'
               }`}
             >

@@ -21,7 +21,7 @@ export default function TopHeader() {
             <Bell size={18} />
             <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-danger rounded-full border-2 border-primary" />
           </button>
-          <Link href="/dashboard/customer" className="w-9 h-9 rounded-full bg-secondary flex items-center justify-center text-white font-bold text-sm shadow-sm">
+          <Link href="/dashboard/customer" className="w-9 h-9 rounded-full bg-secondary flex items-center justify-center text-tmain font-bold text-sm shadow-sm">
             {user?.full_name?.charAt(0) || '?'}
           </Link>
         </div>

@@ -59,13 +59,13 @@ export default function PostCard({ post, onBook }: PostCardProps) {
                 <>
                   <button
                     onClick={() => setCurrentImage((p) => Math.max(0, p - 1))}
-                    className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/30 backdrop-blur-sm rounded-full flex items-center justify-center text-white"
+                    className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/30 backdrop-blur-sm rounded-full flex items-center justify-center text-primary-light"
                   >
                     <ChevronLeft size={18} />
                   </button>
                   <button
                     onClick={() => setCurrentImage((p) => Math.min(images.length - 1, p + 1))}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/30 backdrop-blur-sm rounded-full flex items-center justify-center text-white"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/30 backdrop-blur-sm rounded-full flex items-center justify-center text-primary-light"
                   >
                     <ChevronRight size={18} />
                   </button>
@@ -115,7 +115,7 @@ export default function PostCard({ post, onBook }: PostCardProps) {
             <button
               onClick={() => setLiked(!liked)}
               className={`flex items-center gap-1.5 text-sm transition ${
-                liked ? 'text-danger' : 'text-tmuted hover:text-danger'
+                liked ? 'text-danger' : 'text-tmuted hover:bg-danger/10'
               }`}
             >
               <Heart size={20} fill={liked ? 'currentColor' : 'none'} />
