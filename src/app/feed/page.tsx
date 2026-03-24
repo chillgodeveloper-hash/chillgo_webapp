@@ -81,8 +81,8 @@ export default function FeedPage() {
               onClick={() => setCategory('all')}
               className={`px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 ${
                 category === 'all'
-                  ? 'bg-dark-DEFAULT text-primary shadow-md scale-105'
-                  : 'bg-primary-light text-tmain border border-primary/30 hover:bg-primary/20'
+                  ? 'bg-secondary text-tmain shadow-md scale-105 border-2 border-secondary'
+                  : 'bg-white text-tmain border-2 border-primary-dark hover:bg-primary/30'
               }`}
             >
               ทั้งหมด
@@ -91,8 +91,8 @@ export default function FeedPage() {
               onClick={() => setCategory('guide')}
               className={`px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 flex items-center gap-1.5 ${
                 category === 'guide'
-                  ? 'bg-secondary text-tmain shadow-md scale-105'
-                  : 'bg-primary-light text-tmain border border-primary/30 hover:bg-primary/20'
+                  ? 'bg-secondary text-tmain shadow-md scale-105 border-2 border-secondary'
+                  : 'bg-white text-tmain border-2 border-primary-dark hover:bg-primary/30'
               }`}
             >
               <Map size={14} /> ไกด์
@@ -101,8 +101,8 @@ export default function FeedPage() {
               onClick={() => setCategory('car_rental')}
               className={`px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 flex items-center gap-1.5 ${
                 category === 'car_rental'
-                  ? 'bg-info text-tmain shadow-md scale-105'
-                  : 'bg-primary-light text-tmain border border-primary/30 hover:bg-primary/20'
+                  ? 'bg-info text-tmain shadow-md scale-105 border-2 border-info'
+                  : 'bg-white text-tmain border-2 border-primary-dark hover:bg-primary/30'
               }`}
             >
               <Car size={14} /> รถเช่า
