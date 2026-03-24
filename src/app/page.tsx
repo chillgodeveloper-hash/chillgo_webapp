@@ -1,150 +1,147 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase-client';
 import { useAuthStore } from '@/hooks/useAuthStore';
-import AppLayout from '@/components/layout/AppLayout';
-import CreatePostForm from '@/components/feed/CreatePostForm';
-import { Trash2, Eye, EyeOff, Edit, BarChart3, Package } from 'lucide-react';
-import { Post } from '@/types';
+import { Map, Car, ShoppingBag, ArrowRight } from 'lucide-react';
 
-export default function PartnerDashboard() {
-  const [posts, setPosts] = useState<Post[]>([]);
-  const [stats, setStats] = useState({ totalPosts: 0, totalBookings: 0, revenue: 0 });
-  const [loading, setLoading] = useState(true);
-  const { user, partnerProfile } = useAuthStore();
+export default function RoleSelectionPage() {
+  const [selectedRole, setSelectedRole] = useState<'customer' | 'partner' | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<'guide' | 'car_rental' | null>(null);
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
   const supabase = createClient();
+  const { user, setUser } = useAuthStore();
 
-  const fetchData = async () => {
-    if (!partnerProfile) return;
+  const handleSubmit = async () => {
+    if (!selectedRole || !user) return;
     setLoading(true);
 
-    const { data: postsData } = await supabase
-      .from('posts')
-      .select('*')
-      .eq('partner_id', partnerProfile.id)
-      .order('created_at', { ascending: false });
+    const { error } = await supabase
+      .from('profiles')
+      .update({ role: selectedRole })
+      .eq('id', user.id);
 
-    const { count: bookingCount } = await supabase
-      .from('bookings')
-      .select('*', { count: 'exact', head: true })
-      .eq('partner_id', user?.id);
+    if (error) {
+      setLoading(false);
+      return;
+    }
 
-    const { data: paidBookings } = await supabase
-      .from('bookings')
-      .select('total_price')
-      .eq('partner_id', user?.id)
-      .in('status', ['paid', 'completed']);
-
-    const revenue = paidBookings?.reduce((sum, b) => sum + (b.total_price || 0), 0) || 0;
-
-    setPosts(postsData || []);
-    setStats({
-      totalPosts: postsData?.length || 0,
-      totalBookings: bookingCount || 0,
-      revenue,
-    });
-    setLoading(false);
-  };
-
-  useEffect(() => { fetchData(); }, [partnerProfile]);
-
-  const handleDeletePost = async (postId: string) => {
-    if (!confirm('ต้องการลบโพสต์นี้?')) return;
-    await supabase.from('posts').delete().eq('id', postId);
-    fetchData();
-  };
-
-  const handleTogglePost = async (postId: string, currentStatus: string) => {
-    const newStatus = currentStatus === 'active' ? 'removed' : 'active';
-    await supabase.from('posts').update({ status: newStatus }).eq('id', postId);
-    fetchData();
+    if (selectedRole === 'partner' && selectedCategory) {
+      await supabase.from('partner_profiles').insert({
+        user_id: user.id,
+        category: selectedCategory,
+        business_name: user.full_name,
+        description: '',
+        portfolio_images: [],
+        is_verified: false,
+      });
+      setUser({ ...user, role: 'partner' });
+      router.push('/dashboard/partner/setup');
+    } else {
+      setUser({ ...user, role: 'customer' });
+      router.push('/feed');
+    }
   };
 
   return (
-    <AppLayout>
-      <div className="max-w-4xl mx-auto px-4 lg:px-0">
-        <h1 className="text-2xl font-bold text-gray-800 mb-6 hidden lg:block">จัดการโพสต์</h1>
-
-        <div className="grid grid-cols-3 gap-3 mb-6">
-          <div className="bg-white rounded-2xl p-4 border border-gray-100">
-            <Package size={20} className="text-secondary mb-2" />
-            <p className="text-2xl font-bold text-gray-800">{stats.totalPosts}</p>
-            <p className="text-xs text-gray-500">โพสต์ทั้งหมด</p>
-          </div>
-          <div className="bg-white rounded-2xl p-4 border border-gray-100">
-            <BarChart3 size={20} className="text-info mb-2" />
-            <p className="text-2xl font-bold text-gray-800">{stats.totalBookings}</p>
-            <p className="text-xs text-gray-500">การจองทั้งหมด</p>
-          </div>
-          <div className="bg-white rounded-2xl p-4 border border-gray-100">
-            <span className="text-secondary text-lg">฿</span>
-            <p className="text-2xl font-bold text-gray-800">{stats.revenue.toLocaleString()}</p>
-            <p className="text-xs text-gray-500">รายได้</p>
-          </div>
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
+      <div className="max-w-lg w-full">
+        <div className="text-center mb-8">
+          <h1 className="font-display text-3xl font-bold text-gray-800">คุณต้องการใช้งานในฐานะ?</h1>
+          <p className="text-gray-500 mt-2">เลือกบทบาทของคุณใน #ChillGo</p>
         </div>
 
-        <div className="mb-6">
-          <CreatePostForm onSuccess={fetchData} />
+        <div className="space-y-4 mb-6">
+          <button
+            onClick={() => { setSelectedRole('customer'); setSelectedCategory(null); }}
+            className={`w-full p-6 rounded-2xl border-2 text-left transition-all ${
+              selectedRole === 'customer'
+                ? 'border-primary bg-primary-light shadow-lg'
+                : 'border-gray-200 bg-white hover:border-primary/50'
+            }`}
+          >
+            <div className="flex items-center gap-4">
+              <div className={`w-14 h-14 rounded-2xl flex items-center justify-center ${
+                selectedRole === 'customer' ? 'bg-primary' : 'bg-gray-100'
+              }`}>
+                <ShoppingBag size={28} className={selectedRole === 'customer' ? 'text-dark-DEFAULT' : 'text-gray-400'} />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-gray-800">ลูกค้า (Customer)</h3>
+                <p className="text-sm text-gray-500">ค้นหาและจองบริการไกด์ รถเช่า</p>
+              </div>
+            </div>
+          </button>
+
+          <button
+            onClick={() => setSelectedRole('partner')}
+            className={`w-full p-6 rounded-2xl border-2 text-left transition-all ${
+              selectedRole === 'partner'
+                ? 'border-secondary bg-orange-50 shadow-lg'
+                : 'border-gray-200 bg-white hover:border-secondary/50'
+            }`}
+          >
+            <div className="flex items-center gap-4">
+              <div className={`w-14 h-14 rounded-2xl flex items-center justify-center ${
+                selectedRole === 'partner' ? 'bg-secondary' : 'bg-gray-100'
+              }`}>
+                <Map size={28} className={selectedRole === 'partner' ? 'text-white' : 'text-gray-400'} />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-gray-800">พาร์ทเนอร์ (Partner)</h3>
+                <p className="text-sm text-gray-500">เสนอบริการไกด์หรือรถเช่าของคุณ</p>
+              </div>
+            </div>
+          </button>
         </div>
 
-        <h2 className="font-bold text-gray-800 mb-3">โพสต์ของฉัน</h2>
-
-        {loading ? (
-          <div className="space-y-3">
-            {[1, 2].map((i) => (
-              <div key={i} className="bg-white rounded-2xl p-4 animate-pulse">
-                <div className="h-5 bg-gray-200 rounded w-1/2 mb-2" />
-                <div className="h-4 bg-gray-200 rounded w-1/3" />
-              </div>
-            ))}
-          </div>
-        ) : posts.length === 0 ? (
-          <div className="text-center py-12 bg-white rounded-2xl">
-            <p className="text-4xl mb-2">📝</p>
-            <p className="text-gray-500">ยังไม่มีโพสต์</p>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {posts.map((post) => (
-              <div key={post.id} className="bg-white rounded-2xl p-4 border border-gray-100 flex items-center gap-4">
-                {post.media_urls[0] && (
-                  <img src={post.media_urls[0]} alt="" className="w-16 h-16 rounded-xl object-cover flex-shrink-0" />
-                )}
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-gray-800 truncate">{post.title}</h3>
-                  <p className="text-sm text-gray-500 truncate">{post.content}</p>
-                  <div className="flex items-center gap-2 mt-1">
-                    <span className={`text-xs px-2 py-0.5 rounded-full ${
-                      post.status === 'active' ? 'bg-success/10 text-success' : 'bg-gray-100 text-gray-500'
-                    }`}>
-                      {post.status === 'active' ? 'แสดงอยู่' : 'ซ่อนอยู่'}
-                    </span>
-                    {post.price_min && (
-                      <span className="text-xs text-secondary font-medium">฿{post.price_min.toLocaleString()}</span>
-                    )}
-                  </div>
-                </div>
-                <div className="flex gap-1 flex-shrink-0">
-                  <button
-                    onClick={() => handleTogglePost(post.id, post.status)}
-                    className="w-9 h-9 rounded-lg bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-gray-200 transition"
-                    title={post.status === 'active' ? 'ซ่อน' : 'แสดง'}
-                  >
-                    {post.status === 'active' ? <EyeOff size={16} /> : <Eye size={16} />}
-                  </button>
-                  <button
-                    onClick={() => handleDeletePost(post.id)}
-                    className="w-9 h-9 rounded-lg bg-danger/10 flex items-center justify-center text-danger hover:bg-danger/20 transition"
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                </div>
-              </div>
-            ))}
+        {selectedRole === 'partner' && (
+          <div className="bg-white rounded-2xl p-6 mb-6 border border-gray-200 animate-fade-in">
+            <h3 className="font-bold text-gray-800 mb-4">เลือกประเภทบริการ</h3>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                onClick={() => setSelectedCategory('guide')}
+                className={`p-4 rounded-xl border-2 text-center transition-all ${
+                  selectedCategory === 'guide'
+                    ? 'border-primary bg-primary-light'
+                    : 'border-gray-200 hover:border-primary/50'
+                }`}
+              >
+                <Map size={32} className="mx-auto mb-2 text-secondary" />
+                <p className="font-semibold text-sm">ไกด์</p>
+              </button>
+              <button
+                onClick={() => setSelectedCategory('car_rental')}
+                className={`p-4 rounded-xl border-2 text-center transition-all ${
+                  selectedCategory === 'car_rental'
+                    ? 'border-primary bg-primary-light'
+                    : 'border-gray-200 hover:border-primary/50'
+                }`}
+              >
+                <Car size={32} className="mx-auto mb-2 text-info" />
+                <p className="font-semibold text-sm">รถเช่า</p>
+              </button>
+            </div>
           </div>
         )}
+
+        <button
+          onClick={handleSubmit}
+          disabled={!selectedRole || (selectedRole === 'partner' && !selectedCategory) || loading}
+          className="w-full bg-primary hover:bg-primary-dark text-dark-DEFAULT font-bold py-4 rounded-2xl transition-all flex items-center justify-center gap-2 disabled:opacity-40 shadow-lg shadow-primary/30"
+        >
+          {loading ? (
+            <div className="w-5 h-5 border-2 border-dark-DEFAULT/30 border-t-dark-DEFAULT rounded-full animate-spin" />
+          ) : (
+            <>
+              ดำเนินการต่อ
+              <ArrowRight size={20} />
+            </>
+          )}
+        </button>
       </div>
-    </AppLayout>
+    </div>
   );
 }

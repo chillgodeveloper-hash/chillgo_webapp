@@ -3,142 +3,130 @@
 import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase-client';
 import AppLayout from '@/components/layout/AppLayout';
-import { Search, CheckCircle, XCircle, AlertCircle, Eye } from 'lucide-react';
-import { Booking } from '@/types';
+import { UserCheck, Ban, Search, Star, Map, Car } from 'lucide-react';
 
-export default function AdminBookingsPage() {
-  const [bookings, setBookings] = useState<Booking[]>([]);
+export default function AdminPartnersPage() {
+  const [partners, setPartners] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState('all');
+  const [search, setSearch] = useState('');
   const supabase = createClient();
 
-  const fetchBookings = async () => {
+  const fetchPartners = async () => {
     setLoading(true);
     let query = supabase
-      .from('bookings')
-      .select(`
-        *,
-        customer:profiles!bookings_customer_id_fkey(*),
-        partner:partner_profiles(*, profile:profiles(*)),
-        post:posts(*)
-      `)
+      .from('partner_profiles')
+      .select('*, profile:profiles(*)')
       .order('created_at', { ascending: false });
 
-    if (filter !== 'all') {
-      query = query.eq('status', filter);
-    }
-
     const { data } = await query;
-    setBookings(data || []);
+    setPartners(data || []);
     setLoading(false);
   };
 
-  useEffect(() => { fetchBookings(); }, [filter]);
+  useEffect(() => { fetchPartners(); }, []);
 
-  const handleApprove = async (id: string) => {
-    await supabase.from('bookings').update({ status: 'confirmed' }).eq('id', id);
-    fetchBookings();
+  const toggleVerify = async (partnerId: string, current: boolean) => {
+    await supabase
+      .from('partner_profiles')
+      .update({ is_verified: !current })
+      .eq('id', partnerId);
+    fetchPartners();
   };
 
-  const handleReject = async (id: string) => {
-    const reason = prompt('เหตุผล:');
-    if (reason === null) return;
-    await supabase.from('bookings').update({ status: 'cancelled', admin_note: reason }).eq('id', id);
-    fetchBookings();
-  };
-
-  const statusBadge = (status: string) => {
-    const map: Record<string, { label: string; cls: string }> = {
-      pending: { label: 'รออนุมัติ', cls: 'bg-yellow-100 text-yellow-700' },
-      confirmed: { label: 'ยืนยัน', cls: 'bg-green-100 text-green-700' },
-      paid: { label: 'ชำระแล้ว', cls: 'bg-emerald-100 text-emerald-700' },
-      in_progress: { label: 'ดำเนินการ', cls: 'bg-blue-100 text-blue-700' },
-      completed: { label: 'เสร็จ', cls: 'bg-gray-100 text-gray-600' },
-      cancelled: { label: 'ยกเลิก', cls: 'bg-red-100 text-red-600' },
-      alternative_offered: { label: 'เสนอทางเลือก', cls: 'bg-purple-100 text-purple-700' },
-    };
-    const s = map[status] || map.pending;
-    return <span className={`${s.cls} px-2.5 py-0.5 rounded-full text-xs font-medium`}>{s.label}</span>;
-  };
-
-  const filters = [
-    { value: 'all', label: 'ทั้งหมด' },
-    { value: 'pending', label: 'รออนุมัติ' },
-    { value: 'confirmed', label: 'ยืนยัน' },
-    { value: 'paid', label: 'ชำระแล้ว' },
-    { value: 'completed', label: 'เสร็จ' },
-    { value: 'cancelled', label: 'ยกเลิก' },
-  ];
+  const filtered = partners.filter((p) =>
+    !search ||
+    p.business_name?.toLowerCase().includes(search.toLowerCase()) ||
+    p.profile?.full_name?.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
     <AppLayout>
-      <div className="max-w-5xl mx-auto px-4 lg:px-0">
-        <h1 className="text-2xl font-bold text-gray-800 mb-6">รายการจองทั้งหมด</h1>
+      <div className="max-w-4xl mx-auto px-4 lg:px-0">
+        <h1 className="text-2xl font-bold text-gray-800 mb-6">จัดการพาร์ทเนอร์</h1>
 
-        <div className="flex gap-2 overflow-x-auto pb-2 mb-4">
-          {filters.map((f) => (
-            <button
-              key={f.value}
-              onClick={() => setFilter(f.value)}
-              className={`px-4 py-2 rounded-full text-xs font-medium whitespace-nowrap transition ${
-                filter === f.value ? 'bg-dark-DEFAULT text-white' : 'bg-white text-gray-600 border hover:bg-gray-50'
-              }`}
-            >
-              {f.label}
-            </button>
-          ))}
+        <div className="relative mb-4">
+          <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="ค้นหาพาร์ทเนอร์..."
+            className="w-full pl-11 pr-4 py-3 rounded-2xl bg-white border border-gray-200 focus:border-primary outline-none"
+          />
         </div>
 
-        <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
-          {loading ? (
-            <div className="p-4 space-y-3">
-              {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="h-16 bg-gray-100 rounded-lg animate-pulse" />
-              ))}
-            </div>
-          ) : bookings.length === 0 ? (
-            <div className="p-8 text-center text-gray-400">ไม่พบรายการ</div>
-          ) : (
-            <div className="divide-y divide-gray-50">
-              {bookings.map((booking) => (
-                <div key={booking.id} className="p-4 hover:bg-gray-50/50 transition">
-                  <div className="flex items-start justify-between mb-2">
-                    <div>
-                      <p className="font-semibold text-sm text-gray-800">{booking.post?.title}</p>
-                      <p className="text-xs text-gray-500 mt-0.5">
-                        {booking.customer?.full_name} → {booking.partner?.profile?.full_name}
-                      </p>
-                    </div>
-                    {statusBadge(booking.status)}
+        {loading ? (
+          <div className="space-y-3">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="bg-white rounded-2xl p-4 animate-pulse">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-full bg-gray-200" />
+                  <div className="flex-1 space-y-2">
+                    <div className="w-1/3 h-4 bg-gray-200 rounded" />
+                    <div className="w-1/4 h-3 bg-gray-200 rounded" />
                   </div>
-                  <div className="flex flex-wrap gap-3 text-xs text-gray-500 mb-2">
-                    <span>📅 {new Date(booking.booking_date).toLocaleDateString('th-TH')}</span>
-                    <span>👥 {booking.guests} คน</span>
-                    {booking.total_price && (
-                      <span className="text-secondary font-medium">฿{booking.total_price.toLocaleString()}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {filtered.map((partner) => (
+              <div key={partner.id} className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 rounded-full bg-primary/20 flex items-center justify-center text-primary-dark font-bold text-lg flex-shrink-0">
+                    {partner.profile?.avatar_url ? (
+                      <img src={partner.profile.avatar_url} alt="" className="w-full h-full rounded-full object-cover" />
+                    ) : (
+                      partner.profile?.full_name?.charAt(0)
                     )}
                   </div>
-                  {booking.status === 'pending' && (
-                    <div className="flex gap-2 mt-2">
-                      <button
-                        onClick={() => handleApprove(booking.id)}
-                        className="flex items-center gap-1 bg-success text-white px-3 py-1.5 rounded-lg text-xs font-medium"
-                      >
-                        <CheckCircle size={14} /> อนุมัติ
-                      </button>
-                      <button
-                        onClick={() => handleReject(booking.id)}
-                        className="flex items-center gap-1 bg-danger text-white px-3 py-1.5 rounded-lg text-xs font-medium"
-                      >
-                        <XCircle size={14} /> ปฏิเสธ
-                      </button>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <p className="font-semibold text-gray-800">{partner.business_name}</p>
+                      {partner.is_verified && (
+                        <span className="text-xs bg-success/10 text-success px-2 py-0.5 rounded-full">✓ ยืนยัน</span>
+                      )}
                     </div>
-                  )}
+                    <p className="text-sm text-gray-500">{partner.profile?.full_name} · {partner.profile?.email}</p>
+                    <div className="flex items-center gap-3 mt-1">
+                      <span className={`text-xs px-2 py-0.5 rounded-full ${
+                        partner.category === 'guide' ? 'bg-secondary/10 text-secondary' : 'bg-info/10 text-info'
+                      }`}>
+                        {partner.category === 'guide' ? '🗺️ ไกด์' : '🚗 รถเช่า'}
+                      </span>
+                      {partner.rating > 0 && (
+                        <span className="text-xs text-gray-500 flex items-center gap-0.5">
+                          <Star size={10} className="text-primary fill-primary" />
+                          {partner.rating.toFixed(1)}
+                        </span>
+                      )}
+                      <span className="text-xs text-gray-400">
+                        ผลงาน: {partner.portfolio_images?.length || 0} รูป
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex gap-2 flex-shrink-0">
+                    <button
+                      onClick={() => toggleVerify(partner.id, partner.is_verified)}
+                      className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium transition ${
+                        partner.is_verified
+                          ? 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                          : 'bg-success text-white hover:bg-success/90'
+                      }`}
+                    >
+                      {partner.is_verified ? (
+                        <><Ban size={14} /> ยกเลิกยืนยัน</>
+                      ) : (
+                        <><UserCheck size={14} /> ยืนยัน</>
+                      )}
+                    </button>
+                  </div>
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </AppLayout>
   );
