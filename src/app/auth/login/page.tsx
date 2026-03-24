@@ -20,7 +20,8 @@ export default function LoginPage() {
     setError('');
     setLoading(true);
 
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const loginEmail = email.includes('@') ? email : `${email}@chillgo.local`;
+    const { error } = await supabase.auth.signInWithPassword({ email: loginEmail, password });
 
     if (error) {
       setError(error.message === 'Invalid login credentials'
@@ -76,13 +77,13 @@ export default function LoginPage() {
 
             <form onSubmit={handleLogin} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">อีเมล</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">อีเมล หรือ ชื่อผู้ใช้</label>
                 <input
-                  type="email"
+                  type="text"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition"
-                  placeholder="your@email.com"
+                  placeholder="your@email.com หรือ admin"
                   required
                 />
               </div>
