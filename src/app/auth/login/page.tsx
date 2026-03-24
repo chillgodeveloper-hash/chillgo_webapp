@@ -61,7 +61,7 @@ export default function LoginPage() {
       <div className="w-full lg:w-1/2 flex items-center justify-center p-6">
         <div className="w-full max-w-md">
           <div className="lg:hidden text-center mb-8">
-            <h1 className="font-display text-4xl font-extrabold text-primary-dark">#ChillGo</h1>
+            <h1 className="font-display text-4xl font-extrabold text-primary-text">#ChillGo</h1>
             <p className="text-gray-500 mt-1">จัดทริปง่าย ๆ สไตล์คุณ</p>
           </div>
 

@@ -70,7 +70,7 @@ export default function FeedPage() {
             />
             <button
               type="button"
-              className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center text-primary-dark hover:bg-primary/20 transition"
+              className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center text-primary-text hover:bg-primary/20 transition"
             >
               <SlidersHorizontal size={16} />
             </button>

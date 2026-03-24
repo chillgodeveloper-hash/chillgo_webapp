@@ -66,7 +66,7 @@ export default function AdminCustomersPage() {
               {filtered.map((customer) => (
                 <div key={customer.id} className="p-4 flex flex-col lg:grid lg:grid-cols-4 lg:items-center gap-2 lg:gap-4 hover:bg-gray-50/50 transition">
                   <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-full bg-primary/20 flex items-center justify-center text-primary-dark font-bold text-sm">
+                    <div className="w-9 h-9 rounded-full bg-primary/20 flex items-center justify-center text-primary-text font-bold text-sm">
                       {customer.full_name?.charAt(0)}
                     </div>
                     <span className="font-medium text-gray-800 text-sm">{customer.full_name}</span>

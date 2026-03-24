@@ -22,13 +22,13 @@ export default function CustomerDashboard() {
       <div className="max-w-md mx-auto px-4 lg:px-0">
         <div className="bg-white rounded-3xl p-6 border border-gray-100 mb-4">
           <div className="flex items-center gap-4">
-            <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center text-primary-dark font-bold text-2xl">
+            <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center text-primary-text font-bold text-2xl">
               {user?.full_name?.charAt(0) || '?'}
             </div>
             <div>
               <h2 className="text-xl font-bold text-gray-800">{user?.full_name}</h2>
               <p className="text-sm text-gray-500">{user?.email}</p>
-              <span className="inline-block mt-1 text-xs bg-primary-light text-primary-dark px-3 py-0.5 rounded-full font-medium capitalize">
+              <span className="inline-block mt-1 text-xs bg-primary-light text-primary-text px-3 py-0.5 rounded-full font-medium capitalize">
                 {user?.role}
               </span>
             </div>

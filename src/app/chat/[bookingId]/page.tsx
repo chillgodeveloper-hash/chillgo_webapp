@@ -82,7 +82,7 @@ export default function ChatPage() {
           <Link href="/booking" className="text-gray-400 hover:text-gray-600 lg:hidden">
             <ArrowLeft size={20} />
           </Link>
-          <div className="w-9 h-9 rounded-full bg-primary/20 flex items-center justify-center text-primary-dark font-bold text-sm">
+          <div className="w-9 h-9 rounded-full bg-primary/20 flex items-center justify-center text-primary-text font-bold text-sm">
             💬
           </div>
           <div>

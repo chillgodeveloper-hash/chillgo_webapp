@@ -24,7 +24,7 @@ export default function PostCard({ post, onBook }: PostCardProps) {
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden animate-slide-up">
       <div className="flex items-center gap-3 p-4">
-        <div className="w-11 h-11 rounded-full bg-primary/20 flex items-center justify-center text-primary-dark font-bold">
+        <div className="w-11 h-11 rounded-full bg-primary/20 flex items-center justify-center text-primary-text font-bold">
           {partner?.profile?.full_name?.charAt(0) || 'P'}
         </div>
         <div className="flex-1">
@@ -104,7 +104,7 @@ export default function PostCard({ post, onBook }: PostCardProps) {
 
         {partner?.rating !== undefined && partner.rating > 0 && (
           <div className="flex items-center gap-1 mb-3">
-            <Star size={14} className="text-primary fill-primary" />
+            <Star size={14} className="text-amber-500 fill-amber-500" />
             <span className="text-sm font-medium">{partner.rating.toFixed(1)}</span>
             <span className="text-xs text-gray-400">({partner.total_reviews} รีวิว)</span>
           </div>

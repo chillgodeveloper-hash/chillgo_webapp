@@ -74,7 +74,7 @@ export default function AdminPartnersPage() {
             {filtered.map((partner) => (
               <div key={partner.id} className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
                 <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 rounded-full bg-primary/20 flex items-center justify-center text-primary-dark font-bold text-lg flex-shrink-0">
+                  <div className="w-14 h-14 rounded-full bg-primary/20 flex items-center justify-center text-primary-text font-bold text-lg flex-shrink-0">
                     {partner.profile?.avatar_url ? (
                       <img src={partner.profile.avatar_url} alt="" className="w-full h-full rounded-full object-cover" />
                     ) : (
@@ -97,7 +97,7 @@ export default function AdminPartnersPage() {
                       </span>
                       {partner.rating > 0 && (
                         <span className="text-xs text-gray-500 flex items-center gap-0.5">
-                          <Star size={10} className="text-primary fill-primary" />
+                          <Star size={10} className="text-amber-500 fill-amber-500" />
                           {partner.rating.toFixed(1)}
                         </span>
                       )}

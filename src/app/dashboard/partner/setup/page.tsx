@@ -122,7 +122,7 @@ export default function PartnerSetupPage() {
                   {avatarPreview ? (
                     <img src={avatarPreview} alt="" className="w-full h-full object-cover" />
                   ) : (
-                    <Camera size={32} className="text-primary-dark" />
+                    <Camera size={32} className="text-primary-text" />
                   )}
                 </div>
                 <input ref={avatarRef} type="file" accept="image/*" onChange={handleAvatarSelect} className="hidden" />

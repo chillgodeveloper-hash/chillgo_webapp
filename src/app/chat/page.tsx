@@ -72,7 +72,7 @@ export default function ChatListPage() {
                   href={`/chat/${chat.id}`}
                   className="flex items-center gap-3 bg-white rounded-2xl p-4 border border-gray-100 hover:border-primary/30 hover:shadow-sm transition"
                 >
-                  <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center text-primary-dark font-bold">
+                  <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center text-primary-text font-bold">
                     {otherPerson?.charAt(0) || '?'}
                   </div>
                   <div className="flex-1 min-w-0">

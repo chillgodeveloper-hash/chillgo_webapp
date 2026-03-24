@@ -13,7 +13,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
-          <Loader2 size={40} className="text-primary animate-spin mx-auto mb-3" />
+          <Loader2 size={40} className="text-secondary animate-spin mx-auto mb-3" />
           <p className="text-gray-500">กำลังโหลด...</p>
         </div>
       </div>

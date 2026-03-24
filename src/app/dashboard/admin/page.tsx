@@ -164,7 +164,7 @@ export default function AdminDashboard() {
           </div>
           <div className="flex items-center gap-2">
             <div className="w-9 h-9 rounded-full bg-primary/20 flex items-center justify-center">
-              <span className="text-sm font-bold text-primary-dark">{user?.full_name?.charAt(0)}</span>
+              <span className="text-sm font-bold text-primary-text">{user?.full_name?.charAt(0)}</span>
             </div>
             <span className="text-sm font-medium text-gray-700 hidden lg:inline">Admin</span>
           </div>
@@ -173,7 +173,7 @@ export default function AdminDashboard() {
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
             <div className="w-10 h-10 rounded-xl bg-primary-light flex items-center justify-center mb-3">
-              <Users size={20} className="text-primary-dark" />
+              <Users size={20} className="text-primary-text" />
             </div>
             <p className="text-2xl font-bold text-gray-800">{stats.totalPartners.toLocaleString()}</p>
             <p className="text-xs text-gray-500 mt-0.5">Total Partners</p>

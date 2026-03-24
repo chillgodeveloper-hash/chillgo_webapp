@@ -127,7 +127,7 @@ export default function Sidebar() {
 
       <div className="p-4 border-t border-white/10">
         <div className="flex items-center gap-3 mb-3 px-2">
-          <div className="w-9 h-9 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-sm">
+          <div className="w-9 h-9 rounded-full bg-primary/20 flex items-center justify-center text-primary-dark font-bold text-sm">
             {user?.full_name?.charAt(0) || '?'}
           </div>
           <div className="flex-1 min-w-0">

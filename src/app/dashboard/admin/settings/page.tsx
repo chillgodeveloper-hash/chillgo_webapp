@@ -13,7 +13,7 @@ export default function AdminSettingsPage() {
           <div className="bg-white rounded-2xl p-6 border border-gray-100">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 rounded-xl bg-primary-light flex items-center justify-center">
-                <Globe size={20} className="text-primary-dark" />
+                <Globe size={20} className="text-primary-text" />
               </div>
               <div>
                 <h3 className="font-semibold text-gray-800">ตั้งค่าทั่วไป</h3>

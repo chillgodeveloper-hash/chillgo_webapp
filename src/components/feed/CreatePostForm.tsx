@@ -131,7 +131,7 @@ export default function CreatePostForm({ onSuccess }: CreatePostFormProps) {
   return (
     <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 lg:p-6">
       <div className="flex items-center gap-3 mb-4">
-        <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary-dark font-bold text-sm">
+        <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary-text font-bold text-sm">
           {user?.full_name?.charAt(0)}
         </div>
         <p className="font-semibold text-gray-800">{partnerProfile?.business_name}</p>

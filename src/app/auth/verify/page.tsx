@@ -28,7 +28,7 @@ export default function VerifyPage() {
       <div className="bg-white rounded-3xl shadow-xl p-8 max-w-md w-full text-center">
         {status === 'loading' && (
           <>
-            <Loader2 size={48} className="text-primary animate-spin mx-auto mb-4" />
+            <Loader2 size={48} className="text-secondary animate-spin mx-auto mb-4" />
             <p className="text-gray-600">กำลังยืนยันอีเมล...</p>
           </>
         )}
