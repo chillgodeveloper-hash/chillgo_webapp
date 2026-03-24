@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase-client';
 import { useAuthStore } from '@/hooks/useAuthStore';
-import { Map, Car, ShoppingBag, ArrowRight } from 'lucide-react';
+import { Map, Car, ShoppingBag, ArrowRight, LogOut } from 'lucide-react';
 
 export default function RoleSelectionPage() {
   const [selectedRole, setSelectedRole] = useState<'customer' | 'partner' | null>(null);
@@ -13,6 +13,11 @@ export default function RoleSelectionPage() {
   const router = useRouter();
   const supabase = createClient();
   const { user, setUser } = useAuthStore();
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.push('/auth/login');
+  };
 
   const handleSubmit = async () => {
     if (!selectedRole || !user) return;
@@ -48,6 +53,15 @@ export default function RoleSelectionPage() {
   return (
     <div className="min-h-screen bg-primary-light flex items-center justify-center p-6">
       <div className="max-w-lg w-full">
+        <div className="flex justify-end mb-4">
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-1.5 text-sm text-danger hover:text-danger/80 transition px-3 py-2 rounded-xl hover:bg-danger/5"
+          >
+            <LogOut size={16} /> ออกจากระบบ
+          </button>
+        </div>
+
         <div className="text-center mb-8">
           <h1 className="font-display text-3xl font-bold text-tmain">คุณต้องการใช้งานในฐานะ?</h1>
           <p className="text-tmuted mt-2">เลือกบทบาทของคุณใน #ChillGo</p>

@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase-client';
 import { useAuthStore } from '@/hooks/useAuthStore';
-import { Camera, ImagePlus, X, CheckCircle, ArrowRight } from 'lucide-react';
+import { Camera, ImagePlus, X, CheckCircle, ArrowRight, Loader2, LogOut, ArrowLeft } from 'lucide-react';
 import { validateFile } from '@/lib/moderation';
 
 export default function PartnerSetupPage() {
@@ -15,12 +15,39 @@ export default function PartnerSetupPage() {
   const [description, setDescription] = useState('');
   const [portfolioFiles, setPortfolioFiles] = useState<{ file: File; preview: string }[]>([]);
   const [loading, setLoading] = useState(false);
+  const [pageLoading, setPageLoading] = useState(true);
   const [error, setError] = useState('');
+  const [localPartnerProfile, setLocalPartnerProfile] = useState<any>(null);
   const avatarRef = useRef<HTMLInputElement>(null);
   const portfolioRef = useRef<HTMLInputElement>(null);
-  const { user, partnerProfile, setPartnerProfile } = useAuthStore();
+  const { user, partnerProfile, setPartnerProfile, setUser } = useAuthStore();
   const supabase = createClient();
   const router = useRouter();
+
+  useEffect(() => {
+    const init = async () => {
+      setPageLoading(true);
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) { router.push('/auth/login'); return; }
+
+      let currentUser = user;
+      if (!currentUser) {
+        const { data: profile } = await supabase.from('profiles').select('*').eq('id', session.user.id).single();
+        if (profile) { setUser(profile); currentUser = profile; }
+      }
+
+      let pp = partnerProfile;
+      if (!pp && currentUser) {
+        const { data } = await supabase.from('partner_profiles').select('*').eq('user_id', currentUser.id).single();
+        if (data) { setPartnerProfile(data); pp = data; }
+      }
+
+      setLocalPartnerProfile(pp);
+      if (pp) setBusinessName(pp.business_name || '');
+      setPageLoading(false);
+    };
+    init();
+  }, []);
 
   const handleAvatarSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -43,7 +70,8 @@ export default function PartnerSetupPage() {
   };
 
   const handleSubmit = async () => {
-    if (!user || !partnerProfile) return;
+    if (!user) { setError('กรุณาเข้าสู่ระบบ'); return; }
+    if (!localPartnerProfile) { setError('ไม่พบข้อมูลพาร์ทเนอร์ กรุณาลองใหม่'); return; }
     setLoading(true);
     setError('');
 
@@ -52,7 +80,8 @@ export default function PartnerSetupPage() {
       if (avatarFile) {
         const ext = avatarFile.name.split('.').pop();
         const path = `avatars/${user.id}.${ext}`;
-        await supabase.storage.from('media').upload(path, avatarFile, { upsert: true });
+        const { error: uploadErr } = await supabase.storage.from('media').upload(path, avatarFile, { upsert: true });
+        if (uploadErr) console.error('Avatar upload:', uploadErr);
         const { data: { publicUrl } } = supabase.storage.from('media').getPublicUrl(path);
         avatarUrl = publicUrl;
         await supabase.from('profiles').update({ avatar_url: avatarUrl }).eq('id', user.id);
@@ -62,23 +91,26 @@ export default function PartnerSetupPage() {
       for (const { file } of portfolioFiles) {
         const ext = file.name.split('.').pop();
         const path = `portfolio/${user.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-        await supabase.storage.from('media').upload(path, file);
+        const { error: upErr } = await supabase.storage.from('media').upload(path, file);
+        if (upErr) { console.error('Portfolio upload:', upErr); continue; }
         const { data: { publicUrl } } = supabase.storage.from('media').getPublicUrl(path);
         portfolioUrls.push(publicUrl);
       }
 
-      await supabase
+      const { error: updateErr } = await supabase
         .from('partner_profiles')
         .update({
-          business_name: businessName || partnerProfile.business_name,
+          business_name: businessName || localPartnerProfile.business_name,
           description,
           portfolio_images: portfolioUrls,
         })
-        .eq('id', partnerProfile.id);
+        .eq('id', localPartnerProfile.id);
+
+      if (updateErr) throw updateErr;
 
       setPartnerProfile({
-        ...partnerProfile,
-        business_name: businessName || partnerProfile.business_name,
+        ...localPartnerProfile,
+        business_name: businessName || localPartnerProfile.business_name,
         description,
         portfolio_images: portfolioUrls,
       });
@@ -91,9 +123,46 @@ export default function PartnerSetupPage() {
     }
   };
 
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.push('/auth/login');
+  };
+
+  const handleSwitchToCustomer = async () => {
+    if (!user) return;
+    await supabase.from('partner_profiles').delete().eq('user_id', user.id);
+    await supabase.from('profiles').update({ role: 'customer' }).eq('id', user.id);
+    setUser({ ...user, role: 'customer' });
+    setPartnerProfile(null);
+    router.push('/feed');
+  };
+
+  if (pageLoading) {
+    return (
+      <div className="min-h-screen bg-primary-light flex items-center justify-center">
+        <Loader2 size={40} className="text-secondary animate-spin" />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-primary-light flex items-center justify-center p-6">
       <div className="max-w-lg w-full">
+        <div className="flex items-center justify-between mb-6">
+          <button
+            onClick={handleSwitchToCustomer}
+            className="flex items-center gap-1.5 text-sm text-tmuted hover:text-secondary transition px-3 py-2 rounded-xl hover:bg-white/50"
+          >
+            <ArrowLeft size={16} /> เปลี่ยนเป็นลูกค้า
+          </button>
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-1.5 text-sm text-danger hover:text-danger/80 transition px-3 py-2 rounded-xl hover:bg-danger/5"
+          >
+            <LogOut size={16} /> ออกจากระบบ
+          </button>
+        </div>
+
         <div className="text-center mb-8">
           <h1 className="font-display text-3xl font-bold text-gray-800">ตั้งค่าโปรไฟล์พาร์ทเนอร์</h1>
           <p className="text-gray-500 mt-2">ขั้นตอนที่ {step} จาก 2</p>
