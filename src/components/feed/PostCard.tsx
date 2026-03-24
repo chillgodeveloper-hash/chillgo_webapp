@@ -22,7 +22,7 @@ export default function PostCard({ post, onBook }: PostCardProps) {
   const categoryColor = post.category === 'guide' ? 'bg-secondary/10 text-secondary' : 'bg-info/10 text-info';
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden animate-slide-up">
+    <div className="bg-white rounded-2xl shadow-sm border border-primary/15 overflow-hidden animate-slide-up hover:border-primary/30 transition-colors duration-200">
       <div className="flex items-center gap-3 p-4">
         <div className="w-11 h-11 rounded-full bg-primary/20 flex items-center justify-center text-primary-text font-bold">
           {partner?.profile?.full_name?.charAt(0) || 'P'}

@@ -66,7 +66,7 @@ export default function FeedPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="ค้นหาไกด์ รถเช่า สถานที่..."
-              className="w-full pl-11 pr-12 py-3 rounded-2xl bg-white border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none shadow-sm"
+              className="w-full pl-11 pr-12 py-3 rounded-2xl bg-white border-2 border-primary/40 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none shadow-sm text-gray-800"
             />
             <button
               type="button"
@@ -79,30 +79,30 @@ export default function FeedPage() {
           <div className="flex gap-2">
             <button
               onClick={() => setCategory('all')}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition ${
+              className={`px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 ${
                 category === 'all'
-                  ? 'bg-dark-DEFAULT text-white shadow-md'
-                  : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
+                  ? 'bg-dark-DEFAULT text-white shadow-md scale-105'
+                  : 'bg-primary-light text-gray-700 border border-primary/30 hover:bg-primary/20'
               }`}
             >
               ทั้งหมด
             </button>
             <button
               onClick={() => setCategory('guide')}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition flex items-center gap-1.5 ${
+              className={`px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 flex items-center gap-1.5 ${
                 category === 'guide'
-                  ? 'bg-secondary text-white shadow-md'
-                  : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
+                  ? 'bg-secondary text-white shadow-md scale-105'
+                  : 'bg-primary-light text-gray-700 border border-primary/30 hover:bg-primary/20'
               }`}
             >
               <Map size={14} /> ไกด์
             </button>
             <button
               onClick={() => setCategory('car_rental')}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition flex items-center gap-1.5 ${
+              className={`px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 flex items-center gap-1.5 ${
                 category === 'car_rental'
-                  ? 'bg-info text-white shadow-md'
-                  : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'
+                  ? 'bg-info text-white shadow-md scale-105'
+                  : 'bg-primary-light text-gray-700 border border-primary/30 hover:bg-primary/20'
               }`}
             >
               <Car size={14} /> รถเช่า

@@ -171,7 +171,7 @@ export default function AdminDashboard() {
         </div>
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
+          <div className="bg-white rounded-2xl p-5 border border-primary/15 shadow-sm hover:border-primary/30 transition-colors">
             <div className="w-10 h-10 rounded-xl bg-primary-light flex items-center justify-center mb-3">
               <Users size={20} className="text-primary-text" />
             </div>
@@ -182,7 +182,7 @@ export default function AdminDashboard() {
             </p>
           </div>
 
-          <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
+          <div className="bg-white rounded-2xl p-5 border border-primary/15 shadow-sm hover:border-primary/30 transition-colors">
             <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center mb-3">
               <Briefcase size={20} className="text-blue-600" />
             </div>
@@ -193,7 +193,7 @@ export default function AdminDashboard() {
             </p>
           </div>
 
-          <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
+          <div className="bg-white rounded-2xl p-5 border border-primary/15 shadow-sm hover:border-primary/30 transition-colors">
             <div className="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center mb-3">
               <DollarSign size={20} className="text-green-600" />
             </div>
@@ -204,7 +204,7 @@ export default function AdminDashboard() {
             </p>
           </div>
 
-          <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
+          <div className="bg-white rounded-2xl p-5 border border-primary/15 shadow-sm hover:border-primary/30 transition-colors">
             <div className="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center mb-3">
               <Clock size={20} className="text-orange-500" />
             </div>

@@ -58,7 +58,7 @@ export default function BookingPage() {
           <button
             onClick={() => setActiveTab('active')}
             className={`px-4 py-2 rounded-full text-sm font-medium transition ${
-              activeTab === 'active' ? 'bg-primary text-dark-DEFAULT' : 'bg-white text-gray-500 border'
+              activeTab === 'active' ? 'bg-primary text-dark-DEFAULT font-semibold shadow-sm' : 'bg-primary-light text-gray-700 border border-primary/30'
             }`}
           >
             กำลังดำเนินการ ({activeBookings.length})
@@ -66,7 +66,7 @@ export default function BookingPage() {
           <button
             onClick={() => setActiveTab('completed')}
             className={`px-4 py-2 rounded-full text-sm font-medium transition ${
-              activeTab === 'completed' ? 'bg-gray-800 text-white' : 'bg-white text-gray-500 border'
+              activeTab === 'completed' ? 'bg-gray-800 text-white font-semibold shadow-sm' : 'bg-primary-light text-gray-700 border border-primary/30'
             }`}
           >
             เสร็จสิ้น ({completedBookings.length})

@@ -67,10 +67,11 @@ export default function Sidebar() {
 
   return (
     <aside className="hidden lg:flex flex-col w-64 bg-dark-DEFAULT text-white min-h-screen sticky top-0">
-      <div className="p-6 border-b border-white/10">
+      <div className="p-6 border-b border-primary/20">
         <Link href="/feed" className="font-display text-2xl font-extrabold text-primary">
           #ChillGo
         </Link>
+        <p className="text-xs text-gray-500 mt-0.5">จัดทริปง่าย ๆ สไตล์คุณ</p>
       </div>
 
       <nav className="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
@@ -127,12 +128,12 @@ export default function Sidebar() {
 
       <div className="p-4 border-t border-white/10">
         <div className="flex items-center gap-3 mb-3 px-2">
-          <div className="w-9 h-9 rounded-full bg-primary/20 flex items-center justify-center text-primary-dark font-bold text-sm">
+          <div className="w-9 h-9 rounded-full bg-primary/30 flex items-center justify-center text-primary font-bold text-sm">
             {user?.full_name?.charAt(0) || '?'}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium truncate">{user?.full_name}</p>
-            <p className="text-xs text-gray-500 capitalize">{user?.role}</p>
+            <p className="text-sm font-medium text-white truncate">{user?.full_name}</p>
+            <p className="text-xs text-gray-400 capitalize">{user?.role}</p>
           </div>
         </div>
         <button

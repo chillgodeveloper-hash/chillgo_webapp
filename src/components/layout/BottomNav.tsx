@@ -25,7 +25,7 @@ export default function BottomNav() {
   const nav = user?.role === 'partner' ? partnerNav : customerNav;
 
   return (
-    <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 z-50 safe-area-bottom">
+    <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t-2 border-primary/40 z-50 safe-area-bottom">
       <div className="flex items-center justify-around h-16">
         {nav.map((item) => {
           const active = pathname.startsWith(item.href);
@@ -33,12 +33,13 @@ export default function BottomNav() {
             <Link
               key={item.href}
               href={item.href}
-              className={`flex flex-col items-center gap-0.5 px-3 py-1 transition-colors ${
+              className={`flex flex-col items-center gap-0.5 px-3 py-1 transition-all duration-200 relative ${
                 active ? 'text-secondary' : 'text-gray-400'
               }`}
             >
+              {active && <span className="absolute -top-[9px] left-1/2 -translate-x-1/2 w-8 h-1 bg-primary rounded-full" />}
               <item.icon size={22} strokeWidth={active ? 2.5 : 1.5} />
-              <span className="text-[10px] font-medium">{item.label}</span>
+              <span className={`text-[10px] font-medium ${active ? 'text-secondary' : 'text-gray-500'}`}>{item.label}</span>
             </Link>
           );
         })}
