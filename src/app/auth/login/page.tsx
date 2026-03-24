@@ -62,12 +62,12 @@ export default function LoginPage() {
         <div className="w-full max-w-md">
           <div className="lg:hidden text-center mb-8">
             <h1 className="font-display text-4xl font-extrabold text-primary-text">#ChillGo</h1>
-            <p className="text-gray-500 mt-1">จัดทริปง่าย ๆ สไตล์คุณ</p>
+            <p className="text-tmuted mt-1">จัดทริปง่าย ๆ สไตล์คุณ</p>
           </div>
 
           <div className="bg-white rounded-3xl shadow-xl p-8">
-            <h2 className="text-2xl font-bold text-gray-800 mb-1">เข้าสู่ระบบ</h2>
-            <p className="text-gray-500 mb-6">ยินดีต้อนรับกลับมา!</p>
+            <h2 className="text-2xl font-bold text-tmain mb-1">เข้าสู่ระบบ</h2>
+            <p className="text-tmuted mb-6">ยินดีต้อนรับกลับมา!</p>
 
             {error && (
               <div className="bg-danger/10 border border-danger/20 text-danger rounded-xl p-3 mb-4 text-sm">
@@ -77,32 +77,32 @@ export default function LoginPage() {
 
             <form onSubmit={handleLogin} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">อีเมล หรือ ชื่อผู้ใช้</label>
+                <label className="block text-sm font-medium text-tmain mb-1">อีเมล หรือ ชื่อผู้ใช้</label>
                 <input
                   type="text"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition"
+                  className="w-full px-4 py-3 rounded-xl border border-primary-dark/30 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition"
                   placeholder="your@email.com หรือ admin"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">รหัสผ่าน</label>
+                <label className="block text-sm font-medium text-tmain mb-1">รหัสผ่าน</label>
                 <div className="relative">
                   <input
                     type={showPassword ? 'text' : 'password'}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition pr-12"
+                    className="w-full px-4 py-3 rounded-xl border border-primary-dark/30 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition pr-12"
                     placeholder="••••••••"
                     required
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-tmuted hover:text-tmuted"
                   >
                     {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                   </button>
@@ -125,7 +125,7 @@ export default function LoginPage() {
               </button>
             </form>
 
-            <p className="text-center text-gray-500 mt-6">
+            <p className="text-center text-tmuted mt-6">
               ยังไม่มีบัญชี?{' '}
               <Link href="/auth/register" className="text-secondary font-semibold hover:underline">
                 สมัครสมาชิก

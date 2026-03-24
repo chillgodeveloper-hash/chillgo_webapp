@@ -22,11 +22,11 @@ export default function AdminSettingsPage() {
             </div>
             <div className="space-y-3">
               <div>
-                <label className="text-sm font-medium text-gray-600 block mb-1">ชื่อแพลตฟอร์ม</label>
+                <label className="text-sm font-medium text-tmuted block mb-1">ชื่อแพลตฟอร์ม</label>
                 <input
                   type="text"
                   defaultValue="#ChillGo"
-                  className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-primary outline-none text-sm"
+                  className="w-full px-4 py-2.5 rounded-xl border border-primary-dark/30 focus:border-primary outline-none text-sm"
                 />
               </div>
             </div>

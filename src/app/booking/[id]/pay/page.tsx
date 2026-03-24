@@ -78,14 +78,14 @@ export default function PaymentPage() {
   return (
     <AppLayout>
       <div className="max-w-md mx-auto px-4">
-        <button onClick={() => router.back()} className="flex items-center gap-1 text-tmuted mb-4 hover:text-gray-700">
+        <button onClick={() => router.back()} className="flex items-center gap-1 text-tmuted mb-4 hover:text-tmain">
           <ArrowLeft size={18} /> กลับ
         </button>
 
         {loading ? (
           <div className="bg-white rounded-2xl p-6 animate-pulse">
-            <div className="h-6 bg-gray-200 rounded w-2/3 mb-4" />
-            <div className="h-4 bg-gray-200 rounded w-1/2" />
+            <div className="h-6 bg-primary-dark/30 rounded w-2/3 mb-4" />
+            <div className="h-4 bg-primary-dark/30 rounded w-1/2" />
           </div>
         ) : booking ? (
           <div className="space-y-4">
@@ -110,7 +110,7 @@ export default function PaymentPage() {
                   <span className="text-tmuted">จำนวนคน</span>
                   <span className="font-medium">{booking.guests} คน</span>
                 </div>
-                <div className="border-t border-gray-100 pt-3 flex justify-between">
+                <div className="border-t border-primary-dark/15 pt-3 flex justify-between">
                   <span className="font-bold text-tmain">ยอดรวม</span>
                   <span className="font-bold text-secondary text-lg">
                     ฿{booking.total_price?.toLocaleString()}
@@ -121,7 +121,7 @@ export default function PaymentPage() {
 
             <div className="bg-white rounded-2xl p-6 border border-primary-dark/20">
               <div className="flex items-center gap-2 mb-4">
-                <CreditCard size={20} className="text-gray-600" />
+                <CreditCard size={20} className="text-tmuted" />
                 <h3 className="font-bold text-tmain">ชำระเงิน</h3>
               </div>
               <p className="text-sm text-tmuted mb-4">
@@ -140,7 +140,7 @@ export default function PaymentPage() {
                   </>
                 )}
               </button>
-              <div className="flex items-center gap-1.5 justify-center mt-3 text-xs text-gray-400">
+              <div className="flex items-center gap-1.5 justify-center mt-3 text-xs text-tmuted">
                 <Shield size={12} /> การชำระเงินปลอดภัยด้วย Stripe
               </div>
             </div>

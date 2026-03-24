@@ -45,13 +45,13 @@ export default function AdminPartnersPage() {
         <h1 className="text-2xl font-bold text-tmain mb-6">จัดการพาร์ทเนอร์</h1>
 
         <div className="relative mb-4">
-          <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+          <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-tmuted" />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="ค้นหาพาร์ทเนอร์..."
-            className="w-full pl-11 pr-4 py-3 rounded-2xl bg-white border border-gray-200 focus:border-primary outline-none"
+            className="w-full pl-11 pr-4 py-3 rounded-2xl bg-white border border-primary-dark/30 focus:border-primary outline-none"
           />
         </div>
 
@@ -60,10 +60,10 @@ export default function AdminPartnersPage() {
             {[1, 2, 3].map((i) => (
               <div key={i} className="bg-white rounded-2xl p-4 animate-pulse">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-gray-200" />
+                  <div className="w-12 h-12 rounded-full bg-primary-dark/30" />
                   <div className="flex-1 space-y-2">
-                    <div className="w-1/3 h-4 bg-gray-200 rounded" />
-                    <div className="w-1/4 h-3 bg-gray-200 rounded" />
+                    <div className="w-1/3 h-4 bg-primary-dark/30 rounded" />
+                    <div className="w-1/4 h-3 bg-primary-dark/30 rounded" />
                   </div>
                 </div>
               </div>
@@ -101,7 +101,7 @@ export default function AdminPartnersPage() {
                           {partner.rating.toFixed(1)}
                         </span>
                       )}
-                      <span className="text-xs text-gray-400">
+                      <span className="text-xs text-tmuted">
                         ผลงาน: {partner.portfolio_images?.length || 0} รูป
                       </span>
                     </div>
@@ -111,7 +111,7 @@ export default function AdminPartnersPage() {
                       onClick={() => toggleVerify(partner.id, partner.is_verified)}
                       className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium transition ${
                         partner.is_verified
-                          ? 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                          ? 'bg-primary/20 text-tmuted hover:bg-primary-dark/30'
                           : 'bg-success text-white hover:bg-success/90'
                       }`}
                     >

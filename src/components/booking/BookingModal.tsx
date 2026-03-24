@@ -55,9 +55,9 @@ export default function BookingModal({ post, onClose }: BookingModalProps) {
     <div className="fixed inset-0 z-50 flex items-end lg:items-center justify-center">
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
       <div className="relative bg-white w-full max-w-md rounded-t-3xl lg:rounded-3xl max-h-[90vh] overflow-y-auto animate-slide-up">
-        <div className="sticky top-0 bg-white rounded-t-3xl lg:rounded-t-3xl border-b border-gray-100 p-4 flex items-center justify-between">
+        <div className="sticky top-0 bg-white rounded-t-3xl lg:rounded-t-3xl border-b border-primary-dark/15 p-4 flex items-center justify-between">
           <h2 className="font-bold text-lg text-tmain">จองบริการ</h2>
-          <button onClick={onClose} className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition">
+          <button onClick={onClose} className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center hover:bg-primary-dark/30 transition">
             <X size={18} />
           </button>
         </div>
@@ -87,7 +87,7 @@ export default function BookingModal({ post, onClose }: BookingModalProps) {
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
                 min={new Date().toISOString().split('T')[0]}
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
+                className="w-full px-4 py-3 rounded-xl border border-primary-dark/30 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
                 required
               />
             </div>
@@ -101,7 +101,7 @@ export default function BookingModal({ post, onClose }: BookingModalProps) {
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
                 min={date || new Date().toISOString().split('T')[0]}
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
+                className="w-full px-4 py-3 rounded-xl border border-primary-dark/30 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
               />
             </div>
 
@@ -115,7 +115,7 @@ export default function BookingModal({ post, onClose }: BookingModalProps) {
                 onChange={(e) => setGuests(parseInt(e.target.value) || 1)}
                 min={1}
                 max={50}
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
+                className="w-full px-4 py-3 rounded-xl border border-primary-dark/30 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
               />
             </div>
 
@@ -128,7 +128,7 @@ export default function BookingModal({ post, onClose }: BookingModalProps) {
                 onChange={(e) => setNote(e.target.value)}
                 placeholder="รายละเอียดเพิ่มเติม เช่น ความต้องการพิเศษ"
                 rows={3}
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none resize-none"
+                className="w-full px-4 py-3 rounded-xl border border-primary-dark/30 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none resize-none"
               />
             </div>
 

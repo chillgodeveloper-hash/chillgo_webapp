@@ -164,11 +164,11 @@ export default function PartnerSetupPage() {
         </div>
 
         <div className="text-center mb-8">
-          <h1 className="font-display text-3xl font-bold text-gray-800">ตั้งค่าโปรไฟล์พาร์ทเนอร์</h1>
-          <p className="text-gray-500 mt-2">ขั้นตอนที่ {step} จาก 2</p>
+          <h1 className="font-display text-3xl font-bold text-tmain">ตั้งค่าโปรไฟล์พาร์ทเนอร์</h1>
+          <p className="text-tmuted mt-2">ขั้นตอนที่ {step} จาก 2</p>
           <div className="flex gap-2 justify-center mt-4">
-            <div className={`h-1.5 w-16 rounded-full ${step >= 1 ? 'bg-primary' : 'bg-gray-200'}`} />
-            <div className={`h-1.5 w-16 rounded-full ${step >= 2 ? 'bg-primary' : 'bg-gray-200'}`} />
+            <div className={`h-1.5 w-16 rounded-full ${step >= 1 ? 'bg-primary' : 'bg-primary-dark/30'}`} />
+            <div className={`h-1.5 w-16 rounded-full ${step >= 2 ? 'bg-primary' : 'bg-primary-dark/30'}`} />
           </div>
         </div>
 
@@ -180,7 +180,7 @@ export default function PartnerSetupPage() {
 
         {step === 1 && (
           <div className="bg-white rounded-3xl shadow-xl p-8 animate-fade-in">
-            <h2 className="font-bold text-xl text-gray-800 mb-6">ข้อมูลพื้นฐาน</h2>
+            <h2 className="font-bold text-xl text-tmain mb-6">ข้อมูลพื้นฐาน</h2>
 
             <div className="flex justify-center mb-6">
               <div className="relative">
@@ -195,29 +195,29 @@ export default function PartnerSetupPage() {
                   )}
                 </div>
                 <input ref={avatarRef} type="file" accept="image/*" onChange={handleAvatarSelect} className="hidden" />
-                <p className="text-xs text-gray-400 text-center mt-2">อัปโหลดรูปโปรไฟล์</p>
+                <p className="text-xs text-tmuted text-center mt-2">อัปโหลดรูปโปรไฟล์</p>
               </div>
             </div>
 
             <div className="space-y-4">
               <div>
-                <label className="text-sm font-medium text-gray-700 mb-1 block">ชื่อธุรกิจ / ชื่อบริการ</label>
+                <label className="text-sm font-medium text-tmain mb-1 block">ชื่อธุรกิจ / ชื่อบริการ</label>
                 <input
                   type="text"
                   value={businessName}
                   onChange={(e) => setBusinessName(e.target.value)}
                   placeholder={partnerProfile?.business_name || ''}
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
+                  className="w-full px-4 py-3 rounded-xl border border-primary-dark/30 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
                 />
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-700 mb-1 block">คำอธิบาย / แนะนำตัว</label>
+                <label className="text-sm font-medium text-tmain mb-1 block">คำอธิบาย / แนะนำตัว</label>
                 <textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="เล่าเกี่ยวกับบริการของคุณ..."
                   rows={4}
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none resize-none"
+                  className="w-full px-4 py-3 rounded-xl border border-primary-dark/30 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none resize-none"
                 />
               </div>
             </div>
@@ -234,12 +234,12 @@ export default function PartnerSetupPage() {
 
         {step === 2 && (
           <div className="bg-white rounded-3xl shadow-xl p-8 animate-fade-in">
-            <h2 className="font-bold text-xl text-gray-800 mb-2">อัปโหลดผลงาน</h2>
-            <p className="text-sm text-gray-500 mb-6">เพิ่มรูปภาพผลงานของคุณ (อย่างน้อย 1 รูป)</p>
+            <h2 className="font-bold text-xl text-tmain mb-2">อัปโหลดผลงาน</h2>
+            <p className="text-sm text-tmuted mb-6">เพิ่มรูปภาพผลงานของคุณ (อย่างน้อย 1 รูป)</p>
 
             <div className="grid grid-cols-3 gap-3 mb-6">
               {portfolioFiles.map((f, i) => (
-                <div key={i} className="relative aspect-square rounded-xl overflow-hidden bg-gray-100">
+                <div key={i} className="relative aspect-square rounded-xl overflow-hidden bg-primary/20">
                   <img src={f.preview} alt="" className="w-full h-full object-cover" />
                   <button
                     onClick={() => setPortfolioFiles((prev) => prev.filter((_, idx) => idx !== i))}
@@ -252,7 +252,7 @@ export default function PartnerSetupPage() {
               {portfolioFiles.length < 10 && (
                 <button
                   onClick={() => portfolioRef.current?.click()}
-                  className="aspect-square rounded-xl border-2 border-dashed border-gray-300 flex flex-col items-center justify-center text-gray-400 hover:border-primary hover:text-primary transition"
+                  className="aspect-square rounded-xl border-2 border-dashed border-primary-dark/40 flex flex-col items-center justify-center text-tmuted hover:border-primary hover:text-primary transition"
                 >
                   <ImagePlus size={24} />
                   <span className="text-xs mt-1">เพิ่มรูป</span>
@@ -264,7 +264,7 @@ export default function PartnerSetupPage() {
             <div className="flex gap-3">
               <button
                 onClick={() => setStep(1)}
-                className="flex-1 bg-gray-100 text-gray-600 font-semibold py-3.5 rounded-2xl transition hover:bg-gray-200"
+                className="flex-1 bg-primary/20 text-tmuted font-semibold py-3.5 rounded-2xl transition hover:bg-primary-dark/30"
               >
                 ย้อนกลับ
               </button>

@@ -46,7 +46,7 @@ export default function PostCard({ post, onBook }: PostCardProps) {
       </div>
 
       {(images.length > 0 || videos.length > 0) && (
-        <div className="relative aspect-[4/3] bg-gray-100">
+        <div className="relative aspect-[4/3] bg-primary/20">
           {images.length > 0 && (
             <>
               <Image

@@ -50,22 +50,22 @@ export default function CustomerDashboard() {
           <button onClick={() => setActiveModal('edit')} className="w-full flex items-center gap-3 px-4 py-3.5 text-left hover:bg-primary-light transition border-b border-primary-dark/10">
             <User size={20} className="text-tmuted" />
             <span className="flex-1 text-sm font-medium text-tmain">แก้ไขโปรไฟล์</span>
-            <ChevronRight size={16} className="text-gray-400" />
+            <ChevronRight size={16} className="text-tmuted" />
           </button>
           <button onClick={() => setActiveModal('notifications')} className="w-full flex items-center gap-3 px-4 py-3.5 text-left hover:bg-primary-light transition border-b border-primary-dark/10">
             <Bell size={20} className="text-tmuted" />
             <span className="flex-1 text-sm font-medium text-tmain">การแจ้งเตือน</span>
-            <ChevronRight size={16} className="text-gray-400" />
+            <ChevronRight size={16} className="text-tmuted" />
           </button>
           <button onClick={() => setActiveModal('security')} className="w-full flex items-center gap-3 px-4 py-3.5 text-left hover:bg-primary-light transition border-b border-primary-dark/10">
             <Shield size={20} className="text-tmuted" />
             <span className="flex-1 text-sm font-medium text-tmain">ความปลอดภัย</span>
-            <ChevronRight size={16} className="text-gray-400" />
+            <ChevronRight size={16} className="text-tmuted" />
           </button>
           <button onClick={() => setActiveModal('help')} className="w-full flex items-center gap-3 px-4 py-3.5 text-left hover:bg-primary-light transition">
             <HelpCircle size={20} className="text-tmuted" />
             <span className="flex-1 text-sm font-medium text-tmain">ช่วยเหลือ</span>
-            <ChevronRight size={16} className="text-gray-400" />
+            <ChevronRight size={16} className="text-tmuted" />
           </button>
         </div>
 
@@ -90,9 +90,9 @@ function ModalWrapper({ title, onClose, children }: { title: string; onClose: ()
     <div className="fixed inset-0 z-50 flex items-end lg:items-center justify-center">
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
       <div className="relative bg-white w-full max-w-md rounded-t-3xl lg:rounded-3xl max-h-[90vh] overflow-y-auto animate-slide-up">
-        <div className="sticky top-0 bg-white rounded-t-3xl border-b border-gray-100 p-4 flex items-center justify-between z-10">
+        <div className="sticky top-0 bg-white rounded-t-3xl border-b border-primary-dark/15 p-4 flex items-center justify-between z-10">
           <h2 className="font-bold text-lg text-tmain">{title}</h2>
-          <button onClick={onClose} className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition">
+          <button onClick={onClose} className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center hover:bg-primary-dark/30 transition">
             <X size={18} />
           </button>
         </div>
@@ -170,11 +170,11 @@ function EditProfileModal({ onClose }: { onClose: () => void }) {
           </div>
           <div>
             <label className="text-sm font-medium text-tmain mb-1 block">ชื่อ-นามสกุล</label>
-            <input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none" />
+            <input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-primary-dark/30 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none" />
           </div>
           <div>
             <label className="text-sm font-medium text-tmain mb-1 block">อีเมล</label>
-            <input type="text" value={user?.email || ''} disabled className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-primary-light/70 text-tmuted" />
+            <input type="text" value={user?.email || ''} disabled className="w-full px-4 py-3 rounded-xl border border-primary-dark/30 bg-primary-light/70 text-tmuted" />
           </div>
           <button onClick={handleSave} disabled={loading || !fullName.trim()} className="w-full bg-primary hover:bg-primary-dark text-dark-DEFAULT font-semibold py-3 rounded-xl transition flex items-center justify-center gap-2 disabled:opacity-40">
             {loading ? <div className="w-5 h-5 border-2 border-dark-DEFAULT/30 border-t-dark-DEFAULT rounded-full animate-spin" /> : <><Save size={18} /> บันทึก</>}
@@ -218,13 +218,13 @@ function SecurityModal({ onClose }: { onClose: () => void }) {
           <div>
             <label className="text-sm font-medium text-tmain mb-1 block">รหัสผ่านใหม่</label>
             <div className="relative">
-              <input type={showNew ? 'text' : 'password'} value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="อย่างน้อย 6 ตัวอักษร" className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none pr-12" />
-              <button type="button" onClick={() => setShowNew(!showNew)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">{showNew ? <EyeOff size={18} /> : <Eye size={18} />}</button>
+              <input type={showNew ? 'text' : 'password'} value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="อย่างน้อย 6 ตัวอักษร" className="w-full px-4 py-3 rounded-xl border border-primary-dark/30 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none pr-12" />
+              <button type="button" onClick={() => setShowNew(!showNew)} className="absolute right-3 top-1/2 -translate-y-1/2 text-tmuted">{showNew ? <EyeOff size={18} /> : <Eye size={18} />}</button>
             </div>
           </div>
           <div>
             <label className="text-sm font-medium text-tmain mb-1 block">ยืนยันรหัสผ่านใหม่</label>
-            <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="พิมพ์รหัสผ่านใหม่อีกครั้ง" className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none" />
+            <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="พิมพ์รหัสผ่านใหม่อีกครั้ง" className="w-full px-4 py-3 rounded-xl border border-primary-dark/30 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none" />
           </div>
           <button onClick={handleChangePassword} disabled={loading || !newPassword || !confirmPassword} className="w-full bg-primary hover:bg-primary-dark text-dark-DEFAULT font-semibold py-3 rounded-xl transition flex items-center justify-center gap-2 disabled:opacity-40">
             {loading ? <div className="w-5 h-5 border-2 border-dark-DEFAULT/30 border-t-dark-DEFAULT rounded-full animate-spin" /> : <><Shield size={18} /> เปลี่ยนรหัสผ่าน</>}
@@ -288,7 +288,7 @@ function HelpModal({ onClose }: { onClose: () => void }) {
           <div key={i} className="border border-primary-dark/20 rounded-xl overflow-hidden">
             <button onClick={() => setOpenIndex(openIndex === i ? null : i)} className="w-full flex items-center justify-between p-4 text-left hover:bg-primary-light transition">
               <span className="text-sm font-medium text-tmain">{faq.q}</span>
-              <ChevronRight size={16} className={`text-gray-400 transition-transform ${openIndex === i ? 'rotate-90' : ''}`} />
+              <ChevronRight size={16} className={`text-tmuted transition-transform ${openIndex === i ? 'rotate-90' : ''}`} />
             </button>
             {openIndex === i && <div className="px-4 pb-4"><p className="text-sm text-tmuted">{faq.a}</p></div>}
           </div>

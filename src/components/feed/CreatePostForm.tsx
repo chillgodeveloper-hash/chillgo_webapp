@@ -155,7 +155,7 @@ export default function CreatePostForm({ onSuccess }: CreatePostFormProps) {
         value={title}
         onChange={(e) => handleTitleChange(e.target.value)}
         placeholder="ชื่อบริการ / หัวข้อโพสต์"
-        className="w-full px-3 py-2 text-lg font-semibold border-0 border-b border-gray-100 focus:border-primary outline-none mb-3"
+        className="w-full px-3 py-2 text-lg font-semibold border-0 border-b border-primary-dark/15 focus:border-primary outline-none mb-3"
         required
       />
 
@@ -176,7 +176,7 @@ export default function CreatePostForm({ onSuccess }: CreatePostFormProps) {
             value={priceMin}
             onChange={(e) => setPriceMin(e.target.value)}
             placeholder="0"
-            className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:border-primary outline-none text-sm"
+            className="w-full px-3 py-2 rounded-xl border border-primary-dark/30 focus:border-primary outline-none text-sm"
           />
         </div>
         <div>
@@ -186,7 +186,7 @@ export default function CreatePostForm({ onSuccess }: CreatePostFormProps) {
             value={priceMax}
             onChange={(e) => setPriceMax(e.target.value)}
             placeholder="0"
-            className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:border-primary outline-none text-sm"
+            className="w-full px-3 py-2 rounded-xl border border-primary-dark/30 focus:border-primary outline-none text-sm"
           />
         </div>
       </div>
@@ -196,13 +196,13 @@ export default function CreatePostForm({ onSuccess }: CreatePostFormProps) {
         value={location}
         onChange={(e) => setLocation(e.target.value)}
         placeholder="📍 สถานที่ (ไม่บังคับ)"
-        className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:border-primary outline-none text-sm mb-4"
+        className="w-full px-3 py-2 rounded-xl border border-primary-dark/30 focus:border-primary outline-none text-sm mb-4"
       />
 
       {files.length > 0 && (
         <div className="flex gap-2 overflow-x-auto pb-3 mb-4">
           {files.map((f, i) => (
-            <div key={i} className="relative flex-shrink-0 w-24 h-24 rounded-xl overflow-hidden bg-gray-100">
+            <div key={i} className="relative flex-shrink-0 w-24 h-24 rounded-xl overflow-hidden bg-primary/20">
               {f.type === 'image' ? (
                 <img src={f.preview} alt="" className="w-full h-full object-cover" />
               ) : (
@@ -233,7 +233,7 @@ export default function CreatePostForm({ onSuccess }: CreatePostFormProps) {
           <button
             type="button"
             onClick={() => fileRef.current?.click()}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-tmuted hover:bg-gray-100 transition"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-tmuted hover:bg-primary/20 transition"
           >
             <ImagePlus size={18} /> รูป/คลิป
           </button>

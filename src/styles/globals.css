@@ -29,13 +29,13 @@ body {
 }
 
 ::placeholder {
-  color: #9ca3af !important;
+  color: #757575 !important;
   opacity: 1 !important;
 }
 
 input::placeholder,
 textarea::placeholder {
-  color: #9ca3af !important;
+  color: #757575 !important;
   opacity: 1 !important;
 }
 
@@ -92,4 +92,18 @@ textarea::placeholder {
 
 .pulse-gold {
   animation: pulse-gold 2s infinite;
+}
+
+.card-section {
+  background: white;
+  border: 1px solid #FFD035;
+  border-radius: 1rem;
+  box-shadow: 0 2px 8px rgba(255, 208, 53, 0.15);
+}
+
+.section-divider {
+  height: 3px;
+  background: linear-gradient(90deg, #FFDE5B, #FF9800, #FFDE5B);
+  border-radius: 2px;
+  margin: 1rem 0;
 }

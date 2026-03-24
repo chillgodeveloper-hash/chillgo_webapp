@@ -36,13 +36,13 @@ export default function AdminCustomersPage() {
         <h1 className="text-2xl font-bold text-tmain mb-6">จัดการลูกค้า</h1>
 
         <div className="relative mb-4">
-          <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+          <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-tmuted" />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="ค้นหาลูกค้า..."
-            className="w-full pl-11 pr-4 py-3 rounded-2xl bg-white border border-gray-200 focus:border-primary outline-none"
+            className="w-full pl-11 pr-4 py-3 rounded-2xl bg-white border border-primary-dark/30 focus:border-primary outline-none"
           />
         </div>
 
@@ -56,13 +56,13 @@ export default function AdminCustomersPage() {
           {loading ? (
             <div className="p-4 space-y-3">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="h-12 bg-gray-100 rounded-lg animate-pulse" />
+                <div key={i} className="h-12 bg-primary/20 rounded-lg animate-pulse" />
               ))}
             </div>
           ) : filtered.length === 0 ? (
-            <div className="p-8 text-center text-gray-400">ไม่พบลูกค้า</div>
+            <div className="p-8 text-center text-tmuted">ไม่พบลูกค้า</div>
           ) : (
-            <div className="divide-y divide-gray-50">
+            <div className="divide-y divide-primary-dark/10">
               {filtered.map((customer) => (
                 <div key={customer.id} className="p-4 flex flex-col lg:grid lg:grid-cols-4 lg:items-center gap-2 lg:gap-4 hover:bg-primary-light/50 transition">
                   <div className="flex items-center gap-3">

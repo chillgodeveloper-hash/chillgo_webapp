@@ -73,7 +73,7 @@ export default function RoleSelectionPage() {
             className={`w-full p-6 rounded-2xl border-2 text-left transition-all ${
               selectedRole === 'customer'
                 ? 'border-primary bg-primary-light shadow-lg'
-                : 'border-gray-200 bg-white hover:border-primary/50'
+                : 'border-primary-dark/30 bg-white hover:border-primary/50'
             }`}
           >
             <div className="flex items-center gap-4">
@@ -94,7 +94,7 @@ export default function RoleSelectionPage() {
             className={`w-full p-6 rounded-2xl border-2 text-left transition-all ${
               selectedRole === 'partner'
                 ? 'border-secondary bg-orange-50 shadow-lg'
-                : 'border-gray-200 bg-white hover:border-secondary/50'
+                : 'border-primary-dark/30 bg-white hover:border-secondary/50'
             }`}
           >
             <div className="flex items-center gap-4">
@@ -112,7 +112,7 @@ export default function RoleSelectionPage() {
         </div>
 
         {selectedRole === 'partner' && (
-          <div className="bg-white rounded-2xl p-6 mb-6 border border-gray-200 animate-fade-in">
+          <div className="bg-white rounded-2xl p-6 mb-6 border border-primary-dark/30 animate-fade-in">
             <h3 className="font-bold text-tmain mb-4">เลือกประเภทบริการ</h3>
             <div className="grid grid-cols-2 gap-3">
               <button
@@ -120,7 +120,7 @@ export default function RoleSelectionPage() {
                 className={`p-4 rounded-xl border-2 text-center transition-all ${
                   selectedCategory === 'guide'
                     ? 'border-primary bg-primary-light'
-                    : 'border-gray-200 hover:border-primary/50'
+                    : 'border-primary-dark/30 hover:border-primary/50'
                 }`}
               >
                 <Map size={32} className="mx-auto mb-2 text-secondary" />
@@ -131,7 +131,7 @@ export default function RoleSelectionPage() {
                 className={`p-4 rounded-xl border-2 text-center transition-all ${
                   selectedCategory === 'car_rental'
                     ? 'border-primary bg-primary-light'
-                    : 'border-gray-200 hover:border-primary/50'
+                    : 'border-primary-dark/30 hover:border-primary/50'
                 }`}
               >
                 <Car size={32} className="mx-auto mb-2 text-info" />

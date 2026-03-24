@@ -60,7 +60,7 @@ export default function FeedPage() {
       <div className="max-w-2xl mx-auto px-4 lg:px-0">
         <div className="sticky top-14 lg:top-0 z-30 bg-primary-light pt-4 pb-3">
           <form onSubmit={handleSearch} className="relative mb-3">
-            <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+            <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-tmuted" />
             <input
               type="text"
               value={search}
@@ -120,16 +120,16 @@ export default function FeedPage() {
               {[1, 2, 3].map((i) => (
                 <div key={i} className="bg-white rounded-2xl p-4 animate-pulse">
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="w-11 h-11 rounded-full bg-gray-200" />
+                    <div className="w-11 h-11 rounded-full bg-primary-dark/30" />
                     <div className="space-y-2">
-                      <div className="w-32 h-4 bg-gray-200 rounded" />
-                      <div className="w-20 h-3 bg-gray-200 rounded" />
+                      <div className="w-32 h-4 bg-primary-dark/30 rounded" />
+                      <div className="w-20 h-3 bg-primary-dark/30 rounded" />
                     </div>
                   </div>
-                  <div className="aspect-[4/3] bg-gray-200 rounded-xl mb-4" />
+                  <div className="aspect-[4/3] bg-primary-dark/30 rounded-xl mb-4" />
                   <div className="space-y-2">
-                    <div className="w-3/4 h-4 bg-gray-200 rounded" />
-                    <div className="w-1/2 h-4 bg-gray-200 rounded" />
+                    <div className="w-3/4 h-4 bg-primary-dark/30 rounded" />
+                    <div className="w-1/2 h-4 bg-primary-dark/30 rounded" />
                   </div>
                 </div>
               ))}
@@ -138,7 +138,7 @@ export default function FeedPage() {
             <div className="text-center py-16">
               <p className="text-6xl mb-4">🏖️</p>
               <p className="text-tmuted font-medium">ยังไม่มีโพสต์ในขณะนี้</p>
-              <p className="text-gray-400 text-sm mt-1">ลองค้นหาด้วยคำอื่น หรือเปลี่ยนหมวดหมู่</p>
+              <p className="text-tmuted text-sm mt-1">ลองค้นหาด้วยคำอื่น หรือเปลี่ยนหมวดหมู่</p>
             </div>
           ) : (
             posts.map((post) => (

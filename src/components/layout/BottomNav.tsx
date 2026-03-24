@@ -25,7 +25,7 @@ export default function BottomNav() {
   const nav = user?.role === 'partner' ? partnerNav : customerNav;
 
   return (
-    <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-primary/90 backdrop-blur-lg border-t-2 border-primary-dark/50 z-50 safe-area-bottom shadow-lg">
+    <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-primary backdrop-blur-lg z-50 safe-area-bottom shadow-[0_-4px_12px_rgba(255,208,53,0.3)]">
       <div className="flex items-center justify-around h-16">
         {nav.map((item) => {
           const active = pathname.startsWith(item.href);

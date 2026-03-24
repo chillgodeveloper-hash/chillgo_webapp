@@ -60,9 +60,9 @@ export default function RegisterPage() {
           <div className="w-20 h-20 bg-success/10 rounded-full flex items-center justify-center mx-auto mb-4">
             <CheckCircle size={40} className="text-success" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-800 mb-2">ลงทะเบียนสำเร็จ!</h2>
-          <p className="text-gray-500 mb-6">
-            กรุณาตรวจสอบอีเมล <strong className="text-gray-700">{email}</strong> เพื่อยืนยันบัญชีของคุณ
+          <h2 className="text-2xl font-bold text-tmain mb-2">ลงทะเบียนสำเร็จ!</h2>
+          <p className="text-tmuted mb-6">
+            กรุณาตรวจสอบอีเมล <strong className="text-tmain">{email}</strong> เพื่อยืนยันบัญชีของคุณ
           </p>
           <Link
             href="/auth/login"
@@ -95,8 +95,8 @@ export default function RegisterPage() {
           </div>
 
           <div className="bg-white rounded-3xl shadow-xl p-8">
-            <h2 className="text-2xl font-bold text-gray-800 mb-1">สมัครสมาชิก</h2>
-            <p className="text-gray-500 mb-6">สร้างบัญชีใหม่เพื่อเริ่มใช้งาน</p>
+            <h2 className="text-2xl font-bold text-tmain mb-1">สมัครสมาชิก</h2>
+            <p className="text-tmuted mb-6">สร้างบัญชีใหม่เพื่อเริ่มใช้งาน</p>
 
             {error && (
               <div className="bg-danger/10 border border-danger/20 text-danger rounded-xl p-3 mb-4 text-sm">
@@ -106,44 +106,44 @@ export default function RegisterPage() {
 
             <form onSubmit={handleRegister} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">ชื่อ-นามสกุล</label>
+                <label className="block text-sm font-medium text-tmain mb-1">ชื่อ-นามสกุล</label>
                 <input
                   type="text"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition"
+                  className="w-full px-4 py-3 rounded-xl border border-primary-dark/30 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition"
                   placeholder="สมชาย ใจดี"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">อีเมล</label>
+                <label className="block text-sm font-medium text-tmain mb-1">อีเมล</label>
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition"
+                  className="w-full px-4 py-3 rounded-xl border border-primary-dark/30 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition"
                   placeholder="your@email.com"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">รหัสผ่าน</label>
+                <label className="block text-sm font-medium text-tmain mb-1">รหัสผ่าน</label>
                 <div className="relative">
                   <input
                     type={showPassword ? 'text' : 'password'}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition pr-12"
+                    className="w-full px-4 py-3 rounded-xl border border-primary-dark/30 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition pr-12"
                     placeholder="อย่างน้อย 6 ตัวอักษร"
                     required
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-tmuted hover:text-tmuted"
                   >
                     {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                   </button>
@@ -151,12 +151,12 @@ export default function RegisterPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">ยืนยันรหัสผ่าน</label>
+                <label className="block text-sm font-medium text-tmain mb-1">ยืนยันรหัสผ่าน</label>
                 <input
                   type="password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition"
+                  className="w-full px-4 py-3 rounded-xl border border-primary-dark/30 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition"
                   placeholder="••••••••"
                   required
                 />
@@ -178,7 +178,7 @@ export default function RegisterPage() {
               </button>
             </form>
 
-            <p className="text-center text-gray-500 mt-6">
+            <p className="text-center text-tmuted mt-6">
               มีบัญชีแล้ว?{' '}
               <Link href="/auth/login" className="text-secondary font-semibold hover:underline">
                 เข้าสู่ระบบ

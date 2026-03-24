@@ -66,12 +66,12 @@ export default function Sidebar() {
   const nav = user?.role === 'admin' ? adminNav : user?.role === 'partner' ? partnerNav : customerNav;
 
   return (
-    <aside className="hidden lg:flex flex-col w-64 bg-dark-DEFAULT text-white min-h-screen sticky top-0">
+    <aside className="hidden lg:flex flex-col w-64 bg-dark-DEFAULT text-white min-h-screen sticky top-0 border-r-4 border-primary">
       <div className="p-6 border-b border-primary/20">
         <Link href="/feed" className="font-display text-2xl font-extrabold text-primary">
           #ChillGo
         </Link>
-        <p className="text-xs text-gray-500 mt-0.5">จัดทริปง่าย ๆ สไตล์คุณ</p>
+        <p className="text-xs text-tmuted mt-0.5">จัดทริปง่าย ๆ สไตล์คุณ</p>
       </div>
 
       <nav className="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
@@ -84,7 +84,7 @@ export default function Sidebar() {
                 <button
                   onClick={() => toggleMenu(item.label)}
                   className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors ${
-                    hasActive ? 'bg-primary/20 text-primary' : 'text-gray-400 hover:text-white hover:bg-white/5'
+                    hasActive ? 'bg-primary/20 text-primary' : 'text-tmuted hover:text-white hover:bg-white/5'
                   }`}
                 >
                   <item.icon size={20} />
@@ -98,7 +98,7 @@ export default function Sidebar() {
                         key={child.href}
                         href={child.href}
                         className={`block px-3 py-2 rounded-lg text-sm transition-colors ${
-                          pathname === child.href ? 'text-primary bg-primary/10' : 'text-gray-500 hover:text-white'
+                          pathname === child.href ? 'text-primary bg-primary/10' : 'text-tmuted hover:text-white'
                         }`}
                       >
                         {child.label}
@@ -116,7 +116,7 @@ export default function Sidebar() {
               key={item.href}
               href={item.href}
               className={`flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors ${
-                active ? 'bg-primary/20 text-primary' : 'text-gray-400 hover:text-white hover:bg-white/5'
+                active ? 'bg-primary/20 text-primary' : 'text-tmuted hover:text-white hover:bg-white/5'
               }`}
             >
               <item.icon size={20} />
@@ -133,12 +133,12 @@ export default function Sidebar() {
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-white truncate">{user?.full_name}</p>
-            <p className="text-xs text-gray-400 capitalize">{user?.role}</p>
+            <p className="text-xs text-tmuted capitalize">{user?.role}</p>
           </div>
         </div>
         <button
           onClick={handleLogout}
-          className="w-full flex items-center gap-2 px-4 py-2 rounded-xl text-sm text-gray-400 hover:text-danger hover:bg-danger/10 transition-colors"
+          className="w-full flex items-center gap-2 px-4 py-2 rounded-xl text-sm text-tmuted hover:text-danger hover:bg-danger/10 transition-colors"
         >
           <LogOut size={18} />
           ออกจากระบบ

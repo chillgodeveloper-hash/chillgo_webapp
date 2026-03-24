@@ -79,15 +79,15 @@ export default function ChatPage() {
     <AppLayout>
       <div className="max-w-2xl mx-auto flex flex-col h-[calc(100vh-8rem)] lg:h-[calc(100vh-6rem)]">
         <div className="bg-white rounded-t-2xl border border-primary-dark/20 p-4 flex items-center gap-3">
-          <Link href="/booking" className="text-gray-400 hover:text-gray-600 lg:hidden">
+          <Link href="/booking" className="text-tmuted hover:text-tmuted lg:hidden">
             <ArrowLeft size={20} />
           </Link>
           <div className="w-9 h-9 rounded-full bg-primary/20 flex items-center justify-center text-primary-text font-bold text-sm">
             💬
           </div>
           <div>
-            <p className="font-semibold text-sm text-gray-800">ห้องแชทการจอง</p>
-            <p className="text-xs text-gray-400">#{String(bookingId).slice(0, 8)}</p>
+            <p className="font-semibold text-sm text-tmain">ห้องแชทการจอง</p>
+            <p className="text-xs text-tmuted">#{String(bookingId).slice(0, 8)}</p>
           </div>
         </div>
 
@@ -95,7 +95,7 @@ export default function ChatPage() {
           {messages.length === 0 && (
             <div className="text-center py-12">
               <p className="text-4xl mb-2">💬</p>
-              <p className="text-gray-400 text-sm">เริ่มต้นสนทนา</p>
+              <p className="text-tmuted text-sm">เริ่มต้นสนทนา</p>
             </div>
           )}
 
@@ -105,16 +105,16 @@ export default function ChatPage() {
               <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
                 <div className={`max-w-[75%] ${isMe ? 'order-1' : 'order-2'}`}>
                   {!isMe && (
-                    <p className="text-xs text-gray-400 mb-1 ml-1">{msg.sender?.full_name}</p>
+                    <p className="text-xs text-tmuted mb-1 ml-1">{msg.sender?.full_name}</p>
                   )}
                   <div className={`px-4 py-2.5 rounded-2xl text-sm ${
                     isMe
                       ? 'bg-primary text-dark-DEFAULT rounded-br-md'
-                      : 'bg-white text-gray-700 border border-primary-dark/20 rounded-bl-md'
+                      : 'bg-white text-tmain border border-primary-dark/20 rounded-bl-md'
                   }`}>
                     {msg.message}
                   </div>
-                  <p className={`text-[10px] text-gray-400 mt-1 ${isMe ? 'text-right mr-1' : 'ml-1'}`}>
+                  <p className={`text-[10px] text-tmuted mt-1 ${isMe ? 'text-right mr-1' : 'ml-1'}`}>
                     {new Date(msg.created_at).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })}
                   </p>
                 </div>
@@ -125,7 +125,7 @@ export default function ChatPage() {
         </div>
 
         <form onSubmit={handleSend} className="bg-white border-t border-primary-dark/15 p-3 rounded-b-2xl flex items-center gap-2">
-          <button type="button" className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 hover:bg-gray-200 transition flex-shrink-0">
+          <button type="button" className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-tmuted hover:bg-primary-dark/30 transition flex-shrink-0">
             <ImagePlus size={18} />
           </button>
           <input
@@ -133,7 +133,7 @@ export default function ChatPage() {
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
             placeholder="พิมพ์ข้อความ..."
-            className="flex-1 px-4 py-2.5 rounded-full bg-gray-100 outline-none text-sm focus:bg-primary-light focus:ring-2 focus:ring-primary/20 transition"
+            className="flex-1 px-4 py-2.5 rounded-full bg-primary/20 outline-none text-sm focus:bg-primary-light focus:ring-2 focus:ring-primary/20 transition"
           />
           <button
             type="submit"
