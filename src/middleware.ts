@@ -36,8 +36,12 @@ export async function middleware(request: NextRequest) {
   }
 
   if (request.nextUrl.pathname.startsWith('/auth/') && session) {
-    const redirectUrl = new URL('/feed', request.url);
-    return NextResponse.redirect(redirectUrl);
+    const allowedAuthPaths = ['/auth/role-select', '/auth/verify'];
+    const isAllowed = allowedAuthPaths.some((p) => request.nextUrl.pathname.startsWith(p));
+    if (!isAllowed) {
+      const redirectUrl = new URL('/feed', request.url);
+      return NextResponse.redirect(redirectUrl);
+    }
   }
 
   return supabaseResponse;

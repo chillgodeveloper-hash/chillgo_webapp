@@ -31,6 +31,12 @@ export function useAuth(requireRole?: string) {
       if (profile) {
         setUser(profile);
 
+        if (!profile.role) {
+          setLoading(false);
+          router.push('/auth/role-select');
+          return;
+        }
+
         if (profile.role === 'partner') {
           const { data: partnerProfile } = await supabase
             .from('partner_profiles')
@@ -38,6 +44,12 @@ export function useAuth(requireRole?: string) {
             .eq('user_id', profile.id)
             .single();
           setPartnerProfile(partnerProfile);
+
+          if (partnerProfile && partnerProfile.portfolio_images?.length === 0) {
+            setLoading(false);
+            router.push('/dashboard/partner/setup');
+            return;
+          }
         }
 
         if (requireRole && profile.role !== requireRole && requireRole !== 'any') {

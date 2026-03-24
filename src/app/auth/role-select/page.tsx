@@ -49,8 +49,8 @@ export default function RoleSelectionPage() {
     <div className="min-h-screen bg-primary-light flex items-center justify-center p-6">
       <div className="max-w-lg w-full">
         <div className="text-center mb-8">
-          <h1 className="font-display text-3xl font-bold text-gray-800">คุณต้องการใช้งานในฐานะ?</h1>
-          <p className="text-gray-500 mt-2">เลือกบทบาทของคุณใน #ChillGo</p>
+          <h1 className="font-display text-3xl font-bold text-tmain">คุณต้องการใช้งานในฐานะ?</h1>
+          <p className="text-tmuted mt-2">เลือกบทบาทของคุณใน #ChillGo</p>
         </div>
 
         <div className="space-y-4 mb-6">
@@ -64,13 +64,13 @@ export default function RoleSelectionPage() {
           >
             <div className="flex items-center gap-4">
               <div className={`w-14 h-14 rounded-2xl flex items-center justify-center ${
-                selectedRole === 'customer' ? 'bg-primary' : 'bg-gray-100'
+                selectedRole === 'customer' ? 'bg-primary' : 'bg-primary-light'
               }`}>
-                <ShoppingBag size={28} className={selectedRole === 'customer' ? 'text-dark-DEFAULT' : 'text-gray-400'} />
+                <ShoppingBag size={28} className={selectedRole === 'customer' ? 'text-dark-DEFAULT' : 'text-tmuted'} />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-gray-800">ลูกค้า (Customer)</h3>
-                <p className="text-sm text-gray-500">ค้นหาและจองบริการไกด์ รถเช่า</p>
+                <h3 className="text-lg font-bold text-tmain">ลูกค้า (Customer)</h3>
+                <p className="text-sm text-tmuted">ค้นหาและจองบริการไกด์ รถเช่า</p>
               </div>
             </div>
           </button>
@@ -85,13 +85,13 @@ export default function RoleSelectionPage() {
           >
             <div className="flex items-center gap-4">
               <div className={`w-14 h-14 rounded-2xl flex items-center justify-center ${
-                selectedRole === 'partner' ? 'bg-secondary' : 'bg-gray-100'
+                selectedRole === 'partner' ? 'bg-secondary' : 'bg-primary-light'
               }`}>
-                <Map size={28} className={selectedRole === 'partner' ? 'text-white' : 'text-gray-400'} />
+                <Map size={28} className={selectedRole === 'partner' ? 'text-white' : 'text-tmuted'} />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-gray-800">พาร์ทเนอร์ (Partner)</h3>
-                <p className="text-sm text-gray-500">เสนอบริการไกด์หรือรถเช่าของคุณ</p>
+                <h3 className="text-lg font-bold text-tmain">พาร์ทเนอร์ (Partner)</h3>
+                <p className="text-sm text-tmuted">เสนอบริการไกด์หรือรถเช่าของคุณ</p>
               </div>
             </div>
           </button>
@@ -99,7 +99,7 @@ export default function RoleSelectionPage() {
 
         {selectedRole === 'partner' && (
           <div className="bg-white rounded-2xl p-6 mb-6 border border-gray-200 animate-fade-in">
-            <h3 className="font-bold text-gray-800 mb-4">เลือกประเภทบริการ</h3>
+            <h3 className="font-bold text-tmain mb-4">เลือกประเภทบริการ</h3>
             <div className="grid grid-cols-2 gap-3">
               <button
                 onClick={() => setSelectedCategory('guide')}
