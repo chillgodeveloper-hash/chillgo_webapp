@@ -15,7 +15,7 @@ const statusConfig: Record<string, { label: string; color: string; icon: any }> 
   confirmed: { label: 'ยืนยันแล้ว', color: 'bg-green-100 text-green-700', icon: CheckCircle },
   paid: { label: 'ชำระเงินแล้ว', color: 'bg-emerald-100 text-emerald-700', icon: CreditCard },
   in_progress: { label: 'กำลังดำเนินการ', color: 'bg-blue-100 text-blue-700', icon: Clock },
-  completed: { label: 'เสร็จสิ้น', color: 'bg-gray-100 text-gray-600', icon: CheckCircle },
+  completed: { label: 'เสร็จสิ้น', color: 'bg-gray-100 text-tmuted', icon: CheckCircle },
   cancelled: { label: 'ยกเลิก', color: 'bg-red-100 text-red-600', icon: XCircle },
 };
 
@@ -52,7 +52,7 @@ export default function BookingPage() {
   return (
     <AppLayout>
       <div className="max-w-2xl mx-auto px-4 lg:px-0">
-        <h1 className="text-2xl font-bold text-gray-800 mb-4 hidden lg:block">การจองของฉัน</h1>
+        <h1 className="text-2xl font-bold text-tmain mb-4 hidden lg:block">การจองของฉัน</h1>
 
         <div className="flex gap-2 mb-4">
           <button
@@ -86,7 +86,7 @@ export default function BookingPage() {
         ) : displayBookings.length === 0 ? (
           <div className="text-center py-16">
             <p className="text-5xl mb-4">📋</p>
-            <p className="text-gray-500">ยังไม่มีรายการจอง</p>
+            <p className="text-tmuted">ยังไม่มีรายการจอง</p>
           </div>
         ) : (
           <div className="space-y-3">
@@ -94,18 +94,18 @@ export default function BookingPage() {
               const status = statusConfig[booking.status] || statusConfig.pending;
               const StatusIcon = status.icon;
               return (
-                <div key={booking.id} className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
+                <div key={booking.id} className="bg-white rounded-2xl p-4 border border-primary-dark/20 shadow-sm">
                   <div className="flex items-start justify-between mb-3">
                     <div>
-                      <h3 className="font-bold text-gray-800">{booking.post?.title}</h3>
-                      <p className="text-sm text-gray-500">{booking.partner?.profile?.full_name}</p>
+                      <h3 className="font-bold text-tmain">{booking.post?.title}</h3>
+                      <p className="text-sm text-tmuted">{booking.partner?.profile?.full_name}</p>
                     </div>
                     <span className={`${status.color} px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1`}>
                       <StatusIcon size={12} /> {status.label}
                     </span>
                   </div>
 
-                  <div className="flex flex-wrap gap-3 text-sm text-gray-500 mb-3">
+                  <div className="flex flex-wrap gap-3 text-sm text-tmuted mb-3">
                     <span className="flex items-center gap-1">
                       <Calendar size={14} />
                       {new Date(booking.booking_date).toLocaleDateString('th-TH')}
@@ -123,7 +123,7 @@ export default function BookingPage() {
 
                   {booking.admin_note && (
                     <div className="bg-primary-light rounded-xl p-3 mb-3">
-                      <p className="text-xs font-medium text-gray-600 mb-1">หมายเหตุจาก Admin</p>
+                      <p className="text-xs font-medium text-tmuted mb-1">หมายเหตุจาก Admin</p>
                       <p className="text-sm text-gray-700">{booking.admin_note}</p>
                     </div>
                   )}
@@ -131,7 +131,7 @@ export default function BookingPage() {
                   {booking.status === 'alternative_offered' && booking.alternative_post && (
                     <div className="bg-purple/10 rounded-xl p-3 mb-3">
                       <p className="text-xs font-medium text-purple mb-1">ตัวเลือกที่แนะนำ</p>
-                      <p className="text-sm font-semibold text-gray-800">{booking.alternative_post.title}</p>
+                      <p className="text-sm font-semibold text-tmain">{booking.alternative_post.title}</p>
                       <div className="flex gap-2 mt-2">
                         <button
                           onClick={async () => {
@@ -153,7 +153,7 @@ export default function BookingPage() {
                               .eq('id', booking.id);
                             window.location.reload();
                           }}
-                          className="bg-gray-200 text-gray-600 px-4 py-1.5 rounded-lg text-xs font-medium"
+                          className="bg-gray-200 text-tmuted px-4 py-1.5 rounded-lg text-xs font-medium"
                         >
                           ยกเลิก
                         </button>
@@ -161,7 +161,7 @@ export default function BookingPage() {
                     </div>
                   )}
 
-                  <div className="flex gap-2 pt-3 border-t border-gray-100">
+                  <div className="flex gap-2 pt-3 border-t border-primary-dark/15">
                     {['confirmed', 'paid', 'in_progress'].includes(booking.status) && (
                       <Link
                         href={`/chat/${booking.id}`}

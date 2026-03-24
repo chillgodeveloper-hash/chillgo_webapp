@@ -64,23 +64,23 @@ export default function PartnerDashboard() {
   return (
     <AppLayout>
       <div className="max-w-4xl mx-auto px-4 lg:px-0">
-        <h1 className="text-2xl font-bold text-gray-800 mb-6 hidden lg:block">จัดการโพสต์</h1>
+        <h1 className="text-2xl font-bold text-tmain mb-6 hidden lg:block">จัดการโพสต์</h1>
 
         <div className="grid grid-cols-3 gap-3 mb-6">
-          <div className="bg-white rounded-2xl p-4 border border-gray-100">
+          <div className="bg-white rounded-2xl p-4 border border-primary-dark/20">
             <Package size={20} className="text-secondary mb-2" />
-            <p className="text-2xl font-bold text-gray-800">{stats.totalPosts}</p>
-            <p className="text-xs text-gray-500">โพสต์ทั้งหมด</p>
+            <p className="text-2xl font-bold text-tmain">{stats.totalPosts}</p>
+            <p className="text-xs text-tmuted">โพสต์ทั้งหมด</p>
           </div>
-          <div className="bg-white rounded-2xl p-4 border border-gray-100">
+          <div className="bg-white rounded-2xl p-4 border border-primary-dark/20">
             <BarChart3 size={20} className="text-info mb-2" />
-            <p className="text-2xl font-bold text-gray-800">{stats.totalBookings}</p>
-            <p className="text-xs text-gray-500">การจองทั้งหมด</p>
+            <p className="text-2xl font-bold text-tmain">{stats.totalBookings}</p>
+            <p className="text-xs text-tmuted">การจองทั้งหมด</p>
           </div>
-          <div className="bg-white rounded-2xl p-4 border border-gray-100">
+          <div className="bg-white rounded-2xl p-4 border border-primary-dark/20">
             <span className="text-secondary text-lg">฿</span>
-            <p className="text-2xl font-bold text-gray-800">{stats.revenue.toLocaleString()}</p>
-            <p className="text-xs text-gray-500">รายได้</p>
+            <p className="text-2xl font-bold text-tmain">{stats.revenue.toLocaleString()}</p>
+            <p className="text-xs text-tmuted">รายได้</p>
           </div>
         </div>
 
@@ -88,7 +88,7 @@ export default function PartnerDashboard() {
           <CreatePostForm onSuccess={fetchData} />
         </div>
 
-        <h2 className="font-bold text-gray-800 mb-3">โพสต์ของฉัน</h2>
+        <h2 className="font-bold text-tmain mb-3">โพสต์ของฉัน</h2>
 
         {loading ? (
           <div className="space-y-3">
@@ -102,21 +102,21 @@ export default function PartnerDashboard() {
         ) : posts.length === 0 ? (
           <div className="text-center py-12 bg-white rounded-2xl">
             <p className="text-4xl mb-2">📝</p>
-            <p className="text-gray-500">ยังไม่มีโพสต์</p>
+            <p className="text-tmuted">ยังไม่มีโพสต์</p>
           </div>
         ) : (
           <div className="space-y-3">
             {posts.map((post) => (
-              <div key={post.id} className="bg-white rounded-2xl p-4 border border-gray-100 flex items-center gap-4">
+              <div key={post.id} className="bg-white rounded-2xl p-4 border border-primary-dark/20 flex items-center gap-4">
                 {post.media_urls[0] && (
                   <img src={post.media_urls[0]} alt="" className="w-16 h-16 rounded-xl object-cover flex-shrink-0" />
                 )}
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-gray-800 truncate">{post.title}</h3>
-                  <p className="text-sm text-gray-500 truncate">{post.content}</p>
+                  <h3 className="font-semibold text-tmain truncate">{post.title}</h3>
+                  <p className="text-sm text-tmuted truncate">{post.content}</p>
                   <div className="flex items-center gap-2 mt-1">
                     <span className={`text-xs px-2 py-0.5 rounded-full ${
-                      post.status === 'active' ? 'bg-success/10 text-success' : 'bg-gray-100 text-gray-500'
+                      post.status === 'active' ? 'bg-success/10 text-success' : 'bg-gray-100 text-tmuted'
                     }`}>
                       {post.status === 'active' ? 'แสดงอยู่' : 'ซ่อนอยู่'}
                     </span>
@@ -128,7 +128,7 @@ export default function PartnerDashboard() {
                 <div className="flex gap-1 flex-shrink-0">
                   <button
                     onClick={() => handleTogglePost(post.id, post.status)}
-                    className="w-9 h-9 rounded-lg bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-gray-200 transition"
+                    className="w-9 h-9 rounded-lg bg-gray-100 flex items-center justify-center text-tmuted hover:bg-gray-200 transition"
                     title={post.status === 'active' ? 'ซ่อน' : 'แสดง'}
                   >
                     {post.status === 'active' ? <EyeOff size={16} /> : <Eye size={16} />}

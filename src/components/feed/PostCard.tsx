@@ -29,12 +29,12 @@ export default function PostCard({ post, onBook }: PostCardProps) {
         </div>
         <div className="flex-1">
           <div className="flex items-center gap-2">
-            <p className="font-semibold text-gray-800 text-sm">{partner?.business_name}</p>
+            <p className="font-semibold text-tmain text-sm">{partner?.business_name}</p>
             {partner?.is_verified && (
               <span className="text-xs bg-success/10 text-success px-2 py-0.5 rounded-full font-medium">✓</span>
             )}
           </div>
-          <div className="flex items-center gap-2 text-xs text-gray-400">
+          <div className="flex items-center gap-2 text-xs text-tmuted">
             <span className={`${categoryColor} px-2 py-0.5 rounded-full font-medium`}>{categoryLabel}</span>
             {post.location && (
               <span className="flex items-center gap-0.5">
@@ -90,8 +90,8 @@ export default function PostCard({ post, onBook }: PostCardProps) {
       )}
 
       <div className="p-4">
-        <h3 className="font-bold text-gray-800 mb-1">{post.title}</h3>
-        <p className="text-sm text-gray-600 line-clamp-3 mb-3">{post.content}</p>
+        <h3 className="font-bold text-tmain mb-1">{post.title}</h3>
+        <p className="text-sm text-tmuted line-clamp-3 mb-3">{post.content}</p>
 
         {(post.price_min || post.price_max) && (
           <div className="flex items-center gap-1 mb-3">
@@ -106,24 +106,24 @@ export default function PostCard({ post, onBook }: PostCardProps) {
           <div className="flex items-center gap-1 mb-3">
             <Star size={14} className="text-amber-500 fill-amber-500" />
             <span className="text-sm font-medium">{partner.rating.toFixed(1)}</span>
-            <span className="text-xs text-gray-400">({partner.total_reviews} รีวิว)</span>
+            <span className="text-xs text-tmuted">({partner.total_reviews} รีวิว)</span>
           </div>
         )}
 
-        <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+        <div className="flex items-center justify-between pt-3 border-t border-primary-dark/15">
           <div className="flex items-center gap-4">
             <button
               onClick={() => setLiked(!liked)}
               className={`flex items-center gap-1.5 text-sm transition ${
-                liked ? 'text-danger' : 'text-gray-400 hover:text-danger'
+                liked ? 'text-danger' : 'text-tmuted hover:text-danger'
               }`}
             >
               <Heart size={20} fill={liked ? 'currentColor' : 'none'} />
             </button>
-            <button className="flex items-center gap-1.5 text-sm text-gray-400 hover:text-gray-600 transition">
+            <button className="flex items-center gap-1.5 text-sm text-tmuted hover:text-tmuted transition">
               <MessageCircle size={20} />
             </button>
-            <button className="flex items-center gap-1.5 text-sm text-gray-400 hover:text-gray-600 transition">
+            <button className="flex items-center gap-1.5 text-sm text-tmuted hover:text-tmuted transition">
               <Share2 size={20} />
             </button>
           </div>

@@ -24,7 +24,7 @@ export default function VerifyPage() {
   }, []);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-6">
+    <div className="min-h-screen flex items-center justify-center bg-primary-light p-6">
       <div className="bg-white rounded-3xl shadow-xl p-8 max-w-md w-full text-center">
         {status === 'loading' && (
           <>

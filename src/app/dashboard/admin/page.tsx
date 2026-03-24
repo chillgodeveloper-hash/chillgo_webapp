@@ -159,8 +159,8 @@ export default function AdminDashboard() {
       <div className="max-w-6xl mx-auto px-4 lg:px-0">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-bold text-gray-800 font-display">#ChillGo</h1>
-            <p className="text-sm text-gray-500">Admin Dashboard</p>
+            <h1 className="text-2xl font-bold text-tmain font-display">#ChillGo</h1>
+            <p className="text-sm text-tmuted">Admin Dashboard</p>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-9 h-9 rounded-full bg-primary/20 flex items-center justify-center">
@@ -175,8 +175,8 @@ export default function AdminDashboard() {
             <div className="w-10 h-10 rounded-xl bg-primary-light flex items-center justify-center mb-3">
               <Users size={20} className="text-primary-text" />
             </div>
-            <p className="text-2xl font-bold text-gray-800">{stats.totalPartners.toLocaleString()}</p>
-            <p className="text-xs text-gray-500 mt-0.5">Total Partners</p>
+            <p className="text-2xl font-bold text-tmain">{stats.totalPartners.toLocaleString()}</p>
+            <p className="text-xs text-tmuted mt-0.5">Total Partners</p>
             <p className="text-xs text-success flex items-center gap-0.5 mt-1">
               <TrendingUp size={10} /> Growth
             </p>
@@ -186,8 +186,8 @@ export default function AdminDashboard() {
             <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center mb-3">
               <Briefcase size={20} className="text-blue-600" />
             </div>
-            <p className="text-2xl font-bold text-gray-800">{stats.activeJobs}</p>
-            <p className="text-xs text-gray-500 mt-0.5">Active Jobs</p>
+            <p className="text-2xl font-bold text-tmain">{stats.activeJobs}</p>
+            <p className="text-xs text-tmuted mt-0.5">Active Jobs</p>
             <p className="text-xs text-success flex items-center gap-0.5 mt-1">
               <TrendingUp size={10} /> Growth
             </p>
@@ -197,8 +197,8 @@ export default function AdminDashboard() {
             <div className="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center mb-3">
               <DollarSign size={20} className="text-green-600" />
             </div>
-            <p className="text-2xl font-bold text-gray-800">฿{(stats.revenue / 1000000).toFixed(1)}M</p>
-            <p className="text-xs text-gray-500 mt-0.5">Revenue</p>
+            <p className="text-2xl font-bold text-tmain">฿{(stats.revenue / 1000000).toFixed(1)}M</p>
+            <p className="text-xs text-tmuted mt-0.5">Revenue</p>
             <p className="text-xs text-success flex items-center gap-0.5 mt-1">
               <TrendingUp size={10} /> Growth
             </p>
@@ -208,8 +208,8 @@ export default function AdminDashboard() {
             <div className="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center mb-3">
               <Clock size={20} className="text-orange-500" />
             </div>
-            <p className="text-2xl font-bold text-gray-800">{stats.pendingApprovals}</p>
-            <p className="text-xs text-gray-500 mt-0.5">Pending Approval</p>
+            <p className="text-2xl font-bold text-tmain">{stats.pendingApprovals}</p>
+            <p className="text-xs text-tmuted mt-0.5">Pending Approval</p>
             <p className="text-xs text-success flex items-center gap-0.5 mt-1">
               <TrendingUp size={10} /> Growth
             </p>
@@ -218,41 +218,41 @@ export default function AdminDashboard() {
 
         <div className="grid lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm">
-              <div className="p-5 border-b border-gray-100 flex items-center justify-between">
-                <h2 className="font-bold text-gray-800">รายการรออนุมัติ</h2>
+            <div className="bg-white rounded-2xl border border-primary-dark/20 shadow-sm">
+              <div className="p-5 border-b border-primary-dark/15 flex items-center justify-between">
+                <h2 className="font-bold text-tmain">รายการรออนุมัติ</h2>
                 <span className="bg-primary text-dark-DEFAULT text-xs font-bold px-2.5 py-1 rounded-full">
                   {pendingBookings.length}
                 </span>
               </div>
 
               {pendingBookings.length === 0 ? (
-                <div className="p-8 text-center text-gray-400">
+                <div className="p-8 text-center text-tmuted">
                   <CheckCircle size={32} className="mx-auto mb-2 text-success" />
                   <p>ไม่มีรายการรออนุมัติ</p>
                 </div>
               ) : (
                 <div className="divide-y divide-gray-50">
                   {pendingBookings.map((booking) => (
-                    <div key={booking.id} className="p-4 hover:bg-gray-50/50 transition">
+                    <div key={booking.id} className="p-4 hover:bg-primary-light/50 transition">
                       <div className="flex items-start justify-between mb-2">
                         <div>
-                          <p className="font-semibold text-gray-800 text-sm">{booking.post?.title}</p>
-                          <p className="text-xs text-gray-500">
+                          <p className="font-semibold text-tmain text-sm">{booking.post?.title}</p>
+                          <p className="text-xs text-tmuted">
                             ลูกค้า: {booking.customer?.full_name} → พาร์ทเนอร์: {booking.partner?.profile?.full_name}
                           </p>
                         </div>
                         {statusBadge(booking.status)}
                       </div>
 
-                      <div className="flex flex-wrap gap-2 text-xs text-gray-500 mb-3">
+                      <div className="flex flex-wrap gap-2 text-xs text-tmuted mb-3">
                         <span>📅 {new Date(booking.booking_date).toLocaleDateString('th-TH')}</span>
                         <span>👥 {booking.guests} คน</span>
                         {booking.total_price && <span className="text-secondary font-medium">฿{booking.total_price.toLocaleString()}</span>}
                       </div>
 
                       {booking.note && (
-                        <p className="text-xs text-gray-500 bg-gray-50 rounded-lg p-2 mb-3">📝 {booking.note}</p>
+                        <p className="text-xs text-tmuted bg-primary-light rounded-lg p-2 mb-3">📝 {booking.note}</p>
                       )}
 
                       <div className="flex gap-2">
@@ -283,18 +283,18 @@ export default function AdminDashboard() {
           </div>
 
           <div>
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm">
-              <div className="p-5 border-b border-gray-100">
-                <h2 className="font-bold text-gray-800">Recent Activity</h2>
+            <div className="bg-white rounded-2xl border border-primary-dark/20 shadow-sm">
+              <div className="p-5 border-b border-primary-dark/15">
+                <h2 className="font-bold text-tmain">Recent Activity</h2>
               </div>
               <div className="divide-y divide-gray-50 max-h-[500px] overflow-y-auto">
                 {recentActivity.map((booking) => (
                   <div key={booking.id} className="p-4">
                     <div className="flex items-center justify-between mb-1">
-                      <p className="text-sm font-medium text-gray-800 truncate flex-1">{booking.partner?.profile?.full_name}</p>
+                      <p className="text-sm font-medium text-tmain truncate flex-1">{booking.partner?.profile?.full_name}</p>
                       {statusBadge(booking.status)}
                     </div>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-tmuted">
                       {new Date(booking.updated_at).toLocaleDateString('th-TH')} {new Date(booking.updated_at).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })}
                     </p>
                     {booking.total_price && (

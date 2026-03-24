@@ -78,7 +78,7 @@ export default function ChatPage() {
   return (
     <AppLayout>
       <div className="max-w-2xl mx-auto flex flex-col h-[calc(100vh-8rem)] lg:h-[calc(100vh-6rem)]">
-        <div className="bg-white rounded-t-2xl border border-gray-100 p-4 flex items-center gap-3">
+        <div className="bg-white rounded-t-2xl border border-primary-dark/20 p-4 flex items-center gap-3">
           <Link href="/booking" className="text-gray-400 hover:text-gray-600 lg:hidden">
             <ArrowLeft size={20} />
           </Link>
@@ -91,7 +91,7 @@ export default function ChatPage() {
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto bg-gray-50 p-4 space-y-3">
+        <div className="flex-1 overflow-y-auto bg-primary-light p-4 space-y-3">
           {messages.length === 0 && (
             <div className="text-center py-12">
               <p className="text-4xl mb-2">💬</p>
@@ -110,7 +110,7 @@ export default function ChatPage() {
                   <div className={`px-4 py-2.5 rounded-2xl text-sm ${
                     isMe
                       ? 'bg-primary text-dark-DEFAULT rounded-br-md'
-                      : 'bg-white text-gray-700 border border-gray-100 rounded-bl-md'
+                      : 'bg-white text-gray-700 border border-primary-dark/20 rounded-bl-md'
                   }`}>
                     {msg.message}
                   </div>
@@ -124,7 +124,7 @@ export default function ChatPage() {
           <div ref={bottomRef} />
         </div>
 
-        <form onSubmit={handleSend} className="bg-white border-t border-gray-100 p-3 rounded-b-2xl flex items-center gap-2">
+        <form onSubmit={handleSend} className="bg-white border-t border-primary-dark/15 p-3 rounded-b-2xl flex items-center gap-2">
           <button type="button" className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 hover:bg-gray-200 transition flex-shrink-0">
             <ImagePlus size={18} />
           </button>
@@ -133,7 +133,7 @@ export default function ChatPage() {
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
             placeholder="พิมพ์ข้อความ..."
-            className="flex-1 px-4 py-2.5 rounded-full bg-gray-100 outline-none text-sm focus:bg-gray-50 focus:ring-2 focus:ring-primary/20 transition"
+            className="flex-1 px-4 py-2.5 rounded-full bg-gray-100 outline-none text-sm focus:bg-primary-light focus:ring-2 focus:ring-primary/20 transition"
           />
           <button
             type="submit"

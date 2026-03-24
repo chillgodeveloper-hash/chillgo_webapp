@@ -7,17 +7,17 @@ export default function AdminSettingsPage() {
   return (
     <AppLayout>
       <div className="max-w-2xl mx-auto px-4 lg:px-0">
-        <h1 className="text-2xl font-bold text-gray-800 mb-6">ตั้งค่าระบบ</h1>
+        <h1 className="text-2xl font-bold text-tmain mb-6">ตั้งค่าระบบ</h1>
 
         <div className="space-y-4">
-          <div className="bg-white rounded-2xl p-6 border border-gray-100">
+          <div className="bg-white rounded-2xl p-6 border border-primary-dark/20">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 rounded-xl bg-primary-light flex items-center justify-center">
                 <Globe size={20} className="text-primary-text" />
               </div>
               <div>
-                <h3 className="font-semibold text-gray-800">ตั้งค่าทั่วไป</h3>
-                <p className="text-sm text-gray-500">ชื่อแพลตฟอร์ม ภาษา</p>
+                <h3 className="font-semibold text-tmain">ตั้งค่าทั่วไป</h3>
+                <p className="text-sm text-tmuted">ชื่อแพลตฟอร์ม ภาษา</p>
               </div>
             </div>
             <div className="space-y-3">
@@ -32,36 +32,36 @@ export default function AdminSettingsPage() {
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl p-6 border border-gray-100">
+          <div className="bg-white rounded-2xl p-6 border border-primary-dark/20">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center">
                 <Shield size={20} className="text-blue-600" />
               </div>
               <div>
-                <h3 className="font-semibold text-gray-800">ความปลอดภัย</h3>
-                <p className="text-sm text-gray-500">การตั้งค่า content moderation</p>
+                <h3 className="font-semibold text-tmain">ความปลอดภัย</h3>
+                <p className="text-sm text-tmuted">การตั้งค่า content moderation</p>
               </div>
             </div>
             <div className="space-y-3">
               <label className="flex items-center justify-between">
-                <span className="text-sm text-gray-700">บล็อกช่องทางติดต่อภายนอก</span>
+                <span className="text-sm text-tmain">บล็อกช่องทางติดต่อภายนอก</span>
                 <input type="checkbox" defaultChecked className="w-5 h-5 accent-primary rounded" />
               </label>
               <label className="flex items-center justify-between">
-                <span className="text-sm text-gray-700">จำกัดขนาดไฟล์อัปโหลด</span>
+                <span className="text-sm text-tmain">จำกัดขนาดไฟล์อัปโหลด</span>
                 <input type="checkbox" defaultChecked className="w-5 h-5 accent-primary rounded" />
               </label>
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl p-6 border border-gray-100">
+          <div className="bg-white rounded-2xl p-6 border border-primary-dark/20">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center">
                 <Database size={20} className="text-green-600" />
               </div>
               <div>
-                <h3 className="font-semibold text-gray-800">ฐานข้อมูล</h3>
-                <p className="text-sm text-gray-500">Supabase connection</p>
+                <h3 className="font-semibold text-tmain">ฐานข้อมูล</h3>
+                <p className="text-sm text-tmuted">Supabase connection</p>
               </div>
             </div>
             <p className="text-sm text-success bg-success/10 rounded-xl p-3">✓ เชื่อมต่อสำเร็จ</p>

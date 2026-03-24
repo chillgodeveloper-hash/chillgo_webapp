@@ -33,7 +33,7 @@ export default function AdminCustomersPage() {
   return (
     <AppLayout>
       <div className="max-w-4xl mx-auto px-4 lg:px-0">
-        <h1 className="text-2xl font-bold text-gray-800 mb-6">จัดการลูกค้า</h1>
+        <h1 className="text-2xl font-bold text-tmain mb-6">จัดการลูกค้า</h1>
 
         <div className="relative mb-4">
           <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -46,8 +46,8 @@ export default function AdminCustomersPage() {
           />
         </div>
 
-        <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
-          <div className="hidden lg:grid grid-cols-4 gap-4 p-4 bg-gray-50 text-xs font-medium text-gray-500 uppercase">
+        <div className="bg-white rounded-2xl border border-primary-dark/20 overflow-hidden">
+          <div className="hidden lg:grid grid-cols-4 gap-4 p-4 bg-primary-light/70 text-xs font-medium text-tmuted uppercase">
             <span>ลูกค้า</span>
             <span>อีเมล</span>
             <span>วันที่สมัคร</span>
@@ -64,17 +64,17 @@ export default function AdminCustomersPage() {
           ) : (
             <div className="divide-y divide-gray-50">
               {filtered.map((customer) => (
-                <div key={customer.id} className="p-4 flex flex-col lg:grid lg:grid-cols-4 lg:items-center gap-2 lg:gap-4 hover:bg-gray-50/50 transition">
+                <div key={customer.id} className="p-4 flex flex-col lg:grid lg:grid-cols-4 lg:items-center gap-2 lg:gap-4 hover:bg-primary-light/50 transition">
                   <div className="flex items-center gap-3">
                     <div className="w-9 h-9 rounded-full bg-primary/20 flex items-center justify-center text-primary-text font-bold text-sm">
                       {customer.full_name?.charAt(0)}
                     </div>
-                    <span className="font-medium text-gray-800 text-sm">{customer.full_name}</span>
+                    <span className="font-medium text-tmain text-sm">{customer.full_name}</span>
                   </div>
-                  <span className="text-sm text-gray-500 flex items-center gap-1">
+                  <span className="text-sm text-tmuted flex items-center gap-1">
                     <Mail size={12} className="lg:hidden" /> {customer.email}
                   </span>
-                  <span className="text-sm text-gray-500 flex items-center gap-1">
+                  <span className="text-sm text-tmuted flex items-center gap-1">
                     <Calendar size={12} className="lg:hidden" />
                     {new Date(customer.created_at).toLocaleDateString('th-TH')}
                   </span>

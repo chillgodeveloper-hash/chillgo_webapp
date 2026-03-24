@@ -73,7 +73,7 @@ export default function AdminBookingsPage() {
   return (
     <AppLayout>
       <div className="max-w-5xl mx-auto px-4 lg:px-0">
-        <h1 className="text-2xl font-bold text-gray-800 mb-6">รายการจองทั้งหมด</h1>
+        <h1 className="text-2xl font-bold text-tmain mb-6">รายการจองทั้งหมด</h1>
 
         <div className="flex gap-2 overflow-x-auto pb-2 mb-4">
           {filters.map((f) => (
@@ -81,7 +81,7 @@ export default function AdminBookingsPage() {
               key={f.value}
               onClick={() => setFilter(f.value)}
               className={`px-4 py-2 rounded-full text-xs font-medium whitespace-nowrap transition ${
-                filter === f.value ? 'bg-dark-DEFAULT text-white' : 'bg-white text-gray-600 border hover:bg-gray-50'
+                filter === f.value ? 'bg-dark-DEFAULT text-white' : 'bg-white text-gray-600 border hover:bg-primary-light'
               }`}
             >
               {f.label}
@@ -89,7 +89,7 @@ export default function AdminBookingsPage() {
           ))}
         </div>
 
-        <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+        <div className="bg-white rounded-2xl border border-primary-dark/20 overflow-hidden">
           {loading ? (
             <div className="p-4 space-y-3">
               {[1, 2, 3, 4].map((i) => (
@@ -101,17 +101,17 @@ export default function AdminBookingsPage() {
           ) : (
             <div className="divide-y divide-gray-50">
               {bookings.map((booking) => (
-                <div key={booking.id} className="p-4 hover:bg-gray-50/50 transition">
+                <div key={booking.id} className="p-4 hover:bg-primary-light/50 transition">
                   <div className="flex items-start justify-between mb-2">
                     <div>
-                      <p className="font-semibold text-sm text-gray-800">{booking.post?.title}</p>
-                      <p className="text-xs text-gray-500 mt-0.5">
+                      <p className="font-semibold text-sm text-tmain">{booking.post?.title}</p>
+                      <p className="text-xs text-tmuted mt-0.5">
                         {booking.customer?.full_name} → {booking.partner?.profile?.full_name}
                       </p>
                     </div>
                     {statusBadge(booking.status)}
                   </div>
-                  <div className="flex flex-wrap gap-3 text-xs text-gray-500 mb-2">
+                  <div className="flex flex-wrap gap-3 text-xs text-tmuted mb-2">
                     <span>📅 {new Date(booking.booking_date).toLocaleDateString('th-TH')}</span>
                     <span>👥 {booking.guests} คน</span>
                     {booking.total_price && (

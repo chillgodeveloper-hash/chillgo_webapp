@@ -56,7 +56,7 @@ export default function BookingModal({ post, onClose }: BookingModalProps) {
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
       <div className="relative bg-white w-full max-w-md rounded-t-3xl lg:rounded-3xl max-h-[90vh] overflow-y-auto animate-slide-up">
         <div className="sticky top-0 bg-white rounded-t-3xl lg:rounded-t-3xl border-b border-gray-100 p-4 flex items-center justify-between">
-          <h2 className="font-bold text-lg text-gray-800">จองบริการ</h2>
+          <h2 className="font-bold text-lg text-tmain">จองบริการ</h2>
           <button onClick={onClose} className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition">
             <X size={18} />
           </button>
@@ -65,21 +65,21 @@ export default function BookingModal({ post, onClose }: BookingModalProps) {
         {success ? (
           <div className="p-8 text-center">
             <div className="text-5xl mb-4">🎉</div>
-            <h3 className="text-xl font-bold text-gray-800 mb-2">ส่งคำขอจองสำเร็จ!</h3>
-            <p className="text-gray-500 text-sm">กรุณารอ Admin ตรวจสอบและอนุมัติ</p>
+            <h3 className="text-xl font-bold text-tmain mb-2">ส่งคำขอจองสำเร็จ!</h3>
+            <p className="text-tmuted text-sm">กรุณารอ Admin ตรวจสอบและอนุมัติ</p>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="p-6 space-y-4">
             <div className="bg-primary-light rounded-2xl p-4">
-              <p className="font-semibold text-gray-800">{post.title}</p>
-              <p className="text-sm text-gray-500">{post.partner_profile?.business_name}</p>
+              <p className="font-semibold text-tmain">{post.title}</p>
+              <p className="text-sm text-tmuted">{post.partner_profile?.business_name}</p>
               {post.price_min && (
                 <p className="text-secondary font-bold mt-1">฿{post.price_min.toLocaleString()}</p>
               )}
             </div>
 
             <div>
-              <label className="text-sm font-medium text-gray-700 mb-1 flex items-center gap-1.5">
+              <label className="text-sm font-medium text-tmain mb-1 flex items-center gap-1.5">
                 <Calendar size={14} /> วันที่เริ่มต้น
               </label>
               <input
@@ -93,7 +93,7 @@ export default function BookingModal({ post, onClose }: BookingModalProps) {
             </div>
 
             <div>
-              <label className="text-sm font-medium text-gray-700 mb-1 flex items-center gap-1.5">
+              <label className="text-sm font-medium text-tmain mb-1 flex items-center gap-1.5">
                 <Calendar size={14} /> วันที่สิ้นสุด (ไม่บังคับ)
               </label>
               <input
@@ -106,7 +106,7 @@ export default function BookingModal({ post, onClose }: BookingModalProps) {
             </div>
 
             <div>
-              <label className="text-sm font-medium text-gray-700 mb-1 flex items-center gap-1.5">
+              <label className="text-sm font-medium text-tmain mb-1 flex items-center gap-1.5">
                 <Users size={14} /> จำนวนผู้เข้าร่วม
               </label>
               <input
@@ -120,7 +120,7 @@ export default function BookingModal({ post, onClose }: BookingModalProps) {
             </div>
 
             <div>
-              <label className="text-sm font-medium text-gray-700 mb-1 flex items-center gap-1.5">
+              <label className="text-sm font-medium text-tmain mb-1 flex items-center gap-1.5">
                 <FileText size={14} /> หมายเหตุ (ไม่บังคับ)
               </label>
               <textarea

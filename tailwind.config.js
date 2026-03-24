@@ -26,6 +26,8 @@ module.exports = {
           light: '#16213e',
           card: '#1e293b',
         },
+        tmain: '#333333',
+        tmuted: '#757575',
       },
       fontFamily: {
         sans: ['Prompt', 'sans-serif'],

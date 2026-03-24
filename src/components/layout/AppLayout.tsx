@@ -11,7 +11,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-primary-light">
         <div className="text-center">
           <Loader2 size={40} className="text-secondary animate-spin mx-auto mb-3" />
           <p className="text-gray-500">กำลังโหลด...</p>
@@ -21,7 +21,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="flex min-h-screen bg-primary-light">
       <Sidebar />
       <div className="flex-1 flex flex-col min-h-screen">
         <TopHeader />

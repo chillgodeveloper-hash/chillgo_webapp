@@ -129,12 +129,12 @@ export default function CreatePostForm({ onSuccess }: CreatePostFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 lg:p-6">
+    <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-sm border border-primary-dark/20 p-4 lg:p-6">
       <div className="flex items-center gap-3 mb-4">
         <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary-text font-bold text-sm">
           {user?.full_name?.charAt(0)}
         </div>
-        <p className="font-semibold text-gray-800">{partnerProfile?.business_name}</p>
+        <p className="font-semibold text-tmain">{partnerProfile?.business_name}</p>
       </div>
 
       {violation && (
@@ -164,13 +164,13 @@ export default function CreatePostForm({ onSuccess }: CreatePostFormProps) {
         onChange={(e) => handleContentChange(e.target.value)}
         placeholder="รายละเอียดบริการ..."
         rows={4}
-        className="w-full px-3 py-2 border-0 outline-none resize-none text-gray-700"
+        className="w-full px-3 py-2 border-0 outline-none resize-none text-tmain"
         required
       />
 
       <div className="grid grid-cols-2 gap-3 mb-4">
         <div>
-          <label className="text-xs text-gray-500 mb-1 block">ราคาเริ่มต้น (฿)</label>
+          <label className="text-xs text-tmuted mb-1 block">ราคาเริ่มต้น (฿)</label>
           <input
             type="number"
             value={priceMin}
@@ -180,7 +180,7 @@ export default function CreatePostForm({ onSuccess }: CreatePostFormProps) {
           />
         </div>
         <div>
-          <label className="text-xs text-gray-500 mb-1 block">ราคาสูงสุด (฿)</label>
+          <label className="text-xs text-tmuted mb-1 block">ราคาสูงสุด (฿)</label>
           <input
             type="number"
             value={priceMax}
@@ -220,7 +220,7 @@ export default function CreatePostForm({ onSuccess }: CreatePostFormProps) {
         </div>
       )}
 
-      <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+      <div className="flex items-center justify-between pt-3 border-t border-primary-dark/15">
         <div className="flex gap-2">
           <input
             ref={fileRef}
@@ -233,7 +233,7 @@ export default function CreatePostForm({ onSuccess }: CreatePostFormProps) {
           <button
             type="button"
             onClick={() => fileRef.current?.click()}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-gray-500 hover:bg-gray-100 transition"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-tmuted hover:bg-gray-100 transition"
           >
             <ImagePlus size={18} /> รูป/คลิป
           </button>

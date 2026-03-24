@@ -46,7 +46,7 @@ export default function RoleSelectionPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
+    <div className="min-h-screen bg-primary-light flex items-center justify-center p-6">
       <div className="max-w-lg w-full">
         <div className="text-center mb-8">
           <h1 className="font-display text-3xl font-bold text-gray-800">คุณต้องการใช้งานในฐานะ?</h1>

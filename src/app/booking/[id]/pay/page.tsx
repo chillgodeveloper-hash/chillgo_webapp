@@ -62,8 +62,8 @@ export default function PaymentPage() {
           <div className="w-20 h-20 bg-success/10 rounded-full flex items-center justify-center mx-auto mb-4">
             <CheckCircle size={40} className="text-success" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-800 mb-2">ชำระเงินสำเร็จ!</h2>
-          <p className="text-gray-500 mb-6">คุณสามารถแชทกับพาร์ทเนอร์ได้แล้ว</p>
+          <h2 className="text-2xl font-bold text-tmain mb-2">ชำระเงินสำเร็จ!</h2>
+          <p className="text-tmuted mb-6">คุณสามารถแชทกับพาร์ทเนอร์ได้แล้ว</p>
           <button
             onClick={() => router.push(`/chat/${booking?.id}`)}
             className="bg-primary hover:bg-primary-dark text-dark-DEFAULT font-semibold px-8 py-3 rounded-xl transition"
@@ -78,7 +78,7 @@ export default function PaymentPage() {
   return (
     <AppLayout>
       <div className="max-w-md mx-auto px-4">
-        <button onClick={() => router.back()} className="flex items-center gap-1 text-gray-500 mb-4 hover:text-gray-700">
+        <button onClick={() => router.back()} className="flex items-center gap-1 text-tmuted mb-4 hover:text-gray-700">
           <ArrowLeft size={18} /> กลับ
         </button>
 
@@ -89,29 +89,29 @@ export default function PaymentPage() {
           </div>
         ) : booking ? (
           <div className="space-y-4">
-            <div className="bg-white rounded-2xl p-6 border border-gray-100">
-              <h2 className="font-bold text-lg text-gray-800 mb-4">สรุปรายการ</h2>
+            <div className="bg-white rounded-2xl p-6 border border-primary-dark/20">
+              <h2 className="font-bold text-lg text-tmain mb-4">สรุปรายการ</h2>
               <div className="space-y-3 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-gray-500">บริการ</span>
+                  <span className="text-tmuted">บริการ</span>
                   <span className="font-medium">{booking.post?.title}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-500">พาร์ทเนอร์</span>
+                  <span className="text-tmuted">พาร์ทเนอร์</span>
                   <span className="font-medium">{booking.partner?.profile?.full_name}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-500">วันที่</span>
+                  <span className="text-tmuted">วันที่</span>
                   <span className="font-medium">
                     {new Date(booking.booking_date).toLocaleDateString('th-TH')}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-500">จำนวนคน</span>
+                  <span className="text-tmuted">จำนวนคน</span>
                   <span className="font-medium">{booking.guests} คน</span>
                 </div>
                 <div className="border-t border-gray-100 pt-3 flex justify-between">
-                  <span className="font-bold text-gray-800">ยอดรวม</span>
+                  <span className="font-bold text-tmain">ยอดรวม</span>
                   <span className="font-bold text-secondary text-lg">
                     ฿{booking.total_price?.toLocaleString()}
                   </span>
@@ -119,12 +119,12 @@ export default function PaymentPage() {
               </div>
             </div>
 
-            <div className="bg-white rounded-2xl p-6 border border-gray-100">
+            <div className="bg-white rounded-2xl p-6 border border-primary-dark/20">
               <div className="flex items-center gap-2 mb-4">
                 <CreditCard size={20} className="text-gray-600" />
-                <h3 className="font-bold text-gray-800">ชำระเงิน</h3>
+                <h3 className="font-bold text-tmain">ชำระเงิน</h3>
               </div>
-              <p className="text-sm text-gray-500 mb-4">
+              <p className="text-sm text-tmuted mb-4">
                 ชำระผ่าน Stripe (รองรับ Visa, Mastercard, PromptPay)
               </p>
               <button

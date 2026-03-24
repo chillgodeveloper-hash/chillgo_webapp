@@ -58,7 +58,7 @@ export default function FeedPage() {
   return (
     <AppLayout>
       <div className="max-w-2xl mx-auto px-4 lg:px-0">
-        <div className="sticky top-14 lg:top-0 z-30 bg-gray-50 pt-4 pb-3">
+        <div className="sticky top-14 lg:top-0 z-30 bg-primary-light pt-4 pb-3">
           <form onSubmit={handleSearch} className="relative mb-3">
             <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
             <input
@@ -66,7 +66,7 @@ export default function FeedPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="ค้นหาไกด์ รถเช่า สถานที่..."
-              className="w-full pl-11 pr-12 py-3 rounded-2xl bg-white border-2 border-primary/40 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none shadow-sm text-gray-800"
+              className="w-full pl-11 pr-12 py-3 rounded-2xl bg-white border-2 border-primary/40 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none shadow-sm text-tmain"
             />
             <button
               type="button"
@@ -82,7 +82,7 @@ export default function FeedPage() {
               className={`px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 ${
                 category === 'all'
                   ? 'bg-dark-DEFAULT text-white shadow-md scale-105'
-                  : 'bg-primary-light text-gray-700 border border-primary/30 hover:bg-primary/20'
+                  : 'bg-primary-light text-tmain border border-primary/30 hover:bg-primary/20'
               }`}
             >
               ทั้งหมด
@@ -92,7 +92,7 @@ export default function FeedPage() {
               className={`px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 flex items-center gap-1.5 ${
                 category === 'guide'
                   ? 'bg-secondary text-white shadow-md scale-105'
-                  : 'bg-primary-light text-gray-700 border border-primary/30 hover:bg-primary/20'
+                  : 'bg-primary-light text-tmain border border-primary/30 hover:bg-primary/20'
               }`}
             >
               <Map size={14} /> ไกด์
@@ -102,7 +102,7 @@ export default function FeedPage() {
               className={`px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 flex items-center gap-1.5 ${
                 category === 'car_rental'
                   ? 'bg-info text-white shadow-md scale-105'
-                  : 'bg-primary-light text-gray-700 border border-primary/30 hover:bg-primary/20'
+                  : 'bg-primary-light text-tmain border border-primary/30 hover:bg-primary/20'
               }`}
             >
               <Car size={14} /> รถเช่า
@@ -137,7 +137,7 @@ export default function FeedPage() {
           ) : posts.length === 0 ? (
             <div className="text-center py-16">
               <p className="text-6xl mb-4">🏖️</p>
-              <p className="text-gray-500 font-medium">ยังไม่มีโพสต์ในขณะนี้</p>
+              <p className="text-tmuted font-medium">ยังไม่มีโพสต์ในขณะนี้</p>
               <p className="text-gray-400 text-sm mt-1">ลองค้นหาด้วยคำอื่น หรือเปลี่ยนหมวดหมู่</p>
             </div>
           ) : (

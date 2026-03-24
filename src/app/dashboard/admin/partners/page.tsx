@@ -42,7 +42,7 @@ export default function AdminPartnersPage() {
   return (
     <AppLayout>
       <div className="max-w-4xl mx-auto px-4 lg:px-0">
-        <h1 className="text-2xl font-bold text-gray-800 mb-6">จัดการพาร์ทเนอร์</h1>
+        <h1 className="text-2xl font-bold text-tmain mb-6">จัดการพาร์ทเนอร์</h1>
 
         <div className="relative mb-4">
           <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -72,7 +72,7 @@ export default function AdminPartnersPage() {
         ) : (
           <div className="space-y-3">
             {filtered.map((partner) => (
-              <div key={partner.id} className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
+              <div key={partner.id} className="bg-white rounded-2xl p-4 border border-primary-dark/20 shadow-sm">
                 <div className="flex items-center gap-4">
                   <div className="w-14 h-14 rounded-full bg-primary/20 flex items-center justify-center text-primary-text font-bold text-lg flex-shrink-0">
                     {partner.profile?.avatar_url ? (
@@ -83,12 +83,12 @@ export default function AdminPartnersPage() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <p className="font-semibold text-gray-800">{partner.business_name}</p>
+                      <p className="font-semibold text-tmain">{partner.business_name}</p>
                       {partner.is_verified && (
                         <span className="text-xs bg-success/10 text-success px-2 py-0.5 rounded-full">✓ ยืนยัน</span>
                       )}
                     </div>
-                    <p className="text-sm text-gray-500">{partner.profile?.full_name} · {partner.profile?.email}</p>
+                    <p className="text-sm text-tmuted">{partner.profile?.full_name} · {partner.profile?.email}</p>
                     <div className="flex items-center gap-3 mt-1">
                       <span className={`text-xs px-2 py-0.5 rounded-full ${
                         partner.category === 'guide' ? 'bg-secondary/10 text-secondary' : 'bg-info/10 text-info'
@@ -96,7 +96,7 @@ export default function AdminPartnersPage() {
                         {partner.category === 'guide' ? '🗺️ ไกด์' : '🚗 รถเช่า'}
                       </span>
                       {partner.rating > 0 && (
-                        <span className="text-xs text-gray-500 flex items-center gap-0.5">
+                        <span className="text-xs text-tmuted flex items-center gap-0.5">
                           <Star size={10} className="text-amber-500 fill-amber-500" />
                           {partner.rating.toFixed(1)}
                         </span>

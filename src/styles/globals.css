@@ -12,6 +12,8 @@
   --success: #4CAF50;
   --info: #00BCD4;
   --danger: #F44336;
+  --text-main: #333333;
+  --text-muted: #757575;
 }
 
 * {
@@ -22,7 +24,8 @@
 
 body {
   font-family: 'Prompt', sans-serif;
-  background: #f5f5f5;
+  background: #FFF4D1;
+  color: #333333;
 }
 
 ::placeholder {
@@ -47,7 +50,7 @@ textarea::placeholder {
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: #FFF4D1;
 }
 
 ::-webkit-scrollbar-thumb {

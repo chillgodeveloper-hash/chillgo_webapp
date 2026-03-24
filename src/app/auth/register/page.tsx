@@ -55,7 +55,7 @@ export default function RegisterPage() {
 
   if (success) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 p-6">
+      <div className="min-h-screen flex items-center justify-center bg-primary-light p-6">
         <div className="bg-white rounded-3xl shadow-xl p-8 max-w-md w-full text-center animate-fade-in">
           <div className="w-20 h-20 bg-success/10 rounded-full flex items-center justify-center mx-auto mb-4">
             <CheckCircle size={40} className="text-success" />
