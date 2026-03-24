@@ -1,221 +1,150 @@
 'use client';
 
-import { useState, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase-client';
 import { useAuthStore } from '@/hooks/useAuthStore';
-import { Camera, ImagePlus, X, CheckCircle, ArrowRight } from 'lucide-react';
-import { validateFile } from '@/lib/moderation';
+import AppLayout from '@/components/layout/AppLayout';
+import CreatePostForm from '@/components/feed/CreatePostForm';
+import { Trash2, Eye, EyeOff, Edit, BarChart3, Package } from 'lucide-react';
+import { Post } from '@/types';
 
-export default function PartnerSetupPage() {
-  const [step, setStep] = useState(1);
-  const [avatarFile, setAvatarFile] = useState<File | null>(null);
-  const [avatarPreview, setAvatarPreview] = useState('');
-  const [businessName, setBusinessName] = useState('');
-  const [description, setDescription] = useState('');
-  const [portfolioFiles, setPortfolioFiles] = useState<{ file: File; preview: string }[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const avatarRef = useRef<HTMLInputElement>(null);
-  const portfolioRef = useRef<HTMLInputElement>(null);
-  const { user, partnerProfile, setPartnerProfile } = useAuthStore();
+export default function PartnerDashboard() {
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [stats, setStats] = useState({ totalPosts: 0, totalBookings: 0, revenue: 0 });
+  const [loading, setLoading] = useState(true);
+  const { user, partnerProfile } = useAuthStore();
   const supabase = createClient();
-  const router = useRouter();
 
-  const handleAvatarSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const validation = validateFile(file, 'avatar');
-    if (!validation.valid) { setError(validation.error || ''); return; }
-    setAvatarFile(file);
-    setAvatarPreview(URL.createObjectURL(file));
-  };
-
-  const handlePortfolioSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    const newFiles: typeof portfolioFiles = [];
-    for (const file of files) {
-      const validation = validateFile(file, 'image');
-      if (!validation.valid) { setError(validation.error || ''); continue; }
-      newFiles.push({ file, preview: URL.createObjectURL(file) });
-    }
-    setPortfolioFiles((prev) => [...prev, ...newFiles].slice(0, 10));
-  };
-
-  const handleSubmit = async () => {
-    if (!user || !partnerProfile) return;
+  const fetchData = async () => {
+    if (!partnerProfile) return;
     setLoading(true);
-    setError('');
 
-    try {
-      let avatarUrl = user.avatar_url;
-      if (avatarFile) {
-        const ext = avatarFile.name.split('.').pop();
-        const path = `avatars/${user.id}.${ext}`;
-        await supabase.storage.from('media').upload(path, avatarFile, { upsert: true });
-        const { data: { publicUrl } } = supabase.storage.from('media').getPublicUrl(path);
-        avatarUrl = publicUrl;
-        await supabase.from('profiles').update({ avatar_url: avatarUrl }).eq('id', user.id);
-      }
+    const { data: postsData } = await supabase
+      .from('posts')
+      .select('*')
+      .eq('partner_id', partnerProfile.id)
+      .order('created_at', { ascending: false });
 
-      const portfolioUrls: string[] = [];
-      for (const { file } of portfolioFiles) {
-        const ext = file.name.split('.').pop();
-        const path = `portfolio/${user.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-        await supabase.storage.from('media').upload(path, file);
-        const { data: { publicUrl } } = supabase.storage.from('media').getPublicUrl(path);
-        portfolioUrls.push(publicUrl);
-      }
+    const { count: bookingCount } = await supabase
+      .from('bookings')
+      .select('*', { count: 'exact', head: true })
+      .eq('partner_id', user?.id);
 
-      await supabase
-        .from('partner_profiles')
-        .update({
-          business_name: businessName || partnerProfile.business_name,
-          description,
-          portfolio_images: portfolioUrls,
-        })
-        .eq('id', partnerProfile.id);
+    const { data: paidBookings } = await supabase
+      .from('bookings')
+      .select('total_price')
+      .eq('partner_id', user?.id)
+      .in('status', ['paid', 'completed']);
 
-      setPartnerProfile({
-        ...partnerProfile,
-        business_name: businessName || partnerProfile.business_name,
-        description,
-        portfolio_images: portfolioUrls,
-      });
+    const revenue = paidBookings?.reduce((sum, b) => sum + (b.total_price || 0), 0) || 0;
 
-      router.push('/feed');
-    } catch (err: any) {
-      setError(err.message || 'เกิดข้อผิดพลาด');
-    } finally {
-      setLoading(false);
-    }
+    setPosts(postsData || []);
+    setStats({
+      totalPosts: postsData?.length || 0,
+      totalBookings: bookingCount || 0,
+      revenue,
+    });
+    setLoading(false);
+  };
+
+  useEffect(() => { fetchData(); }, [partnerProfile]);
+
+  const handleDeletePost = async (postId: string) => {
+    if (!confirm('ต้องการลบโพสต์นี้?')) return;
+    await supabase.from('posts').delete().eq('id', postId);
+    fetchData();
+  };
+
+  const handleTogglePost = async (postId: string, currentStatus: string) => {
+    const newStatus = currentStatus === 'active' ? 'removed' : 'active';
+    await supabase.from('posts').update({ status: newStatus }).eq('id', postId);
+    fetchData();
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
-      <div className="max-w-lg w-full">
-        <div className="text-center mb-8">
-          <h1 className="font-display text-3xl font-bold text-gray-800">ตั้งค่าโปรไฟล์พาร์ทเนอร์</h1>
-          <p className="text-gray-500 mt-2">ขั้นตอนที่ {step} จาก 2</p>
-          <div className="flex gap-2 justify-center mt-4">
-            <div className={`h-1.5 w-16 rounded-full ${step >= 1 ? 'bg-primary' : 'bg-gray-200'}`} />
-            <div className={`h-1.5 w-16 rounded-full ${step >= 2 ? 'bg-primary' : 'bg-gray-200'}`} />
+    <AppLayout>
+      <div className="max-w-4xl mx-auto px-4 lg:px-0">
+        <h1 className="text-2xl font-bold text-gray-800 mb-6 hidden lg:block">จัดการโพสต์</h1>
+
+        <div className="grid grid-cols-3 gap-3 mb-6">
+          <div className="bg-white rounded-2xl p-4 border border-gray-100">
+            <Package size={20} className="text-secondary mb-2" />
+            <p className="text-2xl font-bold text-gray-800">{stats.totalPosts}</p>
+            <p className="text-xs text-gray-500">โพสต์ทั้งหมด</p>
+          </div>
+          <div className="bg-white rounded-2xl p-4 border border-gray-100">
+            <BarChart3 size={20} className="text-info mb-2" />
+            <p className="text-2xl font-bold text-gray-800">{stats.totalBookings}</p>
+            <p className="text-xs text-gray-500">การจองทั้งหมด</p>
+          </div>
+          <div className="bg-white rounded-2xl p-4 border border-gray-100">
+            <span className="text-secondary text-lg">฿</span>
+            <p className="text-2xl font-bold text-gray-800">{stats.revenue.toLocaleString()}</p>
+            <p className="text-xs text-gray-500">รายได้</p>
           </div>
         </div>
 
-        {error && (
-          <div className="bg-danger/10 border border-danger/20 text-danger rounded-xl p-3 mb-4 text-sm">
-            {error}
+        <div className="mb-6">
+          <CreatePostForm onSuccess={fetchData} />
+        </div>
+
+        <h2 className="font-bold text-gray-800 mb-3">โพสต์ของฉัน</h2>
+
+        {loading ? (
+          <div className="space-y-3">
+            {[1, 2].map((i) => (
+              <div key={i} className="bg-white rounded-2xl p-4 animate-pulse">
+                <div className="h-5 bg-gray-200 rounded w-1/2 mb-2" />
+                <div className="h-4 bg-gray-200 rounded w-1/3" />
+              </div>
+            ))}
           </div>
-        )}
-
-        {step === 1 && (
-          <div className="bg-white rounded-3xl shadow-xl p-8 animate-fade-in">
-            <h2 className="font-bold text-xl text-gray-800 mb-6">ข้อมูลพื้นฐาน</h2>
-
-            <div className="flex justify-center mb-6">
-              <div className="relative">
-                <div
-                  onClick={() => avatarRef.current?.click()}
-                  className="w-28 h-28 rounded-full bg-primary/10 border-3 border-primary flex items-center justify-center cursor-pointer overflow-hidden hover:opacity-80 transition"
-                >
-                  {avatarPreview ? (
-                    <img src={avatarPreview} alt="" className="w-full h-full object-cover" />
-                  ) : (
-                    <Camera size={32} className="text-primary-dark" />
-                  )}
+        ) : posts.length === 0 ? (
+          <div className="text-center py-12 bg-white rounded-2xl">
+            <p className="text-4xl mb-2">📝</p>
+            <p className="text-gray-500">ยังไม่มีโพสต์</p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {posts.map((post) => (
+              <div key={post.id} className="bg-white rounded-2xl p-4 border border-gray-100 flex items-center gap-4">
+                {post.media_urls[0] && (
+                  <img src={post.media_urls[0]} alt="" className="w-16 h-16 rounded-xl object-cover flex-shrink-0" />
+                )}
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-gray-800 truncate">{post.title}</h3>
+                  <p className="text-sm text-gray-500 truncate">{post.content}</p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className={`text-xs px-2 py-0.5 rounded-full ${
+                      post.status === 'active' ? 'bg-success/10 text-success' : 'bg-gray-100 text-gray-500'
+                    }`}>
+                      {post.status === 'active' ? 'แสดงอยู่' : 'ซ่อนอยู่'}
+                    </span>
+                    {post.price_min && (
+                      <span className="text-xs text-secondary font-medium">฿{post.price_min.toLocaleString()}</span>
+                    )}
+                  </div>
                 </div>
-                <input ref={avatarRef} type="file" accept="image/*" onChange={handleAvatarSelect} className="hidden" />
-                <p className="text-xs text-gray-400 text-center mt-2">อัปโหลดรูปโปรไฟล์</p>
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <div>
-                <label className="text-sm font-medium text-gray-700 mb-1 block">ชื่อธุรกิจ / ชื่อบริการ</label>
-                <input
-                  type="text"
-                  value={businessName}
-                  onChange={(e) => setBusinessName(e.target.value)}
-                  placeholder={partnerProfile?.business_name || ''}
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium text-gray-700 mb-1 block">คำอธิบาย / แนะนำตัว</label>
-                <textarea
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder="เล่าเกี่ยวกับบริการของคุณ..."
-                  rows={4}
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none resize-none"
-                />
-              </div>
-            </div>
-
-            <button
-              onClick={() => setStep(2)}
-              disabled={!avatarPreview}
-              className="w-full bg-primary hover:bg-primary-dark text-dark-DEFAULT font-bold py-3.5 rounded-2xl mt-6 transition flex items-center justify-center gap-2 disabled:opacity-40"
-            >
-              ถัดไป <ArrowRight size={18} />
-            </button>
-          </div>
-        )}
-
-        {step === 2 && (
-          <div className="bg-white rounded-3xl shadow-xl p-8 animate-fade-in">
-            <h2 className="font-bold text-xl text-gray-800 mb-2">อัปโหลดผลงาน</h2>
-            <p className="text-sm text-gray-500 mb-6">เพิ่มรูปภาพผลงานของคุณ (อย่างน้อย 1 รูป)</p>
-
-            <div className="grid grid-cols-3 gap-3 mb-6">
-              {portfolioFiles.map((f, i) => (
-                <div key={i} className="relative aspect-square rounded-xl overflow-hidden bg-gray-100">
-                  <img src={f.preview} alt="" className="w-full h-full object-cover" />
+                <div className="flex gap-1 flex-shrink-0">
                   <button
-                    onClick={() => setPortfolioFiles((prev) => prev.filter((_, idx) => idx !== i))}
-                    className="absolute top-1 right-1 w-6 h-6 bg-black/50 rounded-full flex items-center justify-center text-white"
+                    onClick={() => handleTogglePost(post.id, post.status)}
+                    className="w-9 h-9 rounded-lg bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-gray-200 transition"
+                    title={post.status === 'active' ? 'ซ่อน' : 'แสดง'}
                   >
-                    <X size={14} />
+                    {post.status === 'active' ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                  <button
+                    onClick={() => handleDeletePost(post.id)}
+                    className="w-9 h-9 rounded-lg bg-danger/10 flex items-center justify-center text-danger hover:bg-danger/20 transition"
+                  >
+                    <Trash2 size={16} />
                   </button>
                 </div>
-              ))}
-              {portfolioFiles.length < 10 && (
-                <button
-                  onClick={() => portfolioRef.current?.click()}
-                  className="aspect-square rounded-xl border-2 border-dashed border-gray-300 flex flex-col items-center justify-center text-gray-400 hover:border-primary hover:text-primary transition"
-                >
-                  <ImagePlus size={24} />
-                  <span className="text-xs mt-1">เพิ่มรูป</span>
-                </button>
-              )}
-            </div>
-            <input ref={portfolioRef} type="file" accept="image/*" multiple onChange={handlePortfolioSelect} className="hidden" />
-
-            <div className="flex gap-3">
-              <button
-                onClick={() => setStep(1)}
-                className="flex-1 bg-gray-100 text-gray-600 font-semibold py-3.5 rounded-2xl transition hover:bg-gray-200"
-              >
-                ย้อนกลับ
-              </button>
-              <button
-                onClick={handleSubmit}
-                disabled={portfolioFiles.length === 0 || loading}
-                className="flex-1 bg-primary hover:bg-primary-dark text-dark-DEFAULT font-bold py-3.5 rounded-2xl transition flex items-center justify-center gap-2 disabled:opacity-40"
-              >
-                {loading ? (
-                  <div className="w-5 h-5 border-2 border-dark-DEFAULT/30 border-t-dark-DEFAULT rounded-full animate-spin" />
-                ) : (
-                  <>
-                    <CheckCircle size={18} /> เสร็จสิ้น
-                  </>
-                )}
-              </button>
-            </div>
+              </div>
+            ))}
           </div>
         )}
       </div>
-    </div>
+    </AppLayout>
   );
 }
