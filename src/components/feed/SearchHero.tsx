@@ -47,24 +47,24 @@ export default function SearchHero({ onSearch, compact = false }: SearchHeroProp
             value={location}
             onChange={(e) => setLocation(e.target.value)}
             placeholder="สถานที่ / จังหวัด"
-            className="w-full min-w-0 px-3 py-2.5 rounded-xl border border-primary-dark/30 text-sm text-tmain outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+            className="w-full min-w-0 h-12 px-3 rounded-xl border border-primary-dark/30 text-sm text-tmain outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
           />
           <input
             type="date"
             value={date}
             onChange={(e) => setDate(e.target.value)}
             min={new Date().toISOString().split('T')[0]}
-            className="w-full min-w-0 px-3 py-2.5 rounded-xl border border-primary-dark/30 text-sm text-tmain outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+            className="w-full min-w-0 h-12 px-3 rounded-xl border border-primary-dark/30 text-sm text-tmain outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
           />
           <input
             type="time"
             value={time}
             onChange={(e) => setTime(e.target.value)}
-            className="w-full min-w-0 px-3 py-2.5 rounded-xl border border-primary-dark/30 text-sm text-tmain outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+            className="w-full min-w-0 h-12 px-3 rounded-xl border border-primary-dark/30 text-sm text-tmain outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
           />
           <button
             onClick={handleSearch}
-            className="w-full bg-secondary hover:bg-secondary/90 text-tmain font-semibold px-6 py-2.5 rounded-xl transition flex items-center justify-center gap-2 text-sm shadow-sm"
+            className="w-full h-12 bg-secondary hover:bg-secondary/90 text-tmain font-semibold rounded-xl transition flex items-center justify-center gap-2 text-sm shadow-sm"
           >
             <Search size={16} /> ค้นหา
           </button>
@@ -118,7 +118,7 @@ export default function SearchHero({ onSearch, compact = false }: SearchHeroProp
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
                 placeholder="สถานที่ / จังหวัด"
-                className="w-full min-w-0 pl-10 pr-3 py-3 rounded-xl border border-primary-dark/30 text-sm text-tmain outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 box-border"
+                className="w-full min-w-0 h-12 pl-10 pr-3 rounded-xl border border-primary-dark/30 text-sm text-tmain outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
               />
             </div>
             <div className="relative">
@@ -128,7 +128,7 @@ export default function SearchHero({ onSearch, compact = false }: SearchHeroProp
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
                 min={new Date().toISOString().split('T')[0]}
-                className="w-full min-w-0 pl-10 pr-3 py-3 rounded-xl border border-primary-dark/30 text-sm text-tmain outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 box-border"
+                className="w-full min-w-0 h-12 pl-10 pr-3 rounded-xl border border-primary-dark/30 text-sm text-tmain outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
               />
             </div>
             <div className="relative">
@@ -137,12 +137,12 @@ export default function SearchHero({ onSearch, compact = false }: SearchHeroProp
                 type="time"
                 value={time}
                 onChange={(e) => setTime(e.target.value)}
-                className="w-full min-w-0 pl-10 pr-3 py-3 rounded-xl border border-primary-dark/30 text-sm text-tmain outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 box-border"
+                className="w-full min-w-0 h-12 pl-10 pr-3 rounded-xl border border-primary-dark/30 text-sm text-tmain outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
               />
             </div>
             <button
               onClick={handleSearch}
-              className="w-full bg-secondary hover:bg-secondary/90 text-tmain font-bold py-3 rounded-xl transition flex items-center justify-center gap-2 shadow-md"
+              className="w-full h-12 bg-secondary hover:bg-secondary/90 text-tmain font-bold rounded-xl transition flex items-center justify-center gap-2 shadow-md"
             >
               <Search size={18} /> ค้นหา
             </button>
