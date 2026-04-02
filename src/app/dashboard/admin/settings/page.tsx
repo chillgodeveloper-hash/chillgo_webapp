@@ -6,7 +6,7 @@ import { Settings, Shield, Bell, Database, Globe } from 'lucide-react';
 export default function AdminSettingsPage() {
   return (
     <AppLayout>
-      <div className="max-w-2xl mx-auto px-4 lg:px-0">
+      <div className="max-w-2xl mx-auto px-4 lg:px-0 py-6 lg:py-8">
         <h1 className="text-2xl font-bold text-tmain mb-6">ตั้งค่าระบบ</h1>
 
         <div className="space-y-4">

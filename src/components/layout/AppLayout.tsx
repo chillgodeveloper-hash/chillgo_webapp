@@ -1,9 +1,7 @@
 'use client';
 
 import { useAuth } from '@/hooks/useAuth';
-import Sidebar from './Sidebar';
-import BottomNav from './BottomNav';
-import TopHeader from './TopHeader';
+import Navbar from './Navbar';
 import { Loader2 } from 'lucide-react';
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
@@ -21,15 +19,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="flex min-h-screen bg-primary-light">
-      <Sidebar />
-      <div className="flex-1 flex flex-col min-h-screen">
-        <TopHeader />
-        <main className="flex-1 pb-20 lg:pb-6 lg:p-6 animate-page-enter">
-          {children}
-        </main>
-        <BottomNav />
-      </div>
+    <div className="min-h-screen bg-primary-light">
+      <Navbar />
+      <main className="animate-page-enter">
+        {children}
+      </main>
     </div>
   );
 }

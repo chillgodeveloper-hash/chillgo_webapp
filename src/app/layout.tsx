@@ -4,6 +4,9 @@ import '@/styles/globals.css';
 export const metadata: Metadata = {
   title: '#ChillGo - จัดทริปง่าย ๆ สไตล์คุณ',
   description: 'แพลตฟอร์มจองไกด์และรถเช่าสำหรับทริปในฝัน',
+  icons: {
+    icon: '/icon.svg',
+  },
 };
 
 export default function RootLayout({

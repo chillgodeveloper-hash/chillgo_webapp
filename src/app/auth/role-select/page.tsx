@@ -56,7 +56,7 @@ export default function RoleSelectionPage() {
         <div className="flex justify-end mb-4">
           <button
             onClick={handleLogout}
-            className="flex items-center gap-1.5 text-sm text-danger hover:text-danger/80 transition px-3 py-2 rounded-xl hover:bg-danger/5"
+            className="flex items-center gap-1.5 text-sm text-danger hover:bg-danger/10/80 transition px-3 py-2 rounded-xl hover:bg-danger/5"
           >
             <LogOut size={16} /> ออกจากระบบ
           </button>
@@ -101,7 +101,7 @@ export default function RoleSelectionPage() {
               <div className={`w-14 h-14 rounded-2xl flex items-center justify-center ${
                 selectedRole === 'partner' ? 'bg-secondary' : 'bg-primary-light'
               }`}>
-                <Map size={28} className={selectedRole === 'partner' ? 'text-white' : 'text-tmuted'} />
+                <Map size={28} className={selectedRole === 'partner' ? 'text-tmain' : 'text-tmuted'} />
               </div>
               <div>
                 <h3 className="text-lg font-bold text-tmain">พาร์ทเนอร์ (Partner)</h3>

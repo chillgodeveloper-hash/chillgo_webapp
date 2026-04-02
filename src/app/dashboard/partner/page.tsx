@@ -151,13 +151,13 @@ export default function PartnerSetupPage() {
         <div className="flex items-center justify-between mb-6">
           <button
             onClick={handleSwitchToCustomer}
-            className="flex items-center gap-1.5 text-sm text-tmuted hover:text-secondary transition px-3 py-2 rounded-xl hover:bg-white/50"
+            className="flex items-center gap-1.5 text-sm text-tmuted hover:bg-secondary/10 transition px-3 py-2 rounded-xl hover:bg-white/50"
           >
             <ArrowLeft size={16} /> เปลี่ยนเป็นลูกค้า
           </button>
           <button
             onClick={handleLogout}
-            className="flex items-center gap-1.5 text-sm text-danger hover:text-danger/80 transition px-3 py-2 rounded-xl hover:bg-danger/5"
+            className="flex items-center gap-1.5 text-sm text-danger hover:bg-danger/10/80 transition px-3 py-2 rounded-xl hover:bg-danger/5"
           >
             <LogOut size={16} /> ออกจากระบบ
           </button>
@@ -243,7 +243,7 @@ export default function PartnerSetupPage() {
                   <img src={f.preview} alt="" className="w-full h-full object-cover" />
                   <button
                     onClick={() => setPortfolioFiles((prev) => prev.filter((_, idx) => idx !== i))}
-                    className="absolute top-1 right-1 w-6 h-6 bg-black/50 rounded-full flex items-center justify-center text-white"
+                    className="absolute top-1 right-1 w-6 h-6 bg-black/50 rounded-full flex items-center justify-center text-primary-light"
                   >
                     <X size={14} />
                   </button>
@@ -252,7 +252,7 @@ export default function PartnerSetupPage() {
               {portfolioFiles.length < 10 && (
                 <button
                   onClick={() => portfolioRef.current?.click()}
-                  className="aspect-square rounded-xl border-2 border-dashed border-primary-dark/40 flex flex-col items-center justify-center text-tmuted hover:border-primary hover:text-primary transition"
+                  className="aspect-square rounded-xl border-2 border-dashed border-primary-dark/40 flex flex-col items-center justify-center text-tmuted hover:border-primary hover:bg-primary/20 transition"
                 >
                   <ImagePlus size={24} />
                   <span className="text-xs mt-1">เพิ่มรูป</span>

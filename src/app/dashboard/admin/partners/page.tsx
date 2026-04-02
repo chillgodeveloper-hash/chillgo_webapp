@@ -41,7 +41,7 @@ export default function AdminPartnersPage() {
 
   return (
     <AppLayout>
-      <div className="max-w-4xl mx-auto px-4 lg:px-0">
+      <div className="max-w-4xl mx-auto px-4 lg:px-0 py-6 lg:py-8">
         <h1 className="text-2xl font-bold text-tmain mb-6">จัดการพาร์ทเนอร์</h1>
 
         <div className="relative mb-4">
@@ -112,7 +112,7 @@ export default function AdminPartnersPage() {
                       className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium transition ${
                         partner.is_verified
                           ? 'bg-primary/20 text-tmuted hover:bg-primary-dark/30'
-                          : 'bg-success text-white hover:bg-success/90'
+                          : 'bg-success/20 text-tmain hover:bg-success/90'
                       }`}
                     >
                       {partner.is_verified ? (
