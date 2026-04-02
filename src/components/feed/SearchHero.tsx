@@ -40,31 +40,31 @@ export default function SearchHero({ onSearch, compact = false }: SearchHeroProp
               <Car size={14} className="inline mr-1.5" />รถเช่า
             </button>
           </div>
-          <div className="flex-1 min-w-[150px]">
-            <input
-              type="text"
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-              placeholder="สถานที่ / จังหวัด"
-              className="w-full px-3 py-2.5 rounded-xl border border-primary-dark/30 text-sm text-tmain outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
-            />
-          </div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mt-3">
+          <input
+            type="text"
+            value={location}
+            onChange={(e) => setLocation(e.target.value)}
+            placeholder="สถานที่ / จังหวัด"
+            className="w-full px-3 py-2.5 rounded-xl border border-primary-dark/30 text-sm text-tmain outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+          />
           <input
             type="date"
             value={date}
             onChange={(e) => setDate(e.target.value)}
             min={new Date().toISOString().split('T')[0]}
-            className="px-3 py-2.5 rounded-xl border border-primary-dark/30 text-sm text-tmain outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+            className="w-full px-3 py-2.5 rounded-xl border border-primary-dark/30 text-sm text-tmain outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
           />
           <input
             type="time"
             value={time}
             onChange={(e) => setTime(e.target.value)}
-            className="px-3 py-2.5 rounded-xl border border-primary-dark/30 text-sm text-tmain outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+            className="w-full px-3 py-2.5 rounded-xl border border-primary-dark/30 text-sm text-tmain outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
           />
           <button
             onClick={handleSearch}
-            className="bg-secondary hover:bg-secondary/90 text-tmain font-semibold px-6 py-2.5 rounded-xl transition flex items-center gap-2 text-sm shadow-sm"
+            className="w-full bg-secondary hover:bg-secondary/90 text-tmain font-semibold px-6 py-2.5 rounded-xl transition flex items-center justify-center gap-2 text-sm shadow-sm"
           >
             <Search size={16} /> ค้นหา
           </button>

@@ -26,7 +26,7 @@ export default function CustomerDashboard() {
 
   return (
     <AppLayout>
-      <div className="max-w-md mx-auto px-4 lg:px-0">
+      <div className="max-w-md mx-auto px-4 lg:px-0 py-6 lg:py-8">
         <div className="bg-white rounded-3xl p-6 border border-primary-dark/20 mb-4">
           <div className="flex items-center gap-4">
             <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center overflow-hidden">
@@ -62,19 +62,20 @@ export default function CustomerDashboard() {
             <span className="flex-1 text-sm font-medium text-tmain">ความปลอดภัย</span>
             <ChevronRight size={16} className="text-tmuted" />
           </button>
-          <button onClick={() => setActiveModal('help')} className="w-full flex items-center gap-3 px-4 py-3.5 text-left hover:bg-primary-light transition border-b border-primary-dark/10">
+          <button onClick={() => setActiveModal('help')} className="w-full flex items-center gap-3 px-4 py-3.5 text-left hover:bg-primary-light transition">
             <HelpCircle size={20} className="text-tmuted" />
             <span className="flex-1 text-sm font-medium text-tmain">ช่วยเหลือ</span>
             <ChevronRight size={16} className="text-tmuted" />
           </button>
-          <button onClick={() => setActiveModal('switch-role')} className="w-full flex items-center gap-3 px-4 py-3.5 text-left hover:bg-primary-light transition">
-            <RefreshCw size={20} className="text-tmuted" />
-            <span className="flex-1 text-sm font-medium text-tmain">
-              {user?.role === 'partner' ? 'เปลี่ยนเป็นลูกค้า' : 'เปลี่ยนเป็นพาร์ทเนอร์'}
-            </span>
-            <ChevronRight size={16} className="text-tmuted" />
-          </button>
         </div>
+
+        <button
+          onClick={() => setActiveModal('switch-role')}
+          className="w-full mt-4 flex items-center justify-center gap-2 bg-secondary hover:bg-secondary/90 text-tmain font-semibold py-3 rounded-2xl transition shadow-sm"
+        >
+          <RefreshCw size={18} />
+          {user?.role === 'partner' ? 'เปลี่ยนเป็นลูกค้า' : 'เปลี่ยนเป็นพาร์ทเนอร์'}
+        </button>
 
         <button
           onClick={handleLogout}

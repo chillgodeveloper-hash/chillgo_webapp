@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase-client';
 import { useAuthStore } from '@/hooks/useAuthStore';
 import AppLayout from '@/components/layout/AppLayout';
@@ -8,9 +9,8 @@ import SearchHero from '@/components/feed/SearchHero';
 import PostListItem from '@/components/feed/PostListItem';
 import BookingModal from '@/components/booking/BookingModal';
 import Footer from '@/components/layout/Footer';
-import CreatePostForm from '@/components/feed/CreatePostForm';
 import { Post } from '@/types';
-import { SlidersHorizontal, ArrowUpDown } from 'lucide-react';
+import { ArrowUpDown } from 'lucide-react';
 
 export default function FeedPage() {
   const [posts, setPosts] = useState<Post[]>([]);
@@ -18,6 +18,16 @@ export default function FeedPage() {
   const [searched, setSearched] = useState(false);
   const [bookingPost, setBookingPost] = useState<Post | null>(null);
   const [searchParams, setSearchParams] = useState({ category: '', location: '', date: '', time: '' });
+  const [sortBy, setSortBy] = useState<'newest' | 'price_low' | 'price_high' | 'rating'>('newest');
+  const { user } = useAuthStore();
+  const supabase = createClient();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (user?.role === 'partner') {
+      router.replace('/dashboard/partner');
+    }
+  }, [user]);
   const [sortBy, setSortBy] = useState<'newest' | 'price_low' | 'price_high' | 'rating'>('newest');
   const { user } = useAuthStore();
   const supabase = createClient();
@@ -115,12 +125,6 @@ export default function FeedPage() {
         <>
           <div className="max-w-7xl mx-auto px-4 py-6">
             <SearchHero onSearch={handleSearch} compact />
-
-            {user?.role === 'partner' && (
-              <div className="mt-6">
-                <CreatePostForm onSuccess={() => fetchPosts(searchParams)} />
-              </div>
-            )}
 
             <div className="flex items-center justify-between mt-6 mb-4">
               <p className="text-sm text-tmuted">

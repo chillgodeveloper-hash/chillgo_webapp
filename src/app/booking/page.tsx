@@ -62,7 +62,7 @@ export default function BookingPage() {
 
   return (
     <AppLayout>
-      <div className="max-w-2xl mx-auto px-4 lg:px-0">
+      <div className="max-w-2xl mx-auto px-4 lg:px-0 py-6 lg:py-8">
         <h1 className="text-2xl font-bold text-tmain mb-4 hidden lg:block">การจองของฉัน</h1>
 
         <div className="flex gap-2 mb-4">
