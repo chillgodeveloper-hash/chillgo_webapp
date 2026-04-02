@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
 
         const { data: booking } = await supabase
           .from('bookings')
-          .select('customer_id, partner_id, post:posts(title)')
+          .select('customer_id, partner_id, post_id')
           .eq('id', bookingId)
           .single();
 
@@ -43,14 +43,14 @@ export async function POST(request: NextRequest) {
             {
               user_id: booking.customer_id,
               title: 'ชำระเงินสำเร็จ',
-              message: `การจอง "${booking.post?.title}" ชำระเงินเรียบร้อยแล้ว`,
+              message: `การจอง "${booking.post_id}" ชำระเงินเรียบร้อยแล้ว`,
               type: 'payment',
               link: `/booking`,
             },
             {
               user_id: booking.partner_id,
               title: 'ได้รับการชำระเงิน',
-              message: `ลูกค้าชำระเงินสำหรับ "${booking.post?.title}" แล้ว`,
+              message: `ลูกค้าชำระเงินสำหรับ "${booking.post_id}" แล้ว`,
               type: 'payment',
               link: `/chat/${bookingId}`,
             },
@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
       if (bookingId) {
         const { data: booking } = await supabase
           .from('bookings')
-          .select('customer_id, post:posts(title)')
+          .select('customer_id, post_id')
           .eq('id', bookingId)
           .single();
 
@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
           await supabase.from('notifications').insert({
             user_id: booking.customer_id,
             title: 'การชำระเงินล้มเหลว',
-            message: `การชำระเงินสำหรับ "${booking.post?.title}" ไม่สำเร็จ กรุณาลองใหม่`,
+            message: `การชำระเงินสำหรับ "${booking.post_id}" ไม่สำเร็จ กรุณาลองใหม่`,
             type: 'payment',
             link: `/booking/${bookingId}/pay`,
           });
