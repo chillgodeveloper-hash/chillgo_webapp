@@ -4,9 +4,10 @@ import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase-client';
 import { useAuthStore } from '@/hooks/useAuthStore';
 import AppLayout from '@/components/layout/AppLayout';
-import { Calendar, Clock, MapPin, MessageCircle, CreditCard, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
+import { Calendar, Clock, MapPin, MessageCircle, CreditCard, CheckCircle, XCircle, AlertCircle, Star } from 'lucide-react';
 import { Booking } from '@/types';
 import Link from 'next/link';
+import ReviewModal from '@/components/review/ReviewModal';
 
 const statusConfig: Record<string, { label: string; color: string; icon: any }> = {
   pending: { label: 'รอการอนุมัติ', color: 'bg-yellow-100 text-yellow-700', icon: Clock },
@@ -23,25 +24,35 @@ export default function BookingPage() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'active' | 'completed'>('active');
+  const [reviewBooking, setReviewBooking] = useState<Booking | null>(null);
+  const [reviewedIds, setReviewedIds] = useState<string[]>([]);
   const { user } = useAuthStore();
   const supabase = createClient();
 
-  useEffect(() => {
+  const fetchBookings = async () => {
     if (!user) return;
-    const fetchBookings = async () => {
-      const { data } = await supabase
-        .from('bookings')
-        .select(`
-          *,
-          post:posts(*),
-          partner:partner_profiles(*, profile:profiles(*))
-        `)
-        .eq('customer_id', user.id)
-        .order('created_at', { ascending: false });
+    const { data } = await supabase
+      .from('bookings')
+      .select(`
+        *,
+        post:posts(*),
+        partner:partner_profiles(*, profile:profiles(*))
+      `)
+      .eq('customer_id', user.id)
+      .order('created_at', { ascending: false });
 
-      setBookings(data || []);
-      setLoading(false);
-    };
+    setBookings(data || []);
+
+    const { data: reviews } = await supabase
+      .from('reviews')
+      .select('booking_id')
+      .eq('customer_id', user.id);
+    setReviewedIds(reviews?.map((r: any) => r.booking_id) || []);
+
+    setLoading(false);
+  };
+
+  useEffect(() => {
     fetchBookings();
   }, [user]);
 
@@ -165,7 +176,7 @@ export default function BookingPage() {
                     {['confirmed', 'paid', 'in_progress'].includes(booking.status) && (
                       <Link
                         href={`/chat/${booking.id}`}
-                        className="flex-1 bg-info/10 text-info font-medium py-2 rounded-xl text-sm text-center flex items-center justify-center gap-1.5 hover:bg-info/20 transition"
+                        className="flex-1 bg-info/10 text-tmain font-medium py-2 rounded-xl text-sm text-center flex items-center justify-center gap-1.5 hover:bg-info/20 transition"
                       >
                         <MessageCircle size={16} /> แชท
                       </Link>
@@ -173,10 +184,23 @@ export default function BookingPage() {
                     {booking.status === 'confirmed' && (
                       <Link
                         href={`/booking/${booking.id}/pay`}
-                        className="flex-1 bg-primary hover:bg-primary-dark text-dark-DEFAULT font-medium py-2 rounded-xl text-sm text-center flex items-center justify-center gap-1.5 transition"
+                        className="flex-1 bg-primary hover:bg-primary-dark text-tmain font-medium py-2 rounded-xl text-sm text-center flex items-center justify-center gap-1.5 transition"
                       >
                         <CreditCard size={16} /> ชำระเงิน
                       </Link>
+                    )}
+                    {['paid', 'completed'].includes(booking.status) && !reviewedIds.includes(booking.id) && (
+                      <button
+                        onClick={() => setReviewBooking(booking)}
+                        className="flex-1 bg-secondary/20 text-tmain font-medium py-2 rounded-xl text-sm text-center flex items-center justify-center gap-1.5 hover:bg-secondary/30 transition"
+                      >
+                        <Star size={16} /> รีวิว
+                      </button>
+                    )}
+                    {reviewedIds.includes(booking.id) && (
+                      <span className="flex-1 bg-success/10 text-tmuted font-medium py-2 rounded-xl text-sm text-center flex items-center justify-center gap-1.5">
+                        <Star size={16} className="text-amber-500 fill-amber-500" /> รีวิวแล้ว
+                      </span>
                     )}
                   </div>
                 </div>
@@ -185,6 +209,17 @@ export default function BookingPage() {
           </div>
         )}
       </div>
+
+      {reviewBooking && (
+        <ReviewModal
+          bookingId={reviewBooking.id}
+          partnerId={reviewBooking.partner_id}
+          partnerName={reviewBooking.partner?.profile?.full_name || ''}
+          postTitle={reviewBooking.post?.title || ''}
+          onClose={() => setReviewBooking(null)}
+          onSuccess={fetchBookings}
+        />
+      )}
     </AppLayout>
   );
 }
