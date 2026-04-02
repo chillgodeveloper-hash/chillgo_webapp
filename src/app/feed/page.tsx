@@ -28,9 +28,6 @@ export default function FeedPage() {
       router.replace('/dashboard/partner');
     }
   }, [user]);
-  const [sortBy, setSortBy] = useState<'newest' | 'price_low' | 'price_high' | 'rating'>('newest');
-  const { user } = useAuthStore();
-  const supabase = createClient();
 
   const fetchPosts = async (params?: { category: string; location: string; date: string; time: string }) => {
     setLoading(true);
