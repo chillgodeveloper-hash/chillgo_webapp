@@ -47,20 +47,20 @@ export default function SearchHero({ onSearch, compact = false }: SearchHeroProp
             value={location}
             onChange={(e) => setLocation(e.target.value)}
             placeholder="สถานที่ / จังหวัด"
-            className="w-full px-3 py-2.5 rounded-xl border border-primary-dark/30 text-sm text-tmain outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+            className="w-full min-w-0 px-3 py-2.5 rounded-xl border border-primary-dark/30 text-sm text-tmain outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
           />
           <input
             type="date"
             value={date}
             onChange={(e) => setDate(e.target.value)}
             min={new Date().toISOString().split('T')[0]}
-            className="w-full px-3 py-2.5 rounded-xl border border-primary-dark/30 text-sm text-tmain outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+            className="w-full min-w-0 px-3 py-2.5 rounded-xl border border-primary-dark/30 text-sm text-tmain outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
           />
           <input
             type="time"
             value={time}
             onChange={(e) => setTime(e.target.value)}
-            className="w-full px-3 py-2.5 rounded-xl border border-primary-dark/30 text-sm text-tmain outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+            className="w-full min-w-0 px-3 py-2.5 rounded-xl border border-primary-dark/30 text-sm text-tmain outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
           />
           <button
             onClick={handleSearch}
@@ -118,7 +118,7 @@ export default function SearchHero({ onSearch, compact = false }: SearchHeroProp
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
                 placeholder="สถานที่ / จังหวัด"
-                className="w-full pl-10 pr-3 py-3 rounded-xl border border-primary-dark/30 text-sm text-tmain outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 box-border"
+                className="w-full min-w-0 pl-10 pr-3 py-3 rounded-xl border border-primary-dark/30 text-sm text-tmain outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 box-border"
               />
             </div>
             <div className="relative">
@@ -128,7 +128,7 @@ export default function SearchHero({ onSearch, compact = false }: SearchHeroProp
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
                 min={new Date().toISOString().split('T')[0]}
-                className="w-full pl-10 pr-3 py-3 rounded-xl border border-primary-dark/30 text-sm text-tmain outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 box-border"
+                className="w-full min-w-0 pl-10 pr-3 py-3 rounded-xl border border-primary-dark/30 text-sm text-tmain outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 box-border"
               />
             </div>
             <div className="relative">
@@ -137,7 +137,7 @@ export default function SearchHero({ onSearch, compact = false }: SearchHeroProp
                 type="time"
                 value={time}
                 onChange={(e) => setTime(e.target.value)}
-                className="w-full pl-10 pr-3 py-3 rounded-xl border border-primary-dark/30 text-sm text-tmain outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 box-border"
+                className="w-full min-w-0 pl-10 pr-3 py-3 rounded-xl border border-primary-dark/30 text-sm text-tmain outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 box-border"
               />
             </div>
             <button

@@ -29,6 +29,25 @@ body {
   overflow-x: hidden;
 }
 
+input, textarea, select, button {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+input[type="date"],
+input[type="time"],
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+textarea {
+  -webkit-appearance: none;
+  appearance: none;
+  max-width: 100%;
+  min-width: 0;
+  font-size: 16px;
+}
+
 ::placeholder {
   color: #757575 !important;
   opacity: 1 !important;

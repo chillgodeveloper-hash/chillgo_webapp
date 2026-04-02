@@ -3,141 +3,157 @@
 import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase-client';
 import AppLayout from '@/components/layout/AppLayout';
-import { Search, CheckCircle, XCircle, AlertCircle, Eye } from 'lucide-react';
-import { Booking } from '@/types';
+import { DollarSign, TrendingUp, CalendarCheck, Users } from 'lucide-react';
 
-export default function AdminBookingsPage() {
-  const [bookings, setBookings] = useState<Booking[]>([]);
+interface MonthlyData {
+  month: string;
+  revenue: number;
+  bookings: number;
+}
+
+export default function RevenueReportPage() {
+  const [monthlyData, setMonthlyData] = useState<MonthlyData[]>([]);
+  const [totals, setTotals] = useState({ revenue: 0, bookings: 0, avgOrder: 0, partners: 0 });
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState('all');
   const supabase = createClient();
 
-  const fetchBookings = async () => {
-    setLoading(true);
-    let query = supabase
-      .from('bookings')
-      .select(`
-        *,
-        customer:profiles!bookings_customer_id_fkey(*),
-        partner:partner_profiles(*, profile:profiles(*)),
-        post:posts(*)
-      `)
-      .order('created_at', { ascending: false });
+  useEffect(() => {
+    const fetch = async () => {
+      const { data: bookings } = await supabase
+        .from('bookings')
+        .select('total_price, created_at, status')
+        .in('status', ['paid', 'completed']);
 
-    if (filter !== 'all') {
-      query = query.eq('status', filter);
-    }
+      const { count: partnerCount } = await supabase
+        .from('partner_profiles')
+        .select('*', { count: 'exact', head: true });
 
-    const { data } = await query;
-    setBookings(data || []);
-    setLoading(false);
-  };
+      if (bookings) {
+        const monthMap: Record<string, { revenue: number; bookings: number }> = {};
+        const months = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
 
-  useEffect(() => { fetchBookings(); }, [filter]);
+        months.forEach((m, i) => {
+          monthMap[m] = { revenue: 0, bookings: 0 };
+        });
 
-  const handleApprove = async (id: string) => {
-    await supabase.from('bookings').update({ status: 'confirmed' }).eq('id', id);
-    fetchBookings();
-  };
+        let totalRev = 0;
+        bookings.forEach((b) => {
+          const d = new Date(b.created_at);
+          const monthName = months[d.getMonth()];
+          monthMap[monthName].revenue += b.total_price || 0;
+          monthMap[monthName].bookings += 1;
+          totalRev += b.total_price || 0;
+        });
 
-  const handleReject = async (id: string) => {
-    const reason = prompt('เหตุผล:');
-    if (reason === null) return;
-    await supabase.from('bookings').update({ status: 'cancelled', admin_note: reason }).eq('id', id);
-    fetchBookings();
-  };
+        const data = months.map((m) => ({
+          month: m,
+          revenue: monthMap[m].revenue,
+          bookings: monthMap[m].bookings,
+        }));
 
-  const statusBadge = (status: string) => {
-    const map: Record<string, { label: string; cls: string }> = {
-      pending: { label: 'รออนุมัติ', cls: 'bg-yellow-100 text-yellow-700' },
-      confirmed: { label: 'ยืนยัน', cls: 'bg-green-100 text-green-700' },
-      paid: { label: 'ชำระแล้ว', cls: 'bg-emerald-100 text-emerald-700' },
-      in_progress: { label: 'ดำเนินการ', cls: 'bg-blue-100 text-blue-700' },
-      completed: { label: 'เสร็จ', cls: 'bg-primary/20 text-tmuted' },
-      cancelled: { label: 'ยกเลิก', cls: 'bg-red-100 text-red-600' },
-      alternative_offered: { label: 'เสนอทางเลือก', cls: 'bg-purple-100 text-purple-700' },
+        setMonthlyData(data);
+        setTotals({
+          revenue: totalRev,
+          bookings: bookings.length,
+          avgOrder: bookings.length > 0 ? Math.round(totalRev / bookings.length) : 0,
+          partners: partnerCount || 0,
+        });
+      }
+
+      setLoading(false);
     };
-    const s = map[status] || map.pending;
-    return <span className={`${s.cls} px-2.5 py-0.5 rounded-full text-xs font-medium`}>{s.label}</span>;
-  };
+    fetch();
+  }, []);
 
-  const filters = [
-    { value: 'all', label: 'ทั้งหมด' },
-    { value: 'pending', label: 'รออนุมัติ' },
-    { value: 'confirmed', label: 'ยืนยัน' },
-    { value: 'paid', label: 'ชำระแล้ว' },
-    { value: 'completed', label: 'เสร็จ' },
-    { value: 'cancelled', label: 'ยกเลิก' },
-  ];
+  const maxRevenue = Math.max(...monthlyData.map((d) => d.revenue), 1);
 
   return (
     <AppLayout>
-      <div className="max-w-5xl mx-auto px-4 lg:px-0 py-6 lg:py-8">
-        <h1 className="text-2xl font-bold text-tmain mb-6">รายการจองทั้งหมด</h1>
+      <div className="max-w-6xl mx-auto px-4 py-8">
+        <h1 className="text-2xl font-bold text-tmain mb-6">รายงานรายได้</h1>
 
-        <div className="flex gap-2 overflow-x-auto pb-2 mb-4">
-          {filters.map((f) => (
-            <button
-              key={f.value}
-              onClick={() => setFilter(f.value)}
-              className={`px-4 py-2 rounded-full text-xs font-medium whitespace-nowrap transition ${
-                filter === f.value ? 'bg-dark-DEFAULT text-primary' : 'bg-primary-light text-tmain border border-primary-dark/20 hover:bg-primary/20'
-              }`}
-            >
-              {f.label}
-            </button>
-          ))}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          <div className="bg-white rounded-2xl p-5 border border-primary-dark/20">
+            <DollarSign size={20} className="text-secondary mb-2" />
+            <p className="text-2xl font-bold text-tmain">฿{totals.revenue.toLocaleString()}</p>
+            <p className="text-xs text-tmuted">รายได้ทั้งหมด</p>
+          </div>
+          <div className="bg-white rounded-2xl p-5 border border-primary-dark/20">
+            <CalendarCheck size={20} className="text-info mb-2" />
+            <p className="text-2xl font-bold text-tmain">{totals.bookings}</p>
+            <p className="text-xs text-tmuted">การจองที่ชำระแล้ว</p>
+          </div>
+          <div className="bg-white rounded-2xl p-5 border border-primary-dark/20">
+            <TrendingUp size={20} className="text-success mb-2" />
+            <p className="text-2xl font-bold text-tmain">฿{totals.avgOrder.toLocaleString()}</p>
+            <p className="text-xs text-tmuted">ค่าเฉลี่ยต่อออเดอร์</p>
+          </div>
+          <div className="bg-white rounded-2xl p-5 border border-primary-dark/20">
+            <Users size={20} className="text-secondary mb-2" />
+            <p className="text-2xl font-bold text-tmain">{totals.partners}</p>
+            <p className="text-xs text-tmuted">พาร์ทเนอร์ทั้งหมด</p>
+          </div>
         </div>
 
-        <div className="bg-white rounded-2xl border border-primary-dark/20 overflow-hidden">
+        <div className="bg-white rounded-2xl p-6 border border-primary-dark/20 mb-8">
+          <h2 className="font-bold text-tmain mb-6">รายได้รายเดือน</h2>
+
           {loading ? (
-            <div className="p-4 space-y-3">
-              {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="h-16 bg-primary/20 rounded-lg animate-pulse" />
-              ))}
+            <div className="h-64 flex items-center justify-center">
+              <div className="w-8 h-8 border-3 border-primary-dark/30 border-t-secondary rounded-full animate-spin" />
             </div>
-          ) : bookings.length === 0 ? (
-            <div className="p-8 text-center text-tmuted">ไม่พบรายการ</div>
           ) : (
-            <div className="divide-y divide-primary-dark/10">
-              {bookings.map((booking) => (
-                <div key={booking.id} className="p-4 hover:bg-primary-light/50 transition">
-                  <div className="flex items-start justify-between mb-2">
-                    <div>
-                      <p className="font-semibold text-sm text-tmain">{booking.post?.title}</p>
-                      <p className="text-xs text-tmuted mt-0.5">
-                        {booking.customer?.full_name} → {booking.partner?.profile?.full_name}
-                      </p>
-                    </div>
-                    {statusBadge(booking.status)}
+            <div className="flex items-end gap-2 h-64">
+              {monthlyData.map((d) => (
+                <div key={d.month} className="flex-1 flex flex-col items-center gap-1">
+                  <span className="text-xs text-tmuted font-medium">
+                    {d.revenue > 0 ? `฿${(d.revenue / 1000).toFixed(0)}k` : ''}
+                  </span>
+                  <div className="w-full flex justify-center">
+                    <div
+                      className="w-full max-w-[40px] rounded-t-lg transition-all duration-500"
+                      style={{
+                        height: `${Math.max((d.revenue / maxRevenue) * 200, d.revenue > 0 ? 8 : 2)}px`,
+                        background: d.revenue > 0
+                          ? 'linear-gradient(to top, #FF9800, #FFDE5B)'
+                          : '#FFD03520',
+                      }}
+                    />
                   </div>
-                  <div className="flex flex-wrap gap-3 text-xs text-tmuted mb-2">
-                    <span>📅 {new Date(booking.booking_date).toLocaleDateString('th-TH')}</span>
-                    <span>👥 {booking.guests} คน</span>
-                    {booking.total_price && (
-                      <span className="text-secondary font-medium">฿{booking.total_price.toLocaleString()}</span>
-                    )}
-                  </div>
-                  {booking.status === 'pending' && (
-                    <div className="flex gap-2 mt-2">
-                      <button
-                        onClick={() => handleApprove(booking.id)}
-                        className="flex items-center gap-1 bg-success/20 text-tmain px-3 py-1.5 rounded-lg text-xs font-medium"
-                      >
-                        <CheckCircle size={14} /> อนุมัติ
-                      </button>
-                      <button
-                        onClick={() => handleReject(booking.id)}
-                        className="flex items-center gap-1 bg-danger/20 text-tmain px-3 py-1.5 rounded-lg text-xs font-medium"
-                      >
-                        <XCircle size={14} /> ปฏิเสธ
-                      </button>
-                    </div>
-                  )}
+                  <span className="text-[10px] text-tmuted">{d.month}</span>
                 </div>
               ))}
             </div>
           )}
+        </div>
+
+        <div className="bg-white rounded-2xl p-6 border border-primary-dark/20">
+          <h2 className="font-bold text-tmain mb-4">สรุปรายเดือน</h2>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-primary-dark/15">
+                  <th className="text-left py-3 text-tmuted font-medium">เดือน</th>
+                  <th className="text-right py-3 text-tmuted font-medium">จำนวนจอง</th>
+                  <th className="text-right py-3 text-tmuted font-medium">รายได้</th>
+                </tr>
+              </thead>
+              <tbody>
+                {monthlyData.filter((d) => d.revenue > 0 || d.bookings > 0).map((d) => (
+                  <tr key={d.month} className="border-b border-primary-dark/10">
+                    <td className="py-3 text-tmain font-medium">{d.month}</td>
+                    <td className="py-3 text-right text-tmain">{d.bookings}</td>
+                    <td className="py-3 text-right text-secondary font-semibold">฿{d.revenue.toLocaleString()}</td>
+                  </tr>
+                ))}
+                {monthlyData.every((d) => d.revenue === 0) && (
+                  <tr>
+                    <td colSpan={3} className="py-8 text-center text-tmuted">ยังไม่มีข้อมูลรายได้</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </AppLayout>
