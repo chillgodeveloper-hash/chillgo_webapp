@@ -48,7 +48,18 @@ export default function PartnerDashboard() {
     setLoading(false);
   };
 
-  useEffect(() => { fetchData(); }, [partnerProfile]);
+  useEffect(() => {
+    fetchData();
+
+    const channel = supabase
+      .channel('partner-data')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'bookings' }, () => {
+        fetchData();
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [partnerProfile]);
 
   const handleDeletePost = async (postId: string) => {
     if (!confirm('ต้องการลบโพสต์นี้?')) return;

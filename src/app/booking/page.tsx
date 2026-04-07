@@ -81,6 +81,15 @@ export default function BookingPage() {
     if (user) {
       fetchBookings();
     }
+
+    const channel = supabase
+      .channel('user-bookings')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'bookings' }, () => {
+        if (user) fetchBookings();
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
   }, [user]);
 
   const activeBookings = bookings.filter((b) => !['completed', 'cancelled'].includes(b.status));

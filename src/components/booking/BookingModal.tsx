@@ -53,13 +53,41 @@ export default function BookingModal({ post, onClose }: BookingModalProps) {
     }
 
     if (data) {
-      await supabase.from('notifications').insert({
-        user_id: user.id,
-        title: 'ส่งคำขอจองแล้ว',
-        message: `คำขอจอง "${post.title}" ถูกส่งแล้ว กรุณารอ Admin อนุมัติ`,
-        type: 'booking',
-        link: '/booking',
-      });
+      const notifications: any[] = [
+        {
+          user_id: user.id,
+          title: 'ส่งคำขอจองแล้ว',
+          message: `คำขอจอง "${post.title}" ถูกส่งแล้ว กรุณารอ Admin อนุมัติ`,
+          type: 'booking',
+          link: '/booking',
+        },
+        {
+          user_id: post.partner_profile?.user_id,
+          title: 'มีคำขอจองใหม่',
+          message: `${user.full_name} ต้องการจอง "${post.title}"`,
+          type: 'booking',
+          link: '/booking',
+        },
+      ];
+
+      const { data: admins } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('role', 'admin');
+
+      if (admins) {
+        admins.forEach((admin: any) => {
+          notifications.push({
+            user_id: admin.id,
+            title: 'คำขอจองใหม่รออนุมัติ',
+            message: `${user.full_name} จอง "${post.title}" กรุณาตรวจสอบ`,
+            type: 'booking',
+            link: '/dashboard/admin',
+          });
+        });
+      }
+
+      await supabase.from('notifications').insert(notifications);
 
       setSuccess(true);
       setTimeout(() => {
