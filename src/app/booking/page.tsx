@@ -34,12 +34,7 @@ export default function BookingPage() {
 
     let query = supabase
       .from('bookings')
-      .select(`
-        *,
-        post:posts(*),
-        partner:profiles!bookings_partner_id_fkey(*),
-        customer:profiles!bookings_customer_id_fkey(*)
-      `)
+      .select(`*, post:posts(*)`)
       .order('created_at', { ascending: false });
 
     if (user.role === 'partner') {
@@ -49,7 +44,19 @@ export default function BookingPage() {
     }
 
     const { data } = await query;
-    setBookings(data || []);
+
+    const userIds = [...new Set((data || []).flatMap((b: any) => [b.customer_id, b.partner_id]))];
+    const { data: profilesData } = await supabase.from('profiles').select('*').in('id', userIds.length > 0 ? userIds : ['none']);
+    const profileMap: Record<string, any> = {};
+    profilesData?.forEach(p => { profileMap[p.id] = p; });
+
+    const enriched = (data || []).map((b: any) => ({
+      ...b,
+      customer: profileMap[b.customer_id] || null,
+      partner: profileMap[b.partner_id] || null,
+    }));
+
+    setBookings(enriched);
 
     const { data: reviews } = await supabase
       .from('reviews')

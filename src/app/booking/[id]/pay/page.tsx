@@ -23,10 +23,13 @@ export default function PaymentPage() {
     const fetch = async () => {
       const { data } = await supabase
         .from('bookings')
-        .select(`*, post:posts(*), partner:profiles!bookings_partner_id_fkey(*)`)
+        .select(`*, post:posts(*)`)
         .eq('id', id)
         .single();
-      setBooking(data);
+      if (data) {
+        const { data: partnerData } = await supabase.from('profiles').select('*').eq('id', data.partner_id).single();
+        setBooking({ ...data, partner: partnerData });
+      }
       if (data?.status === 'paid') setPaid(true);
       setLoading(false);
     };

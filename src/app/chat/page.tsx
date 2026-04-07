@@ -18,17 +18,23 @@ export default function ChatListPage() {
     const fetchChats = async () => {
       const { data } = await supabase
         .from('bookings')
-        .select(`
-          id, status,
-          post:posts(title),
-          partner:partner_profiles(*, profile:profiles(*)),
-          customer:profiles!bookings_customer_id_fkey(*)
-        `)
+        .select(`id, status, customer_id, partner_id, post:posts(title)`)
         .or(`customer_id.eq.${user.id},partner_id.eq.${user.id}`)
         .in('status', ['confirmed', 'paid', 'in_progress'])
         .order('updated_at', { ascending: false });
 
-      setChats(data || []);
+      const userIds = [...new Set((data || []).flatMap((b: any) => [b.customer_id, b.partner_id]))];
+      const { data: profilesData } = await supabase.from('profiles').select('*').in('id', userIds.length > 0 ? userIds : ['none']);
+      const profileMap: Record<string, any> = {};
+      profilesData?.forEach(p => { profileMap[p.id] = p; });
+
+      const enriched = (data || []).map((b: any) => ({
+        ...b,
+        customer: profileMap[b.customer_id] || null,
+        partner: profileMap[b.partner_id] || null,
+      }));
+
+      setChats(enriched);
       setLoading(false);
     };
     fetchChats();
@@ -63,8 +69,8 @@ export default function ChatListPage() {
           <div className="space-y-2">
             {chats.map((chat) => {
               const otherPerson = user?.role === 'customer'
-                ? (chat.partner as any)?.profile?.full_name
-                : chat.customer?.full_name;
+                ? (chat as any).partner?.full_name
+                : (chat as any).customer?.full_name;
 
               return (
                 <Link

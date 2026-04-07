@@ -26,7 +26,7 @@ export default function PartnerProfilePage() {
 
       const { data: wh } = await supabase
         .from('work_history')
-        .select('*, post:posts(title, category, location), customer:profiles!work_history_customer_id_fkey(full_name)')
+        .select('*, post:posts(title, category, location)')
         .eq('partner_id', id)
         .eq('status', 'completed')
         .order('completed_at', { ascending: false });
@@ -34,10 +34,19 @@ export default function PartnerProfilePage() {
 
       const { data: rv } = await supabase
         .from('reviews')
-        .select('*, customer:profiles!reviews_customer_id_fkey(full_name)')
+        .select('*')
         .eq('partner_id', id)
         .order('created_at', { ascending: false });
-      setReviews(rv || []);
+
+      const customerIds = [...new Set((rv || []).map((r: any) => r.customer_id))];
+      if (customerIds.length > 0) {
+        const { data: customers } = await supabase.from('profiles').select('id, full_name').in('id', customerIds);
+        const custMap: Record<string, any> = {};
+        customers?.forEach(c => { custMap[c.id] = c; });
+        setReviews((rv || []).map((r: any) => ({ ...r, customer: custMap[r.customer_id] || null })));
+      } else {
+        setReviews(rv || []);
+      }
 
       setLoading(false);
     };

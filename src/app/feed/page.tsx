@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase-client';
-import { useAuthStore } from '@/hooks/useAuthStore';
+import { useAuth } from '@/hooks/useAuth';
 import AppLayout from '@/components/layout/AppLayout';
 import SearchHero from '@/components/feed/SearchHero';
 import PostListItem from '@/components/feed/PostListItem';
@@ -21,7 +21,7 @@ export default function FeedPage() {
   const [searchParams, setSearchParams] = useState({ category: '', location: '', date: '', time: '' });
   const [sortBy, setSortBy] = useState<'newest' | 'price_low' | 'price_high' | 'rating'>('newest');
   const [filters, setFilters] = useState(defaultFilters);
-  const { user } = useAuthStore();
+  const { user } = useAuth();
   const supabase = createClient();
   const router = useRouter();
 
