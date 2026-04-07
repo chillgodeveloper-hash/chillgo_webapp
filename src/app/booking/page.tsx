@@ -43,7 +43,15 @@ export default function BookingPage() {
       query = query.eq('customer_id', user.id);
     }
 
-    const { data } = await query;
+    const { data, error } = await query;
+
+    if (error) {
+      console.error('Bookings fetch error:', error);
+      setLoading(false);
+      return;
+    }
+
+    console.log('Bookings fetched:', data?.length, 'for user:', user.id, 'role:', user.role);
 
     const userIds = Array.from(new Set((data || []).flatMap((b: any) => [b.customer_id, b.partner_id])));
     const profileMap: Record<string, any> = {};
@@ -70,7 +78,9 @@ export default function BookingPage() {
   };
 
   useEffect(() => {
-    fetchBookings();
+    if (user) {
+      fetchBookings();
+    }
   }, [user]);
 
   const activeBookings = bookings.filter((b) => !['completed', 'cancelled'].includes(b.status));

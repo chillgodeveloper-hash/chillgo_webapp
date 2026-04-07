@@ -26,27 +26,43 @@ export async function middleware(request: NextRequest) {
   );
 
   const { data: { session } } = await supabase.auth.getSession();
+  const pathname = request.nextUrl.pathname;
 
   const protectedPaths = ['/dashboard', '/booking', '/chat', '/notifications'];
-  const isProtected = protectedPaths.some((p) => request.nextUrl.pathname.startsWith(p));
+  const isProtected = protectedPaths.some((p) => pathname.startsWith(p));
 
   if (isProtected && !session) {
-    const redirectUrl = new URL('/auth/login', request.url);
-    return NextResponse.redirect(redirectUrl);
+    return NextResponse.redirect(new URL('/auth/login', request.url));
   }
 
-  if (request.nextUrl.pathname.startsWith('/auth/') && session) {
+  if (pathname.startsWith('/auth/') && session) {
     const allowedAuthPaths = ['/auth/role-select', '/auth/verify'];
-    const isAllowed = allowedAuthPaths.some((p) => request.nextUrl.pathname.startsWith(p));
+    const isAllowed = allowedAuthPaths.some((p) => pathname.startsWith(p));
     if (!isAllowed) {
-      const redirectUrl = new URL('/feed', request.url);
-      return NextResponse.redirect(redirectUrl);
+      return NextResponse.redirect(new URL('/feed', request.url));
     }
+  }
+
+  if ((pathname === '/' || pathname === '/feed') && session) {
+    try {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', session.user.id)
+        .single();
+
+      if (profile?.role === 'admin') {
+        return NextResponse.redirect(new URL('/dashboard/admin', request.url));
+      }
+      if (profile?.role === 'partner') {
+        return NextResponse.redirect(new URL('/dashboard/partner', request.url));
+      }
+    } catch (e) {}
   }
 
   return supabaseResponse;
 }
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|api/).*)'],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|icon.svg|api/).*)'],
 };

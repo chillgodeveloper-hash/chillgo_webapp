@@ -4,10 +4,10 @@ import { useAuth } from '@/hooks/useAuth';
 import Navbar from './Navbar';
 import { Loader2 } from 'lucide-react';
 
-export default function AppLayout({ children, requireAuth = false }: { children: React.ReactNode; requireAuth?: boolean }) {
-  const { user, isLoading } = useAuth(requireAuth ? 'any' : undefined);
+export default function AppLayout({ children }: { children: React.ReactNode }) {
+  const { user, isLoading } = useAuth();
 
-  if (isLoading && requireAuth) {
+  if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-primary-light">
         <div className="text-center">
