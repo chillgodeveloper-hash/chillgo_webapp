@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { MapPin, Star, Heart } from 'lucide-react';
 import { Post } from '@/types';
 
@@ -43,7 +44,9 @@ export default function PostListItem({ post, onBook }: PostListItemProps) {
         <div className="flex items-start justify-between mb-2">
           <div>
             <h3 className="font-bold text-tmain text-lg leading-tight">{post.title}</h3>
-            <p className="text-sm text-tmuted mt-0.5">{partner?.business_name}</p>
+            <p className="text-sm text-tmuted mt-0.5">
+              <Link href={`/partner/${partner?.user_id}`} className="hover:underline">{partner?.business_name}</Link>
+            </p>
           </div>
           {partner?.is_verified && (
             <span className="text-xs bg-success/20 text-tmain px-2 py-0.5 rounded-full font-medium flex-shrink-0">✓ ยืนยัน</span>

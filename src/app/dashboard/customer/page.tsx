@@ -8,7 +8,8 @@ import AppLayout from '@/components/layout/AppLayout';
 import { validateFile } from '@/lib/moderation';
 import {
   User, LogOut, ChevronRight, Shield, Bell, HelpCircle,
-  X, Camera, Save, Eye, EyeOff, Check, RefreshCw, Map, ShoppingBag
+  X, Camera, Save, Eye, EyeOff, Check, RefreshCw, Map, ShoppingBag,
+  MessageSquare, Navigation
 } from 'lucide-react';
 
 type ModalType = 'edit' | 'security' | 'notifications' | 'help' | 'switch-role' | null;
@@ -62,10 +63,20 @@ export default function CustomerDashboard() {
             <span className="flex-1 text-sm font-medium text-tmain">ความปลอดภัย</span>
             <ChevronRight size={16} className="text-tmuted" />
           </button>
-          <button onClick={() => setActiveModal('help')} className="w-full flex items-center gap-3 px-4 py-3.5 text-left hover:bg-primary-light transition">
+          <button onClick={() => setActiveModal('help')} className="w-full flex items-center gap-3 px-4 py-3.5 text-left hover:bg-primary-light transition border-b border-primary-dark/10">
             <HelpCircle size={20} className="text-tmuted" />
             <span className="flex-1 text-sm font-medium text-tmain">ช่วยเหลือ</span>
             <ChevronRight size={16} className="text-tmuted" />
+          </button>
+          <button onClick={() => alert('🛠️ ระบบเชื่อมต่อ WeChat อยู่ระหว่างการพัฒนา')} className="w-full flex items-center gap-3 px-4 py-3.5 text-left hover:bg-primary-light transition border-b border-primary-dark/10">
+            <MessageSquare size={20} className="text-tmuted" />
+            <span className="flex-1 text-sm font-medium text-tmain">เชื่อมต่อ WeChat</span>
+            <span className="text-xs bg-secondary/20 text-tmuted px-2 py-0.5 rounded-full">เร็ว ๆ นี้</span>
+          </button>
+          <button onClick={() => alert('🛠️ ระบบ GPS Tracking อยู่ระหว่างการพัฒนา')} className="w-full flex items-center gap-3 px-4 py-3.5 text-left hover:bg-primary-light transition">
+            <Navigation size={20} className="text-tmuted" />
+            <span className="flex-1 text-sm font-medium text-tmain">GPS Tracking</span>
+            <span className="text-xs bg-secondary/20 text-tmuted px-2 py-0.5 rounded-full">เร็ว ๆ นี้</span>
           </button>
         </div>
 

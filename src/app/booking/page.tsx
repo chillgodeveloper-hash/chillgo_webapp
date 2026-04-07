@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase-client';
 import { useAuthStore } from '@/hooks/useAuthStore';
 import AppLayout from '@/components/layout/AppLayout';
-import { Calendar, Clock, MapPin, MessageCircle, CreditCard, CheckCircle, XCircle, AlertCircle, Star } from 'lucide-react';
+import { Calendar, Clock, MapPin, MessageCircle, CreditCard, CheckCircle, XCircle, AlertCircle, Star, Play } from 'lucide-react';
 import { Booking } from '@/types';
 import Link from 'next/link';
 import ReviewModal from '@/components/review/ReviewModal';
@@ -31,16 +31,24 @@ export default function BookingPage() {
 
   const fetchBookings = async () => {
     if (!user) return;
-    const { data } = await supabase
+
+    let query = supabase
       .from('bookings')
       .select(`
         *,
         post:posts(*),
-        partner:partner_profiles(*, profile:profiles(*))
+        partner:partner_profiles(*, profile:profiles(*)),
+        customer:profiles!bookings_customer_id_fkey(*)
       `)
-      .eq('customer_id', user.id)
       .order('created_at', { ascending: false });
 
+    if (user.role === 'partner') {
+      query = query.eq('partner_id', user.id);
+    } else {
+      query = query.eq('customer_id', user.id);
+    }
+
+    const { data } = await query;
     setBookings(data || []);
 
     const { data: reviews } = await supabase
@@ -189,7 +197,59 @@ export default function BookingPage() {
                         <CreditCard size={16} /> ชำระเงิน
                       </Link>
                     )}
-                    {['paid', 'completed'].includes(booking.status) && !reviewedIds.includes(booking.id) && (
+                    {booking.status === 'paid' && user?.role === 'partner' && (
+                      <button
+                        onClick={async () => {
+                          await supabase.from('bookings').update({ status: 'in_progress' }).eq('id', booking.id);
+                          await supabase.from('notifications').insert({
+                            user_id: booking.customer_id,
+                            title: 'เริ่มงานแล้ว',
+                            message: `พาร์ทเนอร์เริ่มงานสำหรับ "${booking.post?.title}" แล้ว`,
+                            type: 'booking',
+                            link: '/booking',
+                          });
+                          await supabase.from('work_history').insert({
+                            partner_id: booking.partner_id,
+                            booking_id: booking.id,
+                            post_id: booking.post_id,
+                            customer_id: booking.customer_id,
+                            status: 'in_progress',
+                          });
+                          fetchBookings();
+                        }}
+                        className="flex-1 bg-success/20 text-tmain font-medium py-2 rounded-xl text-sm text-center flex items-center justify-center gap-1.5 hover:bg-success/30 transition"
+                      >
+                        <Play size={16} /> เริ่มงาน
+                      </button>
+                    )}
+                    {booking.status === 'in_progress' && user?.role === 'partner' && (
+                      <button
+                        onClick={async () => {
+                          await supabase.from('bookings').update({ status: 'completed' }).eq('id', booking.id);
+                          await supabase.from('work_history').update({ status: 'completed', completed_at: new Date().toISOString() }).eq('booking_id', booking.id);
+                          await supabase.from('notifications').insert({
+                            user_id: booking.customer_id,
+                            title: 'งานเสร็จสิ้น',
+                            message: `งาน "${booking.post?.title}" เสร็จสิ้นแล้ว กรุณารีวิว`,
+                            type: 'booking',
+                            link: '/booking',
+                          });
+                          fetchBookings();
+                        }}
+                        className="flex-1 bg-success/20 text-tmain font-medium py-2 rounded-xl text-sm text-center flex items-center justify-center gap-1.5 hover:bg-success/30 transition"
+                      >
+                        <CheckCircle size={16} /> จบงาน
+                      </button>
+                    )}
+                    {booking.status === 'in_progress' && (
+                      <button
+                        onClick={() => alert('🛠️ ระบบ GPS Tracking อยู่ระหว่างการพัฒนา')}
+                        className="flex-1 bg-primary/20 text-tmain font-medium py-2 rounded-xl text-sm text-center flex items-center justify-center gap-1.5 hover:bg-primary/30 transition"
+                      >
+                        <MapPin size={16} /> GPS
+                      </button>
+                    )}
+                    {['paid', 'completed'].includes(booking.status) && !reviewedIds.includes(booking.id) && user?.role !== 'partner' && (
                       <button
                         onClick={() => setReviewBooking(booking)}
                         className="flex-1 bg-secondary/20 text-tmain font-medium py-2 rounded-xl text-sm text-center flex items-center justify-center gap-1.5 hover:bg-secondary/30 transition"
