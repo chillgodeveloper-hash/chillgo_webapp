@@ -38,7 +38,7 @@ export default function PartnerProfilePage() {
         .eq('partner_id', id)
         .order('created_at', { ascending: false });
 
-      const customerIds = [...new Set((rv || []).map((r: any) => r.customer_id))];
+      const customerIds = Array.from(new Set((rv || []).map((r: any) => r.customer_id)));
       if (customerIds.length > 0) {
         const { data: customers } = await supabase.from('profiles').select('id, full_name').in('id', customerIds);
         const custMap: Record<string, any> = {};
