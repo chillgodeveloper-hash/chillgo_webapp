@@ -63,7 +63,7 @@ export default function ChatListPage() {
           <div className="space-y-2">
             {chats.map((chat) => {
               const otherPerson = user?.role === 'customer'
-                ? chat.partner?.profile?.full_name
+                ? (chat.partner as any)?.profile?.full_name
                 : chat.customer?.full_name;
 
               return (

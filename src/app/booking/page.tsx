@@ -274,7 +274,7 @@ export default function BookingPage() {
         <ReviewModal
           bookingId={reviewBooking.id}
           partnerId={reviewBooking.partner_id}
-          partnerName={reviewBooking.partner?.full_name || ''}
+          partnerName={(reviewBooking.partner as any)?.full_name || ''}
           postTitle={reviewBooking.post?.title || ''}
           onClose={() => setReviewBooking(null)}
           onSuccess={fetchBookings}
