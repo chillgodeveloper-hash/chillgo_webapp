@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { MapPin, Star, Heart } from 'lucide-react';
+import { MapPin, Star, Heart, Calendar } from 'lucide-react';
 import { Post } from '@/types';
 
 interface PostListItemProps {
@@ -67,16 +67,29 @@ export default function PostListItem({ post, onBook }: PostListItemProps) {
               {partner.rating.toFixed(1)} ({partner.total_reviews} รีวิว)
             </span>
           )}
+          {(post as any).available_start && (post as any).available_end ? (
+            <span className="flex items-center gap-1">
+              <Calendar size={14} />
+              {new Date((post as any).available_start).toLocaleDateString('th-TH', { day: 'numeric', month: 'short' })}
+              {' - '}
+              {new Date((post as any).available_end).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' })}
+              {(() => {
+                const days = Math.ceil((new Date((post as any).available_end).getTime() - new Date((post as any).available_start).getTime()) / (1000 * 60 * 60 * 24));
+                return days > 0 ? ` (${days} วัน)` : '';
+              })()}
+            </span>
+          ) : (
+            <span className="flex items-center gap-1 text-xs bg-success/10 text-tmain px-2 py-0.5 rounded-full">
+              ตลอดทั้งปี
+            </span>
+          )}
         </div>
 
         <div className="flex items-center justify-between pt-3 border-t border-primary-dark/10">
           <div>
-            {(post.price_min || post.price_max) && (
+            {post.price_min && (
               <span className="text-xl font-bold text-secondary">
                 ฿{post.price_min?.toLocaleString()}
-                {post.price_max && post.price_max !== post.price_min && (
-                  <span className="text-sm font-normal text-tmuted"> - ฿{post.price_max.toLocaleString()}</span>
-                )}
               </span>
             )}
           </div>

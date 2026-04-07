@@ -1,90 +1,148 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { useParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase-client';
 import { useAuthStore } from '@/hooks/useAuthStore';
 import AppLayout from '@/components/layout/AppLayout';
+import { Send, ImagePlus, ArrowLeft } from 'lucide-react';
+import { ChatMessage } from '@/types';
 import Link from 'next/link';
-import { MessageCircle } from 'lucide-react';
 
-export default function ChatListPage() {
-  const [chats, setChats] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+export default function ChatPage() {
+  const { bookingId } = useParams();
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [newMessage, setNewMessage] = useState('');
+  const [sending, setSending] = useState(false);
+  const bottomRef = useRef<HTMLDivElement>(null);
   const { user } = useAuthStore();
   const supabase = createClient();
 
   useEffect(() => {
-    if (!user) return;
-    const fetchChats = async () => {
-      const { data } = await supabase
-        .from('bookings')
-        .select(`
-          id, status,
-          post:posts(title),
-          partner:partner_profiles(*, profile:profiles(*)),
-          customer:profiles!bookings_customer_id_fkey(*)
-        `)
-        .or(`customer_id.eq.${user.id},partner_id.eq.${user.id}`)
-        .in('status', ['confirmed', 'paid', 'in_progress'])
-        .order('updated_at', { ascending: false });
+    if (!bookingId) return;
 
-      setChats(data || []);
-      setLoading(false);
+    const fetchMessages = async () => {
+      const { data } = await supabase
+        .from('chat_messages')
+        .select('*, sender:profiles(*)')
+        .eq('booking_id', bookingId)
+        .order('created_at', { ascending: true });
+      setMessages(data || []);
     };
-    fetchChats();
-  }, [user]);
+
+    fetchMessages();
+
+    const channel = supabase
+      .channel(`chat:${bookingId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'chat_messages',
+          filter: `booking_id=eq.${bookingId}`,
+        },
+        async (payload) => {
+          const { data } = await supabase
+            .from('chat_messages')
+            .select('*, sender:profiles(*)')
+            .eq('id', payload.new.id)
+            .single();
+          if (data) setMessages((prev) => [...prev, data]);
+        }
+      )
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [bookingId]);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  const handleSend = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newMessage.trim() || !user || !bookingId) return;
+    setSending(true);
+
+    await supabase.from('chat_messages').insert({
+      booking_id: bookingId,
+      sender_id: user.id,
+      message: newMessage.trim(),
+    });
+
+    setNewMessage('');
+    setSending(false);
+  };
 
   return (
     <AppLayout>
-      <div className="max-w-2xl mx-auto px-4 lg:px-0 py-6 lg:py-8">
-        <h1 className="text-2xl font-bold text-tmain mb-4 hidden lg:block">ข้อความ</h1>
+      <div className="max-w-2xl mx-auto flex flex-col h-[calc(100vh-8rem)] lg:h-[calc(100vh-6rem)]">
+        <div className="bg-white rounded-t-2xl border border-primary-dark/20 p-4 flex items-center gap-3">
+          <Link href="/booking" className="text-tmuted hover:text-tmuted lg:hidden">
+            <ArrowLeft size={20} />
+          </Link>
+          <div className="w-9 h-9 rounded-full bg-primary/20 flex items-center justify-center text-primary-text font-bold text-sm">
+            💬
+          </div>
+          <div>
+            <p className="font-semibold text-sm text-tmain">ห้องแชทการจอง</p>
+            <p className="text-xs text-tmuted">#{String(bookingId).slice(0, 8)}</p>
+          </div>
+        </div>
 
-        {loading ? (
-          <div className="space-y-3">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="bg-white rounded-2xl p-4 animate-pulse">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-primary-dark/30" />
-                  <div className="space-y-2 flex-1">
-                    <div className="w-1/2 h-4 bg-primary-dark/30 rounded" />
-                    <div className="w-1/3 h-3 bg-primary-dark/30 rounded" />
+        <div className="flex-1 overflow-y-auto bg-primary-light p-4 space-y-3">
+          {messages.length === 0 && (
+            <div className="text-center py-12">
+              <p className="text-4xl mb-2">💬</p>
+              <p className="text-tmuted text-sm">เริ่มต้นสนทนา</p>
+            </div>
+          )}
+
+          {messages.map((msg) => {
+            const isMe = msg.sender_id === user?.id;
+            return (
+              <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
+                <div className={`max-w-[75%] ${isMe ? 'order-1' : 'order-2'}`}>
+                  {!isMe && (
+                    <p className="text-xs text-tmuted mb-1 ml-1">{msg.sender?.full_name}</p>
+                  )}
+                  <div className={`px-4 py-2.5 rounded-2xl text-sm ${
+                    isMe
+                      ? 'bg-primary text-dark-DEFAULT rounded-br-md'
+                      : 'bg-white text-tmain border border-primary-dark/20 rounded-bl-md'
+                  }`}>
+                    {msg.message}
                   </div>
+                  <p className={`text-[10px] text-tmuted mt-1 ${isMe ? 'text-right mr-1' : 'ml-1'}`}>
+                    {new Date(msg.created_at).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })}
+                  </p>
                 </div>
               </div>
-            ))}
-          </div>
-        ) : chats.length === 0 ? (
-          <div className="text-center py-16">
-            <p className="text-5xl mb-4">💬</p>
-            <p className="text-tmuted">ยังไม่มีข้อความ</p>
-            <p className="text-tmuted text-sm mt-1">เริ่มแชทหลังจากยืนยันการจอง</p>
-          </div>
-        ) : (
-          <div className="space-y-2">
-            {chats.map((chat) => {
-              const otherPerson = user?.role === 'customer'
-                ? chat.partner?.profile?.full_name
-                : chat.customer?.full_name;
+            );
+          })}
+          <div ref={bottomRef} />
+        </div>
 
-              return (
-                <Link
-                  key={chat.id}
-                  href={`/chat/${chat.id}`}
-                  className="flex items-center gap-3 bg-white rounded-2xl p-4 border border-primary-dark/20 hover:border-primary/30 hover:shadow-sm transition"
-                >
-                  <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center text-primary-text font-bold">
-                    {otherPerson?.charAt(0) || '?'}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-tmain truncate">{otherPerson}</p>
-                    <p className="text-sm text-tmuted truncate">{chat.post?.title}</p>
-                  </div>
-                  <MessageCircle size={18} className="text-tmuted flex-shrink-0" />
-                </Link>
-              );
-            })}
-          </div>
-        )}
+        <form onSubmit={handleSend} className="bg-white border-t border-primary-dark/15 p-3 rounded-b-2xl flex items-center gap-2">
+          <button type="button" className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-tmuted hover:bg-primary-dark/30 transition flex-shrink-0">
+            <ImagePlus size={18} />
+          </button>
+          <input
+            type="text"
+            value={newMessage}
+            onChange={(e) => setNewMessage(e.target.value)}
+            placeholder="พิมพ์ข้อความ..."
+            className="flex-1 px-4 py-2.5 rounded-full bg-primary/20 outline-none text-sm focus:bg-primary-light focus:ring-2 focus:ring-primary/20 transition"
+          />
+          <button
+            type="submit"
+            disabled={!newMessage.trim() || sending}
+            className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-dark-DEFAULT hover:bg-primary-dark transition disabled:opacity-40 flex-shrink-0"
+          >
+            <Send size={18} />
+          </button>
+        </form>
       </div>
     </AppLayout>
   );

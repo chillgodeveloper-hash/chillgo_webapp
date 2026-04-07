@@ -12,6 +12,7 @@ export default function PartnerDashboard() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [stats, setStats] = useState({ totalPosts: 0, totalBookings: 0, revenue: 0 });
   const [loading, setLoading] = useState(true);
+  const [editingPost, setEditingPost] = useState<Post | null>(null);
   const { user, partnerProfile } = useAuthStore();
   const supabase = createClient();
 
@@ -85,7 +86,7 @@ export default function PartnerDashboard() {
         </div>
 
         <div className="mb-6">
-          <CreatePostForm onSuccess={fetchData} />
+          <CreatePostForm onSuccess={fetchData} editPost={editingPost} onCancelEdit={() => setEditingPost(null)} />
         </div>
 
         <h2 className="font-bold text-tmain mb-3">โพสต์ของฉัน</h2>
@@ -126,6 +127,13 @@ export default function PartnerDashboard() {
                   </div>
                 </div>
                 <div className="flex gap-1 flex-shrink-0">
+                  <button
+                    onClick={() => { setEditingPost(post); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                    className="w-9 h-9 rounded-lg bg-secondary/20 flex items-center justify-center text-tmain hover:bg-secondary/30 transition"
+                    title="แก้ไข"
+                  >
+                    <Edit size={16} />
+                  </button>
                   <button
                     onClick={() => handleTogglePost(post.id, post.status)}
                     className="w-9 h-9 rounded-lg bg-primary/20 flex items-center justify-center text-tmuted hover:bg-primary-dark/30 transition"
