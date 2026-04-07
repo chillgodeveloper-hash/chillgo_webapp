@@ -4,149 +4,152 @@ import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase-client';
 import { useAuthStore } from '@/hooks/useAuthStore';
 import AppLayout from '@/components/layout/AppLayout';
-import { Bell, CreditCard, MessageCircle, CalendarCheck, Settings, Check } from 'lucide-react';
-import { Notification } from '@/types';
-import Link from 'next/link';
+import CreatePostForm from '@/components/feed/CreatePostForm';
+import { Trash2, Eye, EyeOff, Edit, BarChart3, Package } from 'lucide-react';
+import { Post } from '@/types';
 
-const typeIcons: Record<string, any> = {
-  booking: CalendarCheck,
-  chat: MessageCircle,
-  payment: CreditCard,
-  system: Settings,
-};
-
-export default function NotificationsPage() {
-  const [notifications, setNotifications] = useState<Notification[]>([]);
+export default function PartnerDashboard() {
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [stats, setStats] = useState({ totalPosts: 0, totalBookings: 0, revenue: 0 });
   const [loading, setLoading] = useState(true);
-  const { user } = useAuthStore();
+  const [editingPost, setEditingPost] = useState<Post | null>(null);
+  const { user, partnerProfile } = useAuthStore();
   const supabase = createClient();
 
-  useEffect(() => {
-    if (!user) return;
-    const fetch = async () => {
-      const { data } = await supabase
-        .from('notifications')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-        .limit(50);
-      setNotifications(data || []);
-      setLoading(false);
-    };
-    fetch();
+  const fetchData = async () => {
+    if (!partnerProfile) return;
+    setLoading(true);
 
-    const channel = supabase
-      .channel('notifications')
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'notifications',
-          filter: `user_id=eq.${user.id}`,
-        },
-        (payload) => {
-          setNotifications((prev) => [payload.new as Notification, ...prev]);
-        }
-      )
-      .subscribe();
+    const { data: postsData } = await supabase
+      .from('posts')
+      .select('*')
+      .eq('partner_id', partnerProfile.id)
+      .order('created_at', { ascending: false });
 
-    return () => { supabase.removeChannel(channel); };
-  }, [user]);
+    const { count: bookingCount } = await supabase
+      .from('bookings')
+      .select('*', { count: 'exact', head: true })
+      .eq('partner_id', user?.id);
 
-  const markAsRead = async (id: string) => {
-    await supabase.from('notifications').update({ is_read: true }).eq('id', id);
-    setNotifications((prev) => prev.map((n) => n.id === id ? { ...n, is_read: true } : n));
+    const { data: paidBookings } = await supabase
+      .from('bookings')
+      .select('total_price')
+      .eq('partner_id', user?.id)
+      .in('status', ['paid', 'completed']);
+
+    const revenue = paidBookings?.reduce((sum, b) => sum + (b.total_price || 0), 0) || 0;
+
+    setPosts(postsData || []);
+    setStats({
+      totalPosts: postsData?.length || 0,
+      totalBookings: bookingCount || 0,
+      revenue,
+    });
+    setLoading(false);
   };
 
-  const markAllAsRead = async () => {
-    if (!user) return;
-    await supabase.from('notifications').update({ is_read: true }).eq('user_id', user.id).eq('is_read', false);
-    setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
+  useEffect(() => { fetchData(); }, [partnerProfile]);
+
+  const handleDeletePost = async (postId: string) => {
+    if (!confirm('ต้องการลบโพสต์นี้?')) return;
+    await supabase.from('posts').delete().eq('id', postId);
+    fetchData();
   };
 
-  const unreadCount = notifications.filter((n) => !n.is_read).length;
+  const handleTogglePost = async (postId: string, currentStatus: string) => {
+    const newStatus = currentStatus === 'active' ? 'removed' : 'active';
+    await supabase.from('posts').update({ status: newStatus }).eq('id', postId);
+    fetchData();
+  };
 
   return (
     <AppLayout>
-      <div className="max-w-2xl mx-auto px-4 py-8">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-2xl font-bold text-tmain">การแจ้งเตือน</h1>
-            {unreadCount > 0 && (
-              <p className="text-sm text-tmuted">{unreadCount} รายการยังไม่ได้อ่าน</p>
-            )}
+      <div className="max-w-4xl mx-auto px-4 lg:px-0 py-6 lg:py-8">
+        <h1 className="text-2xl font-bold text-tmain mb-6 hidden lg:block">จัดการโพสต์</h1>
+
+        <div className="grid grid-cols-3 gap-3 mb-6">
+          <div className="bg-white rounded-2xl p-4 border border-primary-dark/20">
+            <Package size={20} className="text-secondary mb-2" />
+            <p className="text-2xl font-bold text-tmain">{stats.totalPosts}</p>
+            <p className="text-xs text-tmuted">โพสต์ทั้งหมด</p>
           </div>
-          {unreadCount > 0 && (
-            <button
-              onClick={markAllAsRead}
-              className="flex items-center gap-1.5 text-sm text-tmuted hover:bg-primary/20 px-3 py-1.5 rounded-lg transition"
-            >
-              <Check size={16} /> อ่านทั้งหมด
-            </button>
-          )}
+          <div className="bg-white rounded-2xl p-4 border border-primary-dark/20">
+            <BarChart3 size={20} className="text-info mb-2" />
+            <p className="text-2xl font-bold text-tmain">{stats.totalBookings}</p>
+            <p className="text-xs text-tmuted">การจองทั้งหมด</p>
+          </div>
+          <div className="bg-white rounded-2xl p-4 border border-primary-dark/20">
+            <span className="text-secondary text-lg">฿</span>
+            <p className="text-2xl font-bold text-tmain">{stats.revenue.toLocaleString()}</p>
+            <p className="text-xs text-tmuted">รายได้</p>
+          </div>
         </div>
+
+        <div className="mb-6">
+          <CreatePostForm onSuccess={fetchData} editPost={editingPost} onCancelEdit={() => setEditingPost(null)} />
+        </div>
+
+        <h2 className="font-bold text-tmain mb-3">โพสต์ของฉัน</h2>
 
         {loading ? (
           <div className="space-y-3">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="bg-white rounded-xl p-4 animate-pulse">
-                <div className="flex gap-3">
-                  <div className="w-10 h-10 rounded-full bg-primary/20" />
-                  <div className="flex-1 space-y-2">
-                    <div className="w-1/2 h-4 bg-primary/20 rounded" />
-                    <div className="w-3/4 h-3 bg-primary/20 rounded" />
-                  </div>
-                </div>
+            {[1, 2].map((i) => (
+              <div key={i} className="bg-white rounded-2xl p-4 animate-pulse">
+                <div className="h-5 bg-primary-dark/30 rounded w-1/2 mb-2" />
+                <div className="h-4 bg-primary-dark/30 rounded w-1/3" />
               </div>
             ))}
           </div>
-        ) : notifications.length === 0 ? (
-          <div className="text-center py-16 bg-white rounded-2xl border border-primary-dark/20">
-            <Bell size={48} className="text-primary mx-auto mb-4" />
-            <p className="text-tmain font-medium">ยังไม่มีการแจ้งเตือน</p>
-            <p className="text-sm text-tmuted mt-1">เมื่อมีกิจกรรมใหม่ จะแสดงที่นี่</p>
+        ) : posts.length === 0 ? (
+          <div className="text-center py-12 bg-white rounded-2xl">
+            <p className="text-4xl mb-2">📝</p>
+            <p className="text-tmuted">ยังไม่มีโพสต์</p>
           </div>
         ) : (
-          <div className="space-y-2">
-            {notifications.map((notif) => {
-              const Icon = typeIcons[notif.type] || Bell;
-              return (
-                <Link
-                  key={notif.id}
-                  href={notif.link || '#'}
-                  onClick={() => !notif.is_read && markAsRead(notif.id)}
-                  className={`block rounded-xl p-4 border transition-colors ${
-                    notif.is_read
-                      ? 'bg-white border-primary-dark/10'
-                      : 'bg-primary-light border-primary-dark/20'
-                  } hover:border-primary`}
-                >
-                  <div className="flex gap-3">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
-                      notif.type === 'payment' ? 'bg-success/20' :
-                      notif.type === 'booking' ? 'bg-primary/30' :
-                      notif.type === 'chat' ? 'bg-info/20' :
-                      'bg-primary/20'
+          <div className="space-y-3">
+            {posts.map((post) => (
+              <div key={post.id} className="bg-white rounded-2xl p-4 border border-primary-dark/20 flex items-center gap-4">
+                {post.media_urls[0] && (
+                  <img src={post.media_urls[0]} alt="" className="w-16 h-16 rounded-xl object-cover flex-shrink-0" />
+                )}
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-tmain truncate">{post.title}</h3>
+                  <p className="text-sm text-tmuted truncate">{post.content}</p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className={`text-xs px-2 py-0.5 rounded-full ${
+                      post.status === 'active' ? 'bg-success/10 text-success' : 'bg-primary/20 text-tmuted'
                     }`}>
-                      <Icon size={18} className="text-tmain" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between">
-                        <p className="text-sm font-semibold text-tmain">{notif.title}</p>
-                        {!notif.is_read && (
-                          <span className="w-2.5 h-2.5 rounded-full bg-secondary flex-shrink-0 mt-1" />
-                        )}
-                      </div>
-                      <p className="text-sm text-tmuted mt-0.5">{notif.message}</p>
-                      <p className="text-xs text-tmuted mt-1">
-                        {new Date(notif.created_at).toLocaleDateString('th-TH')} {new Date(notif.created_at).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })}
-                      </p>
-                    </div>
+                      {post.status === 'active' ? 'แสดงอยู่' : 'ซ่อนอยู่'}
+                    </span>
+                    {post.price_min && (
+                      <span className="text-xs text-secondary font-medium">฿{post.price_min.toLocaleString()}</span>
+                    )}
                   </div>
-                </Link>
-              );
-            })}
+                </div>
+                <div className="flex gap-1 flex-shrink-0">
+                  <button
+                    onClick={() => { setEditingPost(post); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                    className="w-9 h-9 rounded-lg bg-secondary/20 flex items-center justify-center text-tmain hover:bg-secondary/30 transition"
+                    title="แก้ไข"
+                  >
+                    <Edit size={16} />
+                  </button>
+                  <button
+                    onClick={() => handleTogglePost(post.id, post.status)}
+                    className="w-9 h-9 rounded-lg bg-primary/20 flex items-center justify-center text-tmuted hover:bg-primary-dark/30 transition"
+                    title={post.status === 'active' ? 'ซ่อน' : 'แสดง'}
+                  >
+                    {post.status === 'active' ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                  <button
+                    onClick={() => handleDeletePost(post.id)}
+                    className="w-9 h-9 rounded-lg bg-danger/10 flex items-center justify-center text-danger hover:bg-danger/20 transition"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+              </div>
+            ))}
           </div>
         )}
       </div>

@@ -117,7 +117,7 @@ export default function BookingPage() {
                   <div className="flex items-start justify-between mb-3">
                     <div>
                       <h3 className="font-bold text-tmain">{booking.post?.title}</h3>
-                      <p className="text-sm text-tmuted">{booking.partner?.full_name}</p>
+                      <p className="text-sm text-tmuted">{(booking.partner as any)?.full_name}</p>
                     </div>
                     <span className={`${status.color} px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1`}>
                       <StatusIcon size={12} /> {status.label}

@@ -131,7 +131,7 @@ export default function PaymentPage() {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-tmuted">พาร์ทเนอร์</span>
-                  <span className="font-medium text-tmain">{booking.partner?.full_name}</span>
+                  <span className="font-medium text-tmain">{(booking.partner as any)?.full_name}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-tmuted">วันที่</span>
