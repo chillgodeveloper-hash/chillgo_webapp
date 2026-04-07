@@ -1,290 +1,184 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase-client';
 import { useAuthStore } from '@/hooks/useAuthStore';
-import { Camera, ImagePlus, X, CheckCircle, ArrowRight, Loader2, LogOut, ArrowLeft } from 'lucide-react';
-import { validateFile } from '@/lib/moderation';
+import AppLayout from '@/components/layout/AppLayout';
+import CreatePostForm from '@/components/feed/CreatePostForm';
+import { Trash2, Eye, EyeOff, Edit, BarChart3, Package, X } from 'lucide-react';
+import { Post } from '@/types';
 
-export default function PartnerSetupPage() {
-  const [step, setStep] = useState(1);
-  const [avatarFile, setAvatarFile] = useState<File | null>(null);
-  const [avatarPreview, setAvatarPreview] = useState('');
-  const [businessName, setBusinessName] = useState('');
-  const [description, setDescription] = useState('');
-  const [portfolioFiles, setPortfolioFiles] = useState<{ file: File; preview: string }[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [pageLoading, setPageLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [localPartnerProfile, setLocalPartnerProfile] = useState<any>(null);
-  const avatarRef = useRef<HTMLInputElement>(null);
-  const portfolioRef = useRef<HTMLInputElement>(null);
-  const { user, partnerProfile, setPartnerProfile, setUser } = useAuthStore();
+export default function PartnerDashboard() {
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [stats, setStats] = useState({ totalPosts: 0, totalBookings: 0, revenue: 0 });
+  const [loading, setLoading] = useState(true);
+  const [editingPost, setEditingPost] = useState<Post | null>(null);
+  const { user, partnerProfile } = useAuthStore();
   const supabase = createClient();
-  const router = useRouter();
+
+  const fetchData = async () => {
+    if (!partnerProfile) return;
+    setLoading(true);
+
+    const { data: postsData } = await supabase
+      .from('posts')
+      .select('*')
+      .eq('partner_id', partnerProfile.id)
+      .order('created_at', { ascending: false });
+
+    const { count: bookingCount } = await supabase
+      .from('bookings')
+      .select('*', { count: 'exact', head: true })
+      .eq('partner_id', user?.id);
+
+    const { data: paidBookings } = await supabase
+      .from('bookings')
+      .select('total_price')
+      .eq('partner_id', user?.id)
+      .in('status', ['paid', 'completed']);
+
+    const revenue = paidBookings?.reduce((sum, b) => sum + (b.total_price || 0), 0) || 0;
+
+    setPosts(postsData || []);
+    setStats({
+      totalPosts: postsData?.length || 0,
+      totalBookings: bookingCount || 0,
+      revenue,
+    });
+    setLoading(false);
+  };
 
   useEffect(() => {
-    const init = async () => {
-      setPageLoading(true);
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) { router.push('/auth/login'); return; }
+    fetchData();
 
-      let currentUser = user;
-      if (!currentUser) {
-        const { data: profile } = await supabase.from('profiles').select('*').eq('id', session.user.id).single();
-        if (profile) { setUser(profile); currentUser = profile; }
-      }
+    const channel = supabase
+      .channel('partner-data')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'bookings' }, () => {
+        fetchData();
+      })
+      .subscribe();
 
-      let pp = partnerProfile;
-      if (!pp && currentUser) {
-        const { data } = await supabase.from('partner_profiles').select('*').eq('user_id', currentUser.id).single();
-        if (data) { setPartnerProfile(data); pp = data; }
-      }
+    return () => { supabase.removeChannel(channel); };
+  }, [partnerProfile]);
 
-      setLocalPartnerProfile(pp);
-      if (pp) setBusinessName(pp.business_name || '');
-      setPageLoading(false);
-    };
-    init();
-  }, []);
-
-  const handleAvatarSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const validation = validateFile(file, 'avatar');
-    if (!validation.valid) { setError(validation.error || ''); return; }
-    setAvatarFile(file);
-    setAvatarPreview(URL.createObjectURL(file));
+  const handleDeletePost = async (postId: string) => {
+    if (!confirm('ต้องการลบโพสต์นี้?')) return;
+    await supabase.from('posts').delete().eq('id', postId);
+    fetchData();
   };
 
-  const handlePortfolioSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    const newFiles: typeof portfolioFiles = [];
-    for (const file of files) {
-      const validation = validateFile(file, 'image');
-      if (!validation.valid) { setError(validation.error || ''); continue; }
-      newFiles.push({ file, preview: URL.createObjectURL(file) });
-    }
-    setPortfolioFiles((prev) => [...prev, ...newFiles].slice(0, 10));
+  const handleTogglePost = async (postId: string, currentStatus: string) => {
+    const newStatus = currentStatus === 'active' ? 'removed' : 'active';
+    await supabase.from('posts').update({ status: newStatus }).eq('id', postId);
+    fetchData();
   };
-
-  const handleSubmit = async () => {
-    if (!user) { setError('กรุณาเข้าสู่ระบบ'); return; }
-    if (!localPartnerProfile) { setError('ไม่พบข้อมูลพาร์ทเนอร์ กรุณาลองใหม่'); return; }
-    setLoading(true);
-    setError('');
-
-    try {
-      let avatarUrl = user.avatar_url;
-      if (avatarFile) {
-        const ext = avatarFile.name.split('.').pop();
-        const path = `avatars/${user.id}.${ext}`;
-        const { error: uploadErr } = await supabase.storage.from('media').upload(path, avatarFile, { upsert: true });
-        if (uploadErr) console.error('Avatar upload:', uploadErr);
-        const { data: { publicUrl } } = supabase.storage.from('media').getPublicUrl(path);
-        avatarUrl = publicUrl;
-        await supabase.from('profiles').update({ avatar_url: avatarUrl }).eq('id', user.id);
-      }
-
-      const portfolioUrls: string[] = [];
-      for (const { file } of portfolioFiles) {
-        const ext = file.name.split('.').pop();
-        const path = `portfolio/${user.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-        const { error: upErr } = await supabase.storage.from('media').upload(path, file);
-        if (upErr) { console.error('Portfolio upload:', upErr); continue; }
-        const { data: { publicUrl } } = supabase.storage.from('media').getPublicUrl(path);
-        portfolioUrls.push(publicUrl);
-      }
-
-      const { error: updateErr } = await supabase
-        .from('partner_profiles')
-        .update({
-          business_name: businessName || localPartnerProfile.business_name,
-          description,
-          portfolio_images: portfolioUrls,
-        })
-        .eq('id', localPartnerProfile.id);
-
-      if (updateErr) throw updateErr;
-
-      setPartnerProfile({
-        ...localPartnerProfile,
-        business_name: businessName || localPartnerProfile.business_name,
-        description,
-        portfolio_images: portfolioUrls,
-      });
-
-      router.push('/feed');
-    } catch (err: any) {
-      setError(err.message || 'เกิดข้อผิดพลาด');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    router.push('/auth/login');
-  };
-
-  const handleSwitchToCustomer = async () => {
-    if (!user) return;
-    await supabase.from('partner_profiles').delete().eq('user_id', user.id);
-    await supabase.from('profiles').update({ role: 'customer' }).eq('id', user.id);
-    setUser({ ...user, role: 'customer' });
-    setPartnerProfile(null);
-    router.push('/feed');
-  };
-
-  if (pageLoading) {
-    return (
-      <div className="min-h-screen bg-primary-light flex items-center justify-center">
-        <Loader2 size={40} className="text-secondary animate-spin" />
-      </div>
-    );
-  }
 
   return (
-    <div className="min-h-screen bg-primary-light flex items-center justify-center p-6">
-      <div className="max-w-lg w-full">
-        <div className="flex items-center justify-between mb-6">
-          <button
-            onClick={handleSwitchToCustomer}
-            className="flex items-center gap-1.5 text-sm text-tmuted hover:bg-secondary/10 transition px-3 py-2 rounded-xl hover:bg-white/50"
-          >
-            <ArrowLeft size={16} /> เปลี่ยนเป็นลูกค้า
-          </button>
-          <button
-            onClick={handleLogout}
-            className="flex items-center gap-1.5 text-sm text-danger hover:bg-danger/10/80 transition px-3 py-2 rounded-xl hover:bg-danger/5"
-          >
-            <LogOut size={16} /> ออกจากระบบ
-          </button>
-        </div>
+    <AppLayout>
+      <div className="max-w-4xl mx-auto px-4 lg:px-0 py-6 lg:py-8">
+        <h1 className="text-2xl font-bold text-tmain mb-6 hidden lg:block">จัดการโพสต์</h1>
 
-        <div className="text-center mb-8">
-          <h1 className="font-display text-3xl font-bold text-tmain">ตั้งค่าโปรไฟล์พาร์ทเนอร์</h1>
-          <p className="text-tmuted mt-2">ขั้นตอนที่ {step} จาก 2</p>
-          <div className="flex gap-2 justify-center mt-4">
-            <div className={`h-1.5 w-16 rounded-full ${step >= 1 ? 'bg-primary' : 'bg-primary-dark/30'}`} />
-            <div className={`h-1.5 w-16 rounded-full ${step >= 2 ? 'bg-primary' : 'bg-primary-dark/30'}`} />
+        <div className="grid grid-cols-3 gap-3 mb-6">
+          <div className="bg-white rounded-2xl p-4 border border-primary-dark/20">
+            <Package size={20} className="text-secondary mb-2" />
+            <p className="text-2xl font-bold text-tmain">{stats.totalPosts}</p>
+            <p className="text-xs text-tmuted">โพสต์ทั้งหมด</p>
+          </div>
+          <div className="bg-white rounded-2xl p-4 border border-primary-dark/20">
+            <BarChart3 size={20} className="text-info mb-2" />
+            <p className="text-2xl font-bold text-tmain">{stats.totalBookings}</p>
+            <p className="text-xs text-tmuted">การจองทั้งหมด</p>
+          </div>
+          <div className="bg-white rounded-2xl p-4 border border-primary-dark/20">
+            <span className="text-secondary text-lg">฿</span>
+            <p className="text-2xl font-bold text-tmain">{stats.revenue.toLocaleString()}</p>
+            <p className="text-xs text-tmuted">รายได้</p>
           </div>
         </div>
 
-        {error && (
-          <div className="bg-danger/10 border border-danger/20 text-danger rounded-xl p-3 mb-4 text-sm">
-            {error}
+        <div className="mb-6">
+          <CreatePostForm onSuccess={fetchData} />
+        </div>
+
+        {editingPost && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center">
+            <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setEditingPost(null)} />
+            <div className="relative bg-white w-full max-w-2xl mx-4 rounded-2xl overflow-hidden max-h-[90vh] overflow-y-auto">
+              <div className="sticky top-0 bg-white p-4 border-b border-primary-dark/15 flex items-center justify-between z-10">
+                <h2 className="font-bold text-lg text-tmain">แก้ไขโพสต์</h2>
+                <button onClick={() => setEditingPost(null)} className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-tmain hover:bg-primary/30 transition"><X size={18} /></button>
+              </div>
+              <div className="p-6">
+                <CreatePostForm key={editingPost.id} onSuccess={() => { fetchData(); setEditingPost(null); }} editPost={editingPost} onCancelEdit={() => setEditingPost(null)} isModal />
+              </div>
+            </div>
           </div>
         )}
 
-        {step === 1 && (
-          <div className="bg-white rounded-3xl shadow-xl p-8 animate-fade-in">
-            <h2 className="font-bold text-xl text-tmain mb-6">ข้อมูลพื้นฐาน</h2>
+        <h2 className="font-bold text-tmain mb-3">โพสต์ของฉัน</h2>
 
-            <div className="flex justify-center mb-6">
-              <div className="relative">
-                <div
-                  onClick={() => avatarRef.current?.click()}
-                  className="w-28 h-28 rounded-full bg-primary/10 border-3 border-primary flex items-center justify-center cursor-pointer overflow-hidden hover:opacity-80 transition"
-                >
-                  {avatarPreview ? (
-                    <img src={avatarPreview} alt="" className="w-full h-full object-cover" />
-                  ) : (
-                    <Camera size={32} className="text-primary-text" />
-                  )}
+        {loading ? (
+          <div className="space-y-3">
+            {[1, 2].map((i) => (
+              <div key={i} className="bg-white rounded-2xl p-4 animate-pulse">
+                <div className="h-5 bg-primary-dark/30 rounded w-1/2 mb-2" />
+                <div className="h-4 bg-primary-dark/30 rounded w-1/3" />
+              </div>
+            ))}
+          </div>
+        ) : posts.length === 0 ? (
+          <div className="text-center py-12 bg-white rounded-2xl">
+            <p className="text-4xl mb-2">📝</p>
+            <p className="text-tmuted">ยังไม่มีโพสต์</p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {posts.map((post) => (
+              <div key={post.id} className="bg-white rounded-2xl p-4 border border-primary-dark/20 flex items-center gap-4">
+                {post.media_urls[0] && (
+                  <img src={post.media_urls[0]} alt="" className="w-16 h-16 rounded-xl object-cover flex-shrink-0" />
+                )}
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-tmain truncate">{post.title}</h3>
+                  <p className="text-sm text-tmuted truncate">{post.content}</p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className={`text-xs px-2 py-0.5 rounded-full ${
+                      post.status === 'active' ? 'bg-success/10 text-success' : 'bg-primary/20 text-tmuted'
+                    }`}>
+                      {post.status === 'active' ? 'แสดงอยู่' : 'ซ่อนอยู่'}
+                    </span>
+                    {post.price_min && (
+                      <span className="text-xs text-secondary font-medium">฿{post.price_min.toLocaleString()}</span>
+                    )}
+                  </div>
                 </div>
-                <input ref={avatarRef} type="file" accept="image/*" onChange={handleAvatarSelect} className="hidden" />
-                <p className="text-xs text-tmuted text-center mt-2">อัปโหลดรูปโปรไฟล์</p>
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <div>
-                <label className="text-sm font-medium text-tmain mb-1 block">ชื่อธุรกิจ / ชื่อบริการ</label>
-                <input
-                  type="text"
-                  value={businessName}
-                  onChange={(e) => setBusinessName(e.target.value)}
-                  placeholder={partnerProfile?.business_name || ''}
-                  className="w-full px-4 py-3 rounded-xl border border-primary-dark/30 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium text-tmain mb-1 block">คำอธิบาย / แนะนำตัว</label>
-                <textarea
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder="เล่าเกี่ยวกับบริการของคุณ..."
-                  rows={4}
-                  className="w-full px-4 py-3 rounded-xl border border-primary-dark/30 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none resize-none"
-                />
-              </div>
-            </div>
-
-            <button
-              onClick={() => setStep(2)}
-              disabled={!avatarPreview}
-              className="w-full bg-primary hover:bg-primary-dark text-dark-DEFAULT font-bold py-3.5 rounded-2xl mt-6 transition flex items-center justify-center gap-2 disabled:opacity-40"
-            >
-              ถัดไป <ArrowRight size={18} />
-            </button>
-          </div>
-        )}
-
-        {step === 2 && (
-          <div className="bg-white rounded-3xl shadow-xl p-8 animate-fade-in">
-            <h2 className="font-bold text-xl text-tmain mb-2">อัปโหลดผลงาน</h2>
-            <p className="text-sm text-tmuted mb-6">เพิ่มรูปภาพผลงานของคุณ (อย่างน้อย 1 รูป)</p>
-
-            <div className="grid grid-cols-3 gap-3 mb-6">
-              {portfolioFiles.map((f, i) => (
-                <div key={i} className="relative aspect-square rounded-xl overflow-hidden bg-primary/20">
-                  <img src={f.preview} alt="" className="w-full h-full object-cover" />
+                <div className="flex gap-1 flex-shrink-0">
                   <button
-                    onClick={() => setPortfolioFiles((prev) => prev.filter((_, idx) => idx !== i))}
-                    className="absolute top-1 right-1 w-6 h-6 bg-black/50 rounded-full flex items-center justify-center text-primary-light"
+                    onClick={() => { setEditingPost(post); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                    className="w-9 h-9 rounded-lg bg-secondary/20 flex items-center justify-center text-tmain hover:bg-secondary/30 transition"
+                    title="แก้ไข"
                   >
-                    <X size={14} />
+                    <Edit size={16} />
+                  </button>
+                  <button
+                    onClick={() => handleTogglePost(post.id, post.status)}
+                    className="w-9 h-9 rounded-lg bg-primary/20 flex items-center justify-center text-tmuted hover:bg-primary-dark/30 transition"
+                    title={post.status === 'active' ? 'ซ่อน' : 'แสดง'}
+                  >
+                    {post.status === 'active' ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                  <button
+                    onClick={() => handleDeletePost(post.id)}
+                    className="w-9 h-9 rounded-lg bg-danger/10 flex items-center justify-center text-danger hover:bg-danger/20 transition"
+                  >
+                    <Trash2 size={16} />
                   </button>
                 </div>
-              ))}
-              {portfolioFiles.length < 10 && (
-                <button
-                  onClick={() => portfolioRef.current?.click()}
-                  className="aspect-square rounded-xl border-2 border-dashed border-primary-dark/40 flex flex-col items-center justify-center text-tmuted hover:border-primary hover:bg-primary/20 transition"
-                >
-                  <ImagePlus size={24} />
-                  <span className="text-xs mt-1">เพิ่มรูป</span>
-                </button>
-              )}
-            </div>
-            <input ref={portfolioRef} type="file" accept="image/*" multiple onChange={handlePortfolioSelect} className="hidden" />
-
-            <div className="flex gap-3">
-              <button
-                onClick={() => setStep(1)}
-                className="flex-1 bg-primary/20 text-tmuted font-semibold py-3.5 rounded-2xl transition hover:bg-primary-dark/30"
-              >
-                ย้อนกลับ
-              </button>
-              <button
-                onClick={handleSubmit}
-                disabled={portfolioFiles.length === 0 || loading}
-                className="flex-1 bg-primary hover:bg-primary-dark text-dark-DEFAULT font-bold py-3.5 rounded-2xl transition flex items-center justify-center gap-2 disabled:opacity-40"
-              >
-                {loading ? (
-                  <div className="w-5 h-5 border-2 border-dark-DEFAULT/30 border-t-dark-DEFAULT rounded-full animate-spin" />
-                ) : (
-                  <>
-                    <CheckCircle size={18} /> เสร็จสิ้น
-                  </>
-                )}
-              </button>
-            </div>
+              </div>
+            ))}
           </div>
         )}
       </div>
-    </div>
+    </AppLayout>
   );
 }

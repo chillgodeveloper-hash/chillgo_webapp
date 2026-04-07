@@ -41,35 +41,33 @@ export default function SearchHero({ onSearch, compact = false }: SearchHeroProp
             </button>
           </div>
         </div>
-        <div className="space-y-3 mt-3">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mt-3">
           <input
             type="text"
             value={location}
             onChange={(e) => setLocation(e.target.value)}
-            placeholder="สถานที่ / จังหวัด / คำค้นหา"
+            placeholder="สถานที่ / จังหวัด"
             className="w-full min-w-0 h-12 px-3 rounded-xl border border-primary-dark/30 text-sm text-tmain outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
           />
-          <div className="grid grid-cols-3 gap-3">
-            <input
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              min={new Date().toISOString().split('T')[0]}
-              className="w-full min-w-0 h-12 px-3 rounded-xl border border-primary-dark/30 text-sm text-tmain outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
-            />
-            <input
-              type="time"
-              value={time}
-              onChange={(e) => setTime(e.target.value)}
-              className="w-full min-w-0 h-12 px-3 rounded-xl border border-primary-dark/30 text-sm text-tmain outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
-            />
-            <button
-              onClick={handleSearch}
-              className="w-full h-12 bg-secondary hover:bg-secondary/90 text-tmain font-semibold rounded-xl transition flex items-center justify-center gap-2 text-sm shadow-sm"
-            >
-              <Search size={16} /> ค้นหา
-            </button>
-          </div>
+          <input
+            type="date"
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+            min={new Date().toISOString().split('T')[0]}
+            className="w-full min-w-0 h-12 px-3 rounded-xl border border-primary-dark/30 text-sm text-tmain outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+          />
+          <input
+            type="time"
+            value={time}
+            onChange={(e) => setTime(e.target.value)}
+            className="w-full min-w-0 h-12 px-3 rounded-xl border border-primary-dark/30 text-sm text-tmain outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+          />
+          <button
+            onClick={handleSearch}
+            className="w-full h-12 bg-secondary hover:bg-secondary/90 text-tmain font-semibold rounded-xl transition flex items-center justify-center gap-2 text-sm shadow-sm"
+          >
+            <Search size={16} /> ค้นหา
+          </button>
         </div>
       </div>
     );
@@ -112,44 +110,42 @@ export default function SearchHero({ onSearch, compact = false }: SearchHeroProp
             </div>
           </div>
 
-          <div className="space-y-3">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
             <div className="relative">
               <MapPin size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-tmuted" />
               <input
                 type="text"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
-                placeholder="สถานที่ / จังหวัด / คำค้นหา"
-                className="w-full min-w-0 h-14 pl-10 pr-3 rounded-xl border border-primary-dark/30 text-base text-tmain outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                placeholder="สถานที่ / จังหวัด"
+                className="w-full min-w-0 h-12 pl-10 pr-3 rounded-xl border border-primary-dark/30 text-sm text-tmain outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
               />
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-              <div className="relative">
-                <Calendar size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-tmuted" />
-                <input
-                  type="date"
-                  value={date}
-                  onChange={(e) => setDate(e.target.value)}
-                  min={new Date().toISOString().split('T')[0]}
-                  className="w-full min-w-0 h-12 pl-10 pr-3 rounded-xl border border-primary-dark/30 text-sm text-tmain outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
-                />
-              </div>
-              <div className="relative">
-                <Clock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-tmuted" />
-                <input
-                  type="time"
-                  value={time}
-                  onChange={(e) => setTime(e.target.value)}
-                  className="w-full min-w-0 h-12 pl-10 pr-3 rounded-xl border border-primary-dark/30 text-sm text-tmain outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
-                />
-              </div>
-              <button
-                onClick={handleSearch}
-                className="w-full h-12 bg-secondary hover:bg-secondary/90 text-tmain font-bold rounded-xl transition flex items-center justify-center gap-2 shadow-md col-span-2 md:col-span-1"
-              >
-                <Search size={18} /> ค้นหา
-              </button>
+            <div className="relative">
+              <Calendar size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-tmuted" />
+              <input
+                type="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                min={new Date().toISOString().split('T')[0]}
+                className="w-full min-w-0 h-12 pl-10 pr-3 rounded-xl border border-primary-dark/30 text-sm text-tmain outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+              />
             </div>
+            <div className="relative">
+              <Clock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-tmuted" />
+              <input
+                type="time"
+                value={time}
+                onChange={(e) => setTime(e.target.value)}
+                className="w-full min-w-0 h-12 pl-10 pr-3 rounded-xl border border-primary-dark/30 text-sm text-tmain outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+              />
+            </div>
+            <button
+              onClick={handleSearch}
+              className="w-full h-12 bg-secondary hover:bg-secondary/90 text-tmain font-bold rounded-xl transition flex items-center justify-center gap-2 shadow-md"
+            >
+              <Search size={18} /> ค้นหา
+            </button>
           </div>
         </div>
       </div>
