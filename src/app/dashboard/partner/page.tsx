@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase-client';
 import { useAuthStore } from '@/hooks/useAuthStore';
 import AppLayout from '@/components/layout/AppLayout';
 import CreatePostForm from '@/components/feed/CreatePostForm';
-import { Trash2, Eye, EyeOff, Edit, BarChart3, Package } from 'lucide-react';
+import { Trash2, Eye, EyeOff, Edit, BarChart3, Package, X } from 'lucide-react';
 import { Post } from '@/types';
 
 export default function PartnerDashboard() {
@@ -97,8 +97,23 @@ export default function PartnerDashboard() {
         </div>
 
         <div className="mb-6">
-          <CreatePostForm key={editingPost?.id || 'new'} onSuccess={fetchData} editPost={editingPost} onCancelEdit={() => setEditingPost(null)} />
+          <CreatePostForm onSuccess={fetchData} />
         </div>
+
+        {editingPost && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center">
+            <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setEditingPost(null)} />
+            <div className="relative bg-white w-full max-w-2xl mx-4 rounded-2xl overflow-hidden max-h-[90vh] overflow-y-auto">
+              <div className="sticky top-0 bg-white p-4 border-b border-primary-dark/15 flex items-center justify-between z-10">
+                <h2 className="font-bold text-lg text-tmain">แก้ไขโพสต์</h2>
+                <button onClick={() => setEditingPost(null)} className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-tmain hover:bg-primary/30 transition"><X size={18} /></button>
+              </div>
+              <div className="p-6">
+                <CreatePostForm key={editingPost.id} onSuccess={() => { fetchData(); setEditingPost(null); }} editPost={editingPost} onCancelEdit={() => setEditingPost(null)} isModal />
+              </div>
+            </div>
+          </div>
+        )}
 
         <h2 className="font-bold text-tmain mb-3">โพสต์ของฉัน</h2>
 
