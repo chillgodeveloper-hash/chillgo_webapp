@@ -142,6 +142,7 @@ export default function BookingPage() {
               const StatusIcon = status.icon;
               return (
                 <div key={booking.id} className="bg-white rounded-2xl p-4 border border-primary-dark/20 shadow-sm">
+                  <Link href={`/booking/${booking.id}`} className="block">
                   <div className="flex items-start justify-between mb-3">
                     <div>
                       <h3 className="font-bold text-tmain">{booking.post?.title}</h3>
@@ -207,6 +208,7 @@ export default function BookingPage() {
                       </div>
                     </div>
                   )}
+                  </Link>
 
                   <div className="flex gap-2 pt-3 border-t border-primary-dark/15">
                     {['confirmed', 'paid', 'in_progress'].includes(booking.status) && (

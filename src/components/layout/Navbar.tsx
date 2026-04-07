@@ -115,6 +115,7 @@ export default function Navbar() {
   ];
 
   const partnerMenu = [
+    { href: '/feed', label: 'หน้าหลัก' },
     { href: '/dashboard/partner', label: 'จัดการโพสต์' },
     { href: '/booking', label: 'การจอง' },
     { href: '/chat', label: 'ข้อความ' },
