@@ -87,7 +87,12 @@ export default function Navbar() {
 
             <div className="hidden md:flex items-center gap-1">
               {menu.map((item) => {
-                const active = pathname === item.href || (item.href !== '/feed' && pathname.startsWith(item.href));
+                const active = pathname === item.href || (
+                  item.href !== '/feed' &&
+                  item.href !== '/dashboard/admin' &&
+                  item.href !== '/dashboard/partner' &&
+                  pathname.startsWith(item.href)
+                );
                 return (
                   <Link
                     key={item.href}

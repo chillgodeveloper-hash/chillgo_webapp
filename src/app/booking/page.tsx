@@ -37,7 +37,7 @@ export default function BookingPage() {
       .select(`
         *,
         post:posts(*),
-        partner:partner_profiles(*, profile:profiles(*)),
+        partner:profiles!bookings_partner_id_fkey(*),
         customer:profiles!bookings_customer_id_fkey(*)
       `)
       .order('created_at', { ascending: false });
@@ -117,7 +117,7 @@ export default function BookingPage() {
                   <div className="flex items-start justify-between mb-3">
                     <div>
                       <h3 className="font-bold text-tmain">{booking.post?.title}</h3>
-                      <p className="text-sm text-tmuted">{booking.partner?.profile?.full_name}</p>
+                      <p className="text-sm text-tmuted">{booking.partner?.full_name}</p>
                     </div>
                     <span className={`${status.color} px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1`}>
                       <StatusIcon size={12} /> {status.label}
@@ -274,7 +274,7 @@ export default function BookingPage() {
         <ReviewModal
           bookingId={reviewBooking.id}
           partnerId={reviewBooking.partner_id}
-          partnerName={reviewBooking.partner?.profile?.full_name || ''}
+          partnerName={reviewBooking.partner?.full_name || ''}
           postTitle={reviewBooking.post?.title || ''}
           onClose={() => setReviewBooking(null)}
           onSuccess={fetchBookings}

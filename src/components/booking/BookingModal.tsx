@@ -31,7 +31,7 @@ export default function BookingModal({ post, onClose }: BookingModalProps) {
     }
     setLoading(true);
 
-    const { error } = await supabase.from('bookings').insert({
+    const bookingData = {
       customer_id: user.id,
       partner_id: post.partner_profile?.user_id,
       post_id: post.id,
@@ -40,10 +40,27 @@ export default function BookingModal({ post, onClose }: BookingModalProps) {
       guests,
       note: note || null,
       status: 'pending',
-      total_price: post.price_min,
-    });
+      total_price: post.price_min || 0,
+    };
 
-    if (!error) {
+    const { data, error } = await supabase.from('bookings').insert(bookingData).select().single();
+
+    if (error) {
+      console.error('Booking error:', error);
+      alert(`การจองไม่สำเร็จ: ${error.message}`);
+      setLoading(false);
+      return;
+    }
+
+    if (data) {
+      await supabase.from('notifications').insert({
+        user_id: user.id,
+        title: 'ส่งคำขอจองแล้ว',
+        message: `คำขอจอง "${post.title}" ถูกส่งแล้ว กรุณารอ Admin อนุมัติ`,
+        type: 'booking',
+        link: '/booking',
+      });
+
       setSuccess(true);
       setTimeout(() => {
         onClose();

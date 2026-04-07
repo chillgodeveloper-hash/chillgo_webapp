@@ -23,7 +23,7 @@ export default function PaymentPage() {
     const fetch = async () => {
       const { data } = await supabase
         .from('bookings')
-        .select(`*, post:posts(*), partner:partner_profiles(*, profile:profiles(*))`)
+        .select(`*, post:posts(*), partner:profiles!bookings_partner_id_fkey(*)`)
         .eq('id', id)
         .single();
       setBooking(data);
@@ -131,7 +131,7 @@ export default function PaymentPage() {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-tmuted">พาร์ทเนอร์</span>
-                  <span className="font-medium text-tmain">{booking.partner?.profile?.full_name}</span>
+                  <span className="font-medium text-tmain">{booking.partner?.full_name}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-tmuted">วันที่</span>
