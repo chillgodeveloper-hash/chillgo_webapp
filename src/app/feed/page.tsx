@@ -28,6 +28,8 @@ export default function FeedPage() {
   useEffect(() => {
     if (user?.role === 'partner') {
       router.replace('/dashboard/partner');
+    } else if (user?.role === 'admin') {
+      router.replace('/dashboard/admin');
     }
   }, [user]);
 

@@ -86,7 +86,7 @@ export default function PartnerDashboard() {
         </div>
 
         <div className="mb-6">
-          <CreatePostForm onSuccess={fetchData} editPost={editingPost} onCancelEdit={() => setEditingPost(null)} />
+          <CreatePostForm key={editingPost?.id || 'new'} onSuccess={fetchData} editPost={editingPost} onCancelEdit={() => setEditingPost(null)} />
         </div>
 
         <h2 className="font-bold text-tmain mb-3">โพสต์ของฉัน</h2>
