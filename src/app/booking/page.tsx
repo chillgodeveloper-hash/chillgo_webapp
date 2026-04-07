@@ -34,7 +34,7 @@ export default function BookingPage() {
 
     let query = supabase
       .from('bookings')
-      .select(`*, post:posts(*)`)
+      .select(`*, post:posts!bookings_post_id_fkey(*)`)
       .order('created_at', { ascending: false });
 
     if (user.role === 'partner') {

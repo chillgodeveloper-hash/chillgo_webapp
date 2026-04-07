@@ -18,7 +18,7 @@ export default function ChatListPage() {
     const fetchChats = async () => {
       const { data } = await supabase
         .from('bookings')
-        .select(`id, status, customer_id, partner_id, post:posts(title)`)
+        .select(`id, status, customer_id, partner_id, post:posts!bookings_post_id_fkey(title)`)
         .or(`customer_id.eq.${user.id},partner_id.eq.${user.id}`)
         .in('status', ['confirmed', 'paid', 'in_progress'])
         .order('updated_at', { ascending: false });

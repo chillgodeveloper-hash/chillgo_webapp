@@ -16,7 +16,7 @@ export default function AdminBookingsPage() {
     setLoading(true);
     let query = supabase
       .from('bookings')
-      .select(`*, post:posts(*)`)
+      .select(`*, post:posts!bookings_post_id_fkey(*)`)
       .order('created_at', { ascending: false });
 
     if (filter !== 'all') {

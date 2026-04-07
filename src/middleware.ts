@@ -43,7 +43,7 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  if ((pathname === '/' || pathname === '/feed') && session) {
+  if (pathname === '/feed' && session) {
     try {
       const { data: profile } = await supabase
         .from('profiles')

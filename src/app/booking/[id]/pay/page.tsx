@@ -23,7 +23,7 @@ export default function PaymentPage() {
     const fetch = async () => {
       const { data } = await supabase
         .from('bookings')
-        .select(`*, post:posts(*)`)
+        .select(`*, post:posts!bookings_post_id_fkey(*)`)
         .eq('id', id)
         .single();
       if (data) {
