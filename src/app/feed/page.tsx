@@ -29,6 +29,14 @@ export default function FeedPage() {
     }
   }, [user]);
 
+  const handleBook = (post: Post) => {
+    if (!user) {
+      router.push('/auth/login');
+      return;
+    }
+    setBookingPost(post);
+  };
+
   const fetchPosts = async (params?: { category: string; location: string; date: string; time: string }) => {
     setLoading(true);
     setSearched(true);
@@ -174,7 +182,7 @@ export default function FeedPage() {
                   <PostListItem
                     key={post.id}
                     post={post}
-                    onBook={setBookingPost}
+                    onBook={handleBook}
                   />
                 ))}
               </div>

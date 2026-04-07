@@ -20,6 +20,6 @@ export default async function Home() {
       redirect('/feed');
     }
   } else {
-    redirect('/auth/login');
+    redirect('/feed');
   }
 }

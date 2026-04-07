@@ -25,7 +25,10 @@ export default function BookingModal({ post, onClose }: BookingModalProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) return;
+    if (!user) {
+      router.push('/auth/login');
+      return;
+    }
     setLoading(true);
 
     const { error } = await supabase.from('bookings').insert({
