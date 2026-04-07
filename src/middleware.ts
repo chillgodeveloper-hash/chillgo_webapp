@@ -43,7 +43,7 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  if (pathname === '/feed' && session) {
+  if (pathname === '/' && session) {
     try {
       const { data: profile } = await supabase
         .from('profiles')
@@ -57,7 +57,14 @@ export async function middleware(request: NextRequest) {
       if (profile?.role === 'partner') {
         return NextResponse.redirect(new URL('/dashboard/partner', request.url));
       }
-    } catch (e) {}
+      return NextResponse.redirect(new URL('/feed', request.url));
+    } catch (e) {
+      return NextResponse.redirect(new URL('/feed', request.url));
+    }
+  }
+
+  if (pathname === '/' && !session) {
+    return NextResponse.redirect(new URL('/feed', request.url));
   }
 
   return supabaseResponse;

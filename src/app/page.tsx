@@ -1,229 +1,313 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase-client';
+import { useAuthStore } from '@/hooks/useAuthStore';
 import AppLayout from '@/components/layout/AppLayout';
-import { Star, MapPin, Calendar, CheckCircle, Briefcase, Image as ImageIcon } from 'lucide-react';
+import { Calendar, Clock, MapPin, MessageCircle, CreditCard, CheckCircle, XCircle, AlertCircle, Star, Play } from 'lucide-react';
+import { Booking } from '@/types';
+import Link from 'next/link';
+import ReviewModal from '@/components/review/ReviewModal';
 
-export default function PartnerProfilePage() {
-  const { id } = useParams();
-  const [partner, setPartner] = useState<any>(null);
-  const [workHistory, setWorkHistory] = useState<any[]>([]);
-  const [reviews, setReviews] = useState<any[]>([]);
+const statusConfig: Record<string, { label: string; color: string; icon: any }> = {
+  pending: { label: 'รอการอนุมัติ', color: 'bg-yellow-100 text-yellow-700', icon: Clock },
+  approved: { label: 'อนุมัติแล้ว', color: 'bg-blue-100 text-blue-700', icon: CheckCircle },
+  alternative_offered: { label: 'มีตัวเลือกใหม่', color: 'bg-purple-100 text-purple-700', icon: AlertCircle },
+  confirmed: { label: 'ยืนยันแล้ว', color: 'bg-green-100 text-green-700', icon: CheckCircle },
+  paid: { label: 'ชำระเงินแล้ว', color: 'bg-emerald-100 text-emerald-700', icon: CreditCard },
+  in_progress: { label: 'กำลังดำเนินการ', color: 'bg-blue-100 text-blue-700', icon: Clock },
+  completed: { label: 'เสร็จสิ้น', color: 'bg-primary/20 text-tmuted', icon: CheckCircle },
+  cancelled: { label: 'ยกเลิก', color: 'bg-red-100 text-red-600', icon: XCircle },
+};
+
+export default function BookingPage() {
+  const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'portfolio' | 'history' | 'reviews'>('portfolio');
+  const [activeTab, setActiveTab] = useState<'active' | 'completed'>('active');
+  const [reviewBooking, setReviewBooking] = useState<Booking | null>(null);
+  const [reviewedIds, setReviewedIds] = useState<string[]>([]);
+  const { user } = useAuthStore();
   const supabase = createClient();
 
-  useEffect(() => {
-    const fetch = async () => {
-      const { data: pp } = await supabase
-        .from('partner_profiles')
-        .select('*, profile:profiles(*)')
-        .eq('user_id', id)
-        .single();
-      setPartner(pp);
+  const fetchBookings = async () => {
+    if (!user) return;
 
-      const { data: wh } = await supabase
-        .from('work_history')
-        .select('*, post:posts(title, category, location)')
-        .eq('partner_id', id)
-        .eq('status', 'completed')
-        .order('completed_at', { ascending: false });
-      setWorkHistory(wh || []);
+    let query = supabase
+      .from('bookings')
+      .select(`*, post:posts!bookings_post_id_fkey(*)`)
+      .order('created_at', { ascending: false });
 
-      const { data: rv } = await supabase
-        .from('reviews')
-        .select('*')
-        .eq('partner_id', id)
-        .order('created_at', { ascending: false });
+    if (user.role === 'partner') {
+      query = query.eq('partner_id', user.id);
+    } else {
+      query = query.eq('customer_id', user.id);
+    }
 
-      const customerIds = Array.from(new Set((rv || []).map((r: any) => r.customer_id)));
-      if (customerIds.length > 0) {
-        const { data: customers } = await supabase.from('profiles').select('id, full_name').in('id', customerIds);
-        const custMap: Record<string, any> = {};
-        customers?.forEach(c => { custMap[c.id] = c; });
-        setReviews((rv || []).map((r: any) => ({ ...r, customer: custMap[r.customer_id] || null })));
-      } else {
-        setReviews(rv || []);
-      }
+    const { data, error } = await query;
 
+    if (error) {
+      console.error('Bookings fetch error:', error);
       setLoading(false);
-    };
-    fetch();
-  }, [id]);
+      return;
+    }
 
-  if (loading) {
-    return (
-      <AppLayout>
-        <div className="max-w-3xl mx-auto px-4 py-8">
-          <div className="bg-white rounded-2xl p-8 animate-pulse">
-            <div className="flex items-center gap-4 mb-6">
-              <div className="w-20 h-20 rounded-full bg-primary/20" />
-              <div className="space-y-2 flex-1">
-                <div className="w-1/3 h-6 bg-primary/20 rounded" />
-                <div className="w-1/4 h-4 bg-primary/20 rounded" />
-              </div>
-            </div>
-          </div>
-        </div>
-      </AppLayout>
-    );
-  }
+    console.log('Bookings fetched:', data?.length, 'for user:', user.id, 'role:', user.role);
 
-  if (!partner) {
-    return (
-      <AppLayout>
-        <div className="max-w-3xl mx-auto px-4 py-16 text-center">
-          <p className="text-5xl mb-4">😕</p>
-          <p className="text-tmain font-medium text-lg">ไม่พบพาร์ทเนอร์</p>
-        </div>
-      </AppLayout>
-    );
-  }
+    const userIds = Array.from(new Set((data || []).flatMap((b: any) => [b.customer_id, b.partner_id])));
+    const profileMap: Record<string, any> = {};
+    if (userIds.length > 0) {
+      const { data: profilesData } = await supabase.from('profiles').select('*').in('id', userIds);
+      profilesData?.forEach(p => { profileMap[p.id] = p; });
+    }
+
+    const enriched = (data || []).map((b: any) => ({
+      ...b,
+      customer: profileMap[b.customer_id] || null,
+      partner: profileMap[b.partner_id] || null,
+    }));
+
+    setBookings(enriched);
+
+    const { data: reviews } = await supabase
+      .from('reviews')
+      .select('booking_id')
+      .eq('customer_id', user.id);
+    setReviewedIds(reviews?.map((r: any) => r.booking_id) || []);
+
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    if (user) {
+      fetchBookings();
+    }
+
+    const channel = supabase
+      .channel('user-bookings')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'bookings' }, () => {
+        if (user) fetchBookings();
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [user]);
+
+  const activeBookings = bookings.filter((b) => !['completed', 'cancelled'].includes(b.status));
+  const completedBookings = bookings.filter((b) => ['completed', 'cancelled'].includes(b.status));
+  const displayBookings = activeTab === 'active' ? activeBookings : completedBookings;
 
   return (
     <AppLayout>
-      <div className="max-w-3xl mx-auto px-4 py-6 lg:py-8">
-        <div className="bg-white rounded-2xl border border-primary-dark/20 overflow-hidden">
-          <div className="bg-gradient-to-r from-primary via-primary-dark to-secondary p-6">
-            <div className="flex items-center gap-4">
-              <div className="w-20 h-20 rounded-full bg-white flex items-center justify-center overflow-hidden border-4 border-white">
-                {partner.profile?.avatar_url ? (
-                  <img src={partner.profile.avatar_url} alt="" className="w-full h-full object-cover" />
-                ) : (
-                  <span className="text-3xl font-bold text-tmain">{partner.profile?.full_name?.charAt(0)}</span>
-                )}
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <h1 className="text-xl font-bold text-tmain">{partner.business_name}</h1>
-                  {partner.is_verified && (
-                    <span className="bg-success/20 text-tmain text-xs px-2 py-0.5 rounded-full font-medium">✓ ยืนยัน</span>
-                  )}
-                </div>
-                <p className="text-sm text-tmain/70">{partner.profile?.full_name}</p>
-                <div className="flex items-center gap-3 mt-1">
-                  <span className="text-xs bg-white/30 px-2 py-0.5 rounded-full text-tmain">
-                    {partner.category === 'guide' ? '🗺️ ไกด์' : '🚗 รถเช่า'}
-                  </span>
-                  {partner.rating > 0 && (
-                    <span className="flex items-center gap-1 text-sm text-tmain">
-                      <Star size={14} className="text-amber-500 fill-amber-500" />
-                      {partner.rating.toFixed(1)} ({partner.total_reviews} รีวิว)
-                    </span>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
+      <div className="max-w-2xl mx-auto px-4 lg:px-0 py-6 lg:py-8">
+        <h1 className="text-2xl font-bold text-tmain mb-4 hidden lg:block">การจองของฉัน</h1>
 
-          {partner.description && (
-            <div className="px-6 py-4 border-b border-primary-dark/10">
-              <p className="text-sm text-tmuted">{partner.description}</p>
-            </div>
-          )}
-
-          <div className="flex border-b border-primary-dark/10">
-            <button
-              onClick={() => setActiveTab('portfolio')}
-              className={`flex-1 py-3 text-sm font-medium text-center transition ${
-                activeTab === 'portfolio' ? 'text-tmain border-b-2 border-secondary' : 'text-tmuted'
-              }`}
-            >
-              <ImageIcon size={16} className="inline mr-1.5" /> ผลงาน ({partner.portfolio_images?.length || 0})
-            </button>
-            <button
-              onClick={() => setActiveTab('history')}
-              className={`flex-1 py-3 text-sm font-medium text-center transition ${
-                activeTab === 'history' ? 'text-tmain border-b-2 border-secondary' : 'text-tmuted'
-              }`}
-            >
-              <Briefcase size={16} className="inline mr-1.5" /> ประวัติงาน ({workHistory.length})
-            </button>
-            <button
-              onClick={() => setActiveTab('reviews')}
-              className={`flex-1 py-3 text-sm font-medium text-center transition ${
-                activeTab === 'reviews' ? 'text-tmain border-b-2 border-secondary' : 'text-tmuted'
-              }`}
-            >
-              <Star size={16} className="inline mr-1.5" /> รีวิว ({reviews.length})
-            </button>
-          </div>
-
-          <div className="p-6">
-            {activeTab === 'portfolio' && (
-              <div>
-                {partner.portfolio_images?.length > 0 ? (
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                    {partner.portfolio_images.map((url: string, i: number) => (
-                      <img key={i} src={url} alt="" className="w-full aspect-square object-cover rounded-xl" />
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-center text-tmuted py-8">ยังไม่มีผลงาน</p>
-                )}
-              </div>
-            )}
-
-            {activeTab === 'history' && (
-              <div>
-                {workHistory.length > 0 ? (
-                  <div className="space-y-3">
-                    {workHistory.map((wh) => (
-                      <div key={wh.id} className="flex items-center gap-4 p-4 bg-primary-light rounded-xl">
-                        <div className="w-10 h-10 rounded-full bg-success/20 flex items-center justify-center flex-shrink-0">
-                          <CheckCircle size={20} className="text-success" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium text-tmain text-sm">{wh.post?.title}</p>
-                          <div className="flex flex-wrap gap-2 text-xs text-tmuted mt-1">
-                            <span>{wh.post?.category === 'guide' ? '🗺️ ไกด์' : '🚗 รถเช่า'}</span>
-                            {wh.post?.location && <span className="flex items-center gap-0.5"><MapPin size={10} /> {wh.post.location}</span>}
-                            <span className="flex items-center gap-0.5"><Calendar size={10} /> {new Date(wh.completed_at).toLocaleDateString('th-TH')}</span>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-center text-tmuted py-8">ยังไม่มีประวัติงาน</p>
-                )}
-              </div>
-            )}
-
-            {activeTab === 'reviews' && (
-              <div>
-                {reviews.length > 0 ? (
-                  <div className="space-y-4">
-                    {reviews.map((rv) => (
-                      <div key={rv.id} className="border-b border-primary-dark/10 pb-4 last:border-0">
-                        <div className="flex items-center justify-between mb-2">
-                          <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-tmain font-bold text-xs">
-                              {rv.customer?.full_name?.charAt(0)}
-                            </div>
-                            <span className="text-sm font-medium text-tmain">{rv.customer?.full_name}</span>
-                          </div>
-                          <div className="flex items-center gap-0.5">
-                            {[1, 2, 3, 4, 5].map((s) => (
-                              <Star key={s} size={14} className={s <= rv.rating ? 'text-amber-500 fill-amber-500' : 'text-primary-dark/20'} />
-                            ))}
-                          </div>
-                        </div>
-                        {rv.comment && <p className="text-sm text-tmuted">{rv.comment}</p>}
-                        <p className="text-xs text-tmuted mt-1">{new Date(rv.created_at).toLocaleDateString('th-TH')}</p>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-center text-tmuted py-8">ยังไม่มีรีวิว</p>
-                )}
-              </div>
-            )}
-          </div>
+        <div className="flex gap-2 mb-4">
+          <button
+            onClick={() => setActiveTab('active')}
+            className={`px-4 py-2 rounded-full text-sm font-medium transition ${
+              activeTab === 'active' ? 'bg-primary text-dark-DEFAULT font-semibold shadow-sm' : 'bg-primary-light text-tmain border border-primary/30'
+            }`}
+          >
+            กำลังดำเนินการ ({activeBookings.length})
+          </button>
+          <button
+            onClick={() => setActiveTab('completed')}
+            className={`px-4 py-2 rounded-full text-sm font-medium transition ${
+              activeTab === 'completed' ? 'bg-dark-DEFAULT text-primary font-semibold shadow-sm' : 'bg-primary-light text-tmain border border-primary/30'
+            }`}
+          >
+            เสร็จสิ้น ({completedBookings.length})
+          </button>
         </div>
+
+        {loading ? (
+          <div className="space-y-3">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="bg-white rounded-2xl p-4 animate-pulse">
+                <div className="w-2/3 h-5 bg-primary-dark/30 rounded mb-3" />
+                <div className="w-1/2 h-4 bg-primary-dark/30 rounded mb-2" />
+                <div className="w-1/3 h-4 bg-primary-dark/30 rounded" />
+              </div>
+            ))}
+          </div>
+        ) : displayBookings.length === 0 ? (
+          <div className="text-center py-16">
+            <p className="text-5xl mb-4">📋</p>
+            <p className="text-tmuted">ยังไม่มีรายการจอง</p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {displayBookings.map((booking) => {
+              const status = statusConfig[booking.status] || statusConfig.pending;
+              const StatusIcon = status.icon;
+              return (
+                <div key={booking.id} className="bg-white rounded-2xl p-4 border border-primary-dark/20 shadow-sm">
+                  <div className="flex items-start justify-between mb-3">
+                    <div>
+                      <h3 className="font-bold text-tmain">{booking.post?.title}</h3>
+                      <p className="text-sm text-tmuted">{(booking.partner as any)?.full_name}</p>
+                    </div>
+                    <span className={`${status.color} px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1`}>
+                      <StatusIcon size={12} /> {status.label}
+                    </span>
+                  </div>
+
+                  <div className="flex flex-wrap gap-3 text-sm text-tmuted mb-3">
+                    <span className="flex items-center gap-1">
+                      <Calendar size={14} />
+                      {new Date(booking.booking_date).toLocaleDateString('th-TH')}
+                    </span>
+                    {booking.post?.location && (
+                      <span className="flex items-center gap-1">
+                        <MapPin size={14} /> {booking.post.location}
+                      </span>
+                    )}
+                  </div>
+
+                  {booking.total_price && (
+                    <p className="text-secondary font-bold mb-3">฿{booking.total_price.toLocaleString()}</p>
+                  )}
+
+                  {booking.admin_note && (
+                    <div className="bg-primary-light rounded-xl p-3 mb-3">
+                      <p className="text-xs font-medium text-tmuted mb-1">หมายเหตุจาก Admin</p>
+                      <p className="text-sm text-tmain">{booking.admin_note}</p>
+                    </div>
+                  )}
+
+                  {booking.status === 'alternative_offered' && booking.alternative_post && (
+                    <div className="bg-purple/10 rounded-xl p-3 mb-3">
+                      <p className="text-xs font-medium text-purple mb-1">ตัวเลือกที่แนะนำ</p>
+                      <p className="text-sm font-semibold text-tmain">{booking.alternative_post.title}</p>
+                      <div className="flex gap-2 mt-2">
+                        <button
+                          onClick={async () => {
+                            await supabase
+                              .from('bookings')
+                              .update({ post_id: booking.alternative_post_id, status: 'confirmed' })
+                              .eq('id', booking.id);
+                            window.location.reload();
+                          }}
+                          className="bg-success/20 text-tmain px-4 py-1.5 rounded-lg text-xs font-medium"
+                        >
+                          ยอมรับ
+                        </button>
+                        <button
+                          onClick={async () => {
+                            await supabase
+                              .from('bookings')
+                              .update({ status: 'cancelled' })
+                              .eq('id', booking.id);
+                            window.location.reload();
+                          }}
+                          className="bg-primary-dark/30 text-tmuted px-4 py-1.5 rounded-lg text-xs font-medium"
+                        >
+                          ยกเลิก
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="flex gap-2 pt-3 border-t border-primary-dark/15">
+                    {['confirmed', 'paid', 'in_progress'].includes(booking.status) && (
+                      <Link
+                        href={`/chat/${booking.id}`}
+                        className="flex-1 bg-info/10 text-tmain font-medium py-2 rounded-xl text-sm text-center flex items-center justify-center gap-1.5 hover:bg-info/20 transition"
+                      >
+                        <MessageCircle size={16} /> แชท
+                      </Link>
+                    )}
+                    {booking.status === 'confirmed' && (
+                      <Link
+                        href={`/booking/${booking.id}/pay`}
+                        className="flex-1 bg-primary hover:bg-primary-dark text-tmain font-medium py-2 rounded-xl text-sm text-center flex items-center justify-center gap-1.5 transition"
+                      >
+                        <CreditCard size={16} /> ชำระเงิน
+                      </Link>
+                    )}
+                    {booking.status === 'paid' && user?.role === 'partner' && (
+                      <button
+                        onClick={async () => {
+                          await supabase.from('bookings').update({ status: 'in_progress' }).eq('id', booking.id);
+                          await supabase.from('notifications').insert({
+                            user_id: booking.customer_id,
+                            title: 'เริ่มงานแล้ว',
+                            message: `พาร์ทเนอร์เริ่มงานสำหรับ "${booking.post?.title}" แล้ว`,
+                            type: 'booking',
+                            link: '/booking',
+                          });
+                          await supabase.from('work_history').insert({
+                            partner_id: booking.partner_id,
+                            booking_id: booking.id,
+                            post_id: booking.post_id,
+                            customer_id: booking.customer_id,
+                            status: 'in_progress',
+                          });
+                          fetchBookings();
+                        }}
+                        className="flex-1 bg-success/20 text-tmain font-medium py-2 rounded-xl text-sm text-center flex items-center justify-center gap-1.5 hover:bg-success/30 transition"
+                      >
+                        <Play size={16} /> เริ่มงาน
+                      </button>
+                    )}
+                    {booking.status === 'in_progress' && user?.role === 'partner' && (
+                      <button
+                        onClick={async () => {
+                          await supabase.from('bookings').update({ status: 'completed' }).eq('id', booking.id);
+                          await supabase.from('work_history').update({ status: 'completed', completed_at: new Date().toISOString() }).eq('booking_id', booking.id);
+                          await supabase.from('notifications').insert({
+                            user_id: booking.customer_id,
+                            title: 'งานเสร็จสิ้น',
+                            message: `งาน "${booking.post?.title}" เสร็จสิ้นแล้ว กรุณารีวิว`,
+                            type: 'booking',
+                            link: '/booking',
+                          });
+                          fetchBookings();
+                        }}
+                        className="flex-1 bg-success/20 text-tmain font-medium py-2 rounded-xl text-sm text-center flex items-center justify-center gap-1.5 hover:bg-success/30 transition"
+                      >
+                        <CheckCircle size={16} /> จบงาน
+                      </button>
+                    )}
+                    {booking.status === 'in_progress' && (
+                      <button
+                        onClick={() => alert('🛠️ ระบบ GPS Tracking อยู่ระหว่างการพัฒนา')}
+                        className="flex-1 bg-primary/20 text-tmain font-medium py-2 rounded-xl text-sm text-center flex items-center justify-center gap-1.5 hover:bg-primary/30 transition"
+                      >
+                        <MapPin size={16} /> GPS
+                      </button>
+                    )}
+                    {['paid', 'completed'].includes(booking.status) && !reviewedIds.includes(booking.id) && user?.role !== 'partner' && (
+                      <button
+                        onClick={() => setReviewBooking(booking)}
+                        className="flex-1 bg-secondary/20 text-tmain font-medium py-2 rounded-xl text-sm text-center flex items-center justify-center gap-1.5 hover:bg-secondary/30 transition"
+                      >
+                        <Star size={16} /> รีวิว
+                      </button>
+                    )}
+                    {reviewedIds.includes(booking.id) && (
+                      <span className="flex-1 bg-success/10 text-tmuted font-medium py-2 rounded-xl text-sm text-center flex items-center justify-center gap-1.5">
+                        <Star size={16} className="text-amber-500 fill-amber-500" /> รีวิวแล้ว
+                      </span>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
+
+      {reviewBooking && (
+        <ReviewModal
+          bookingId={reviewBooking.id}
+          partnerId={reviewBooking.partner_id}
+          partnerName={(reviewBooking.partner as any)?.full_name || ''}
+          postTitle={reviewBooking.post?.title || ''}
+          onClose={() => setReviewBooking(null)}
+          onSuccess={fetchBookings}
+        />
+      )}
     </AppLayout>
   );
 }
