@@ -1,248 +1,149 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, useRef } from 'react';
+import { useParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase-client';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuthStore } from '@/hooks/useAuthStore';
 import AppLayout from '@/components/layout/AppLayout';
-import SearchHero from '@/components/feed/SearchHero';
-import PostListItem from '@/components/feed/PostListItem';
-import BookingModal from '@/components/booking/BookingModal';
-import Footer from '@/components/layout/Footer';
-import { Post } from '@/types';
-import { ArrowUpDown } from 'lucide-react';
-import SearchFilter, { defaultFilters } from '@/components/feed/SearchFilter';
+import { Send, ImagePlus, ArrowLeft } from 'lucide-react';
+import { ChatMessage } from '@/types';
+import Link from 'next/link';
 
-export default function FeedPage() {
-  const [posts, setPosts] = useState<Post[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [searched, setSearched] = useState(false);
-  const [bookingPost, setBookingPost] = useState<Post | null>(null);
-  const [searchParams, setSearchParams] = useState({ category: '', location: '', date: '', time: '' });
-  const [sortBy, setSortBy] = useState<'newest' | 'price_low' | 'price_high' | 'rating'>('newest');
-  const [filters, setFilters] = useState(defaultFilters);
-  const { user, isLoading: authLoading } = useAuth();
+export default function ChatPage() {
+  const { bookingId } = useParams();
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [newMessage, setNewMessage] = useState('');
+  const [sending, setSending] = useState(false);
+  const bottomRef = useRef<HTMLDivElement>(null);
+  const { user } = useAuthStore();
   const supabase = createClient();
-  const router = useRouter();
-
-  const handleBook = (post: Post) => {
-    if (!user) {
-      router.push('/auth/login');
-      return;
-    }
-    setBookingPost(post);
-  };
-
-  const fetchPosts = async (params?: { category: string; location: string; date: string; time: string }) => {
-    setLoading(true);
-    setSearched(true);
-
-    let query = supabase
-      .from('posts')
-      .select(`
-        *,
-        partner_profile:partner_profiles(
-          *,
-          profile:profiles(*)
-        )
-      `)
-      .eq('status', 'active');
-
-    const cat = filters.category || params?.category;
-    if (cat) {
-      query = query.eq('category', cat);
-    }
-
-    const loc = filters.location || params?.location;
-    if (loc) {
-      query = query.or(`title.ilike.%${loc}%,content.ilike.%${loc}%,location.ilike.%${loc}%`);
-    }
-
-    if (filters.priceMin) {
-      query = query.gte('price_min', parseFloat(filters.priceMin));
-    }
-    if (filters.priceMax) {
-      query = query.lte('price_min', parseFloat(filters.priceMax));
-    }
-
-    if (sortBy === 'price_low') {
-      query = query.order('price_min', { ascending: true, nullsFirst: false });
-    } else if (sortBy === 'price_high') {
-      query = query.order('price_min', { ascending: false });
-    } else {
-      query = query.order('created_at', { ascending: false });
-    }
-
-    const { data } = await query;
-
-    let filtered = data || [];
-
-    if (filters.rating > 0) {
-      filtered = filtered.filter((p: any) => p.partner_profile?.rating >= filters.rating);
-    }
-    if (filters.verified) {
-      filtered = filtered.filter((p: any) => p.partner_profile?.is_verified);
-    }
-
-    if (params?.date) {
-      filtered = filtered.filter((p: any) => {
-        if (!p.available_start) return true;
-        const searchDate = new Date(params.date);
-        const start = new Date(p.available_start);
-        const end = p.available_end ? new Date(p.available_end) : start;
-        return searchDate >= start && searchDate <= end;
-      });
-    }
-
-    setPosts(filtered);
-    setLoading(false);
-  };
-
-  const handleSearch = (params: { category: string; location: string; date: string; time: string }) => {
-    setSearchParams(params);
-    fetchPosts(params);
-  };
-
-  const handleSortChange = (newSort: typeof sortBy) => {
-    setSortBy(newSort);
-  };
 
   useEffect(() => {
-    if (searched) {
-      fetchPosts(searchParams);
-    }
-  }, [sortBy, filters]);
+    if (!bookingId) return;
+
+    const fetchMessages = async () => {
+      const { data } = await supabase
+        .from('chat_messages')
+        .select('*, sender:profiles(*)')
+        .eq('booking_id', bookingId)
+        .order('created_at', { ascending: true });
+      setMessages(data || []);
+    };
+
+    fetchMessages();
+
+    const channel = supabase
+      .channel(`chat:${bookingId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'chat_messages',
+          filter: `booking_id=eq.${bookingId}`,
+        },
+        async (payload) => {
+          const { data } = await supabase
+            .from('chat_messages')
+            .select('*, sender:profiles(*)')
+            .eq('id', payload.new.id)
+            .single();
+          if (data) setMessages((prev) => [...prev, data]);
+        }
+      )
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [bookingId]);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  const handleSend = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newMessage.trim() || !user || !bookingId) return;
+    setSending(true);
+
+    await supabase.from('chat_messages').insert({
+      booking_id: bookingId,
+      sender_id: user.id,
+      message: newMessage.trim(),
+    });
+
+    setNewMessage('');
+    setSending(false);
+  };
 
   return (
     <AppLayout>
-      {!searched ? (
-        <>
-          <SearchHero onSearch={handleSearch} />
-
-          <div className="max-w-7xl mx-auto px-4 py-12">
-            <h2 className="font-display text-2xl font-bold text-tmain mb-6 text-center">บริการยอดนิยม</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div
-                onClick={() => handleSearch({ category: 'guide', location: '', date: '', time: '' })}
-                className="bg-white rounded-2xl border border-primary-dark/20 p-6 text-center cursor-pointer hover:border-primary hover:shadow-md transition-all"
-              >
-                <div className="text-5xl mb-3">🗺️</div>
-                <h3 className="font-bold text-tmain text-lg">ไกด์ท่องเที่ยว</h3>
-                <p className="text-sm text-tmuted mt-1">ไกด์มืออาชีพพาเที่ยวทั่วไทย</p>
-              </div>
-              <div
-                onClick={() => handleSearch({ category: 'car_rental', location: '', date: '', time: '' })}
-                className="bg-white rounded-2xl border border-primary-dark/20 p-6 text-center cursor-pointer hover:border-primary hover:shadow-md transition-all"
-              >
-                <div className="text-5xl mb-3">🚗</div>
-                <h3 className="font-bold text-tmain text-lg">รถเช่า</h3>
-                <p className="text-sm text-tmuted mt-1">รถเช่าคุณภาพทั่วประเทศ</p>
-              </div>
-              <div
-                onClick={() => { fetchPosts({ category: '', location: '', date: '', time: '' }); setSearchParams({ category: '', location: '', date: '', time: '' }); }}
-                className="bg-white rounded-2xl border border-primary-dark/20 p-6 text-center cursor-pointer hover:border-primary hover:shadow-md transition-all"
-              >
-                <div className="text-5xl mb-3">🔍</div>
-                <h3 className="font-bold text-tmain text-lg">ดูทั้งหมด</h3>
-                <p className="text-sm text-tmuted mt-1">เรียกดูบริการทั้งหมด</p>
-              </div>
-            </div>
+      <div className="max-w-2xl mx-auto flex flex-col h-[calc(100vh-8rem)] lg:h-[calc(100vh-6rem)]">
+        <div className="bg-white rounded-t-2xl border border-primary-dark/20 p-4 flex items-center gap-3">
+          <Link href="/booking" className="text-tmuted hover:text-tmuted lg:hidden">
+            <ArrowLeft size={20} />
+          </Link>
+          <div className="w-9 h-9 rounded-full bg-primary/20 flex items-center justify-center text-primary-text font-bold text-sm">
+            💬
           </div>
+          <div>
+            <p className="font-semibold text-sm text-tmain">ห้องแชทการจอง</p>
+            <p className="text-xs text-tmuted">#{String(bookingId).slice(0, 8)}</p>
+          </div>
+        </div>
 
-          <Footer />
-        </>
-      ) : (
-        <>
-          <div className="max-w-7xl mx-auto px-4 py-6">
-            <SearchHero onSearch={handleSearch} compact />
+        <div className="flex-1 overflow-y-auto bg-primary-light p-4 space-y-3">
+          {messages.length === 0 && (
+            <div className="text-center py-12">
+              <p className="text-4xl mb-2">💬</p>
+              <p className="text-tmuted text-sm">เริ่มต้นสนทนา</p>
+            </div>
+          )}
 
-            <div className="flex gap-6 mt-6">
-              <SearchFilter
-                filters={filters}
-                onChange={setFilters}
-                onReset={() => setFilters(defaultFilters)}
-              />
-
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between mb-4">
-                  <p className="text-sm text-tmuted">
-                    {loading ? 'กำลังค้นหา...' : `พบ ${posts.length} รายการ`}
+          {messages.map((msg) => {
+            const isMe = msg.sender_id === user?.id;
+            return (
+              <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
+                <div className={`max-w-[75%] ${isMe ? 'order-1' : 'order-2'}`}>
+                  {!isMe && (
+                    <p className="text-xs text-tmuted mb-1 ml-1">{msg.sender?.full_name}</p>
+                  )}
+                  <div className={`px-4 py-2.5 rounded-2xl text-sm ${
+                    isMe
+                      ? 'bg-primary text-dark-DEFAULT rounded-br-md'
+                      : 'bg-white text-tmain border border-primary-dark/20 rounded-bl-md'
+                  }`}>
+                    {msg.message}
+                  </div>
+                  <p className={`text-[10px] text-tmuted mt-1 ${isMe ? 'text-right mr-1' : 'ml-1'}`}>
+                    {new Date(msg.created_at).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })}
                   </p>
-                  <div className="flex items-center gap-2">
-                    <ArrowUpDown size={14} className="text-tmuted" />
-                    <select
-                      value={sortBy}
-                      onChange={(e) => handleSortChange(e.target.value as typeof sortBy)}
-                      className="text-sm text-tmain bg-white border border-primary-dark/30 rounded-lg px-3 py-1.5 outline-none focus:border-primary"
-                    >
-                      <option value="newest">ใหม่ล่าสุด</option>
-                      <option value="price_low">ราคาต่ำ → สูง</option>
-                      <option value="price_high">ราคาสูง → ต่ำ</option>
-                      <option value="rating">คะแนนสูงสุด</option>
-                    </select>
-                  </div>
-                </div>
-
-                {loading ? (
-                  <div className="space-y-4">
-                    {[1, 2, 3].map((i) => (
-                      <div key={i} className="bg-white rounded-2xl p-4 animate-pulse flex gap-4">
-                        <div className="w-64 h-40 bg-primary/20 rounded-xl flex-shrink-0 hidden md:block" />
-                        <div className="flex-1 space-y-3">
-                          <div className="w-2/3 h-5 bg-primary/20 rounded" />
-                          <div className="w-1/3 h-4 bg-primary/20 rounded" />
-                          <div className="w-full h-4 bg-primary/20 rounded" />
-                          <div className="w-1/4 h-6 bg-primary/20 rounded" />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : posts.length === 0 ? (
-                  <div className="text-center py-16 bg-white rounded-2xl border border-primary-dark/20">
-                    <p className="text-5xl mb-4">🏖️</p>
-                    <p className="text-tmain font-medium text-lg">ไม่พบผลลัพธ์</p>
-                    <p className="text-tmuted text-sm mt-1">ลองค้นหาด้วยคำอื่น หรือเปลี่ยนเงื่อนไข</p>
-                    <button
-                      onClick={() => { setSearched(false); setFilters(defaultFilters); }}
-                      className="mt-4 bg-primary hover:bg-primary-dark text-tmain font-semibold px-6 py-2 rounded-xl transition"
-                    >
-                      กลับหน้าหลัก
-                    </button>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {posts.map((post) => (
-                      <PostListItem
-                        key={post.id}
-                        post={post}
-                        onBook={handleBook}
-                      />
-                    ))}
-                  </div>
-                )}
-
-                <div className="mt-8">
-                  <button
-                    onClick={() => { setSearched(false); setFilters(defaultFilters); }}
-                    className="text-sm text-tmuted hover:bg-primary/20 px-4 py-2 rounded-lg transition"
-                  >
-                    ← กลับหน้าหลัก
-                  </button>
                 </div>
               </div>
-            </div>
-          </div>
+            );
+          })}
+          <div ref={bottomRef} />
+        </div>
 
-          <Footer />
-        </>
-      )}
-
-      {bookingPost && (
-        <BookingModal
-          post={bookingPost}
-          onClose={() => setBookingPost(null)}
-        />
-      )}
+        <form onSubmit={handleSend} className="bg-white border-t border-primary-dark/15 p-3 rounded-b-2xl flex items-center gap-2">
+          <button type="button" className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-tmuted hover:bg-primary-dark/30 transition flex-shrink-0">
+            <ImagePlus size={18} />
+          </button>
+          <input
+            type="text"
+            value={newMessage}
+            onChange={(e) => setNewMessage(e.target.value)}
+            placeholder="พิมพ์ข้อความ..."
+            className="flex-1 px-4 py-2.5 rounded-full bg-primary/20 outline-none text-sm focus:bg-primary-light focus:ring-2 focus:ring-primary/20 transition"
+          />
+          <button
+            type="submit"
+            disabled={!newMessage.trim() || sending}
+            className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-dark-DEFAULT hover:bg-primary-dark transition disabled:opacity-40 flex-shrink-0"
+          >
+            <Send size={18} />
+          </button>
+        </form>
+      </div>
     </AppLayout>
   );
 }

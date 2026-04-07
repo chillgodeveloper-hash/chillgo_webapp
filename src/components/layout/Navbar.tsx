@@ -125,6 +125,7 @@ export default function Navbar() {
     { href: '/feed', label: 'หน้าหลัก' },
     { href: '/dashboard/admin', label: 'แดชบอร์ด' },
     { href: '/dashboard/admin/bookings', label: 'การจอง' },
+    { href: '/chat', label: 'ข้อความ' },
     { href: '/dashboard/admin/partners', label: 'พาร์ทเนอร์' },
     { href: '/dashboard/admin/reports/revenue', label: 'รายงาน' },
   ];
