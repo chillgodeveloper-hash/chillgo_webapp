@@ -21,17 +21,18 @@ export default function FeedPage() {
   const [searchParams, setSearchParams] = useState({ category: '', location: '', date: '', time: '' });
   const [sortBy, setSortBy] = useState<'newest' | 'price_low' | 'price_high' | 'rating'>('newest');
   const [filters, setFilters] = useState(defaultFilters);
-  const { user } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const supabase = createClient();
   const router = useRouter();
 
   useEffect(() => {
+    if (authLoading) return;
     if (user?.role === 'partner') {
       router.replace('/dashboard/partner');
     } else if (user?.role === 'admin') {
       router.replace('/dashboard/admin');
     }
-  }, [user]);
+  }, [user, authLoading]);
 
   const handleBook = (post: Post) => {
     if (!user) {

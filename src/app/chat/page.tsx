@@ -24,9 +24,11 @@ export default function ChatListPage() {
         .order('updated_at', { ascending: false });
 
       const userIds = Array.from(new Set((data || []).flatMap((b: any) => [b.customer_id, b.partner_id])));
-      const { data: profilesData } = await supabase.from('profiles').select('*').in('id', userIds.length > 0 ? userIds : ['none']);
       const profileMap: Record<string, any> = {};
-      profilesData?.forEach(p => { profileMap[p.id] = p; });
+      if (userIds.length > 0) {
+        const { data: profilesData } = await supabase.from('profiles').select('*').in('id', userIds);
+        profilesData?.forEach(p => { profileMap[p.id] = p; });
+      }
 
       const enriched = (data || []).map((b: any) => ({
         ...b,
