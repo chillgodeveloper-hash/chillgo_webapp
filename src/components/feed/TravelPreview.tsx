@@ -1,115 +1,81 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Plane, Hotel, ArrowRight, Star, ExternalLink, ChevronRight } from 'lucide-react';
+import { Plane, Hotel, ArrowRight, ExternalLink, ChevronRight } from 'lucide-react';
 
-interface Flight {
-  origin: string;
-  destination: string;
-  price: number;
-  airline: string;
-  departureAt: string;
-  transfers: number;
-  affiliateLink: string;
-}
+const MARKER = process.env.NEXT_PUBLIC_TRAVELPAYOUTS_MARKER || '';
 
-interface HotelItem {
-  id: number;
-  name: string;
-  stars: number;
-  priceFrom: number;
-  rating: number;
-  photoUrl: string | null;
-  link: string;
-}
+const flightRoutes = [
+  { from: 'BKK', to: 'CNX', name: 'เชียงใหม่', nameEn: 'Chiang Mai', image: 'https://photo.hotellook.com/static/cities/960x720/CNX.jpg' },
+  { from: 'BKK', to: 'HKT', name: 'ภูเก็ต', nameEn: 'Phuket', image: 'https://photo.hotellook.com/static/cities/960x720/HKT.jpg' },
+  { from: 'BKK', to: 'NRT', name: 'โตเกียว', nameEn: 'Tokyo', image: 'https://photo.hotellook.com/static/cities/960x720/TYO.jpg' },
+  { from: 'BKK', to: 'ICN', name: 'โซล', nameEn: 'Seoul', image: 'https://photo.hotellook.com/static/cities/960x720/SEL.jpg' },
+];
+
+const hotelDestinations = [
+  { name: 'กรุงเทพ', nameEn: 'Bangkok', image: 'https://photo.hotellook.com/static/cities/960x720/BKK.jpg' },
+  { name: 'เชียงใหม่', nameEn: 'Chiang Mai', image: 'https://photo.hotellook.com/static/cities/960x720/CNX.jpg' },
+  { name: 'ภูเก็ต', nameEn: 'Phuket', image: 'https://photo.hotellook.com/static/cities/960x720/HKT.jpg' },
+  { name: 'กระบี่', nameEn: 'Krabi', image: 'https://photo.hotellook.com/static/cities/960x720/KBV.jpg' },
+];
 
 export default function TravelPreview() {
-  const [flights, setFlights] = useState<Flight[]>([]);
-  const [hotels, setHotels] = useState<HotelItem[]>([]);
-  const [loadingFlights, setLoadingFlights] = useState(true);
-  const [loadingHotels, setLoadingHotels] = useState(true);
+  const buildFlightLink = (from: string, to: string) => {
+    let url = `https://www.aviasales.com/search/${from}${to}1`;
+    if (MARKER) url = `https://tp.media/r?marker=${MARKER}&trs=368880&p=4114&u=${encodeURIComponent(url)}`;
+    return url;
+  };
 
-  useEffect(() => {
-    const fetchFlights = async () => {
-      try {
-        const res = await fetch('/api/travel?type=flights_popular&origin=BKK');
-        const data = await res.json();
-        setFlights((data.flights || []).slice(0, 4));
-      } catch {}
-      setLoadingFlights(false);
-    };
-
-    const fetchHotels = async () => {
-      try {
-        const res = await fetch('/api/travel?type=hotels_popular&city_id=12549');
-        const data = await res.json();
-        setHotels((data.hotels || []).slice(0, 4));
-      } catch {}
-      setLoadingHotels(false);
-    };
-
-    fetchFlights();
-    fetchHotels();
-  }, []);
+  const buildHotelLink = (cityNameEn: string) => {
+    let url = `https://search.hotellook.com/hotels?destination=${encodeURIComponent(cityNameEn)}&adults=2`;
+    if (MARKER) url += `&marker=${MARKER}`;
+    return url;
+  };
 
   return (
     <>
       <div className="max-w-7xl mx-auto px-4 py-10">
         <div className="flex items-center justify-between mb-6">
           <h2 className="font-display text-2xl font-bold text-tmain flex items-center gap-2">
-            <Plane size={24} className="text-secondary" /> เที่ยวบินราคาดี
+            <Plane size={24} className="text-secondary" /> เที่ยวบินยอดนิยม
           </h2>
           <Link href="/flights" className="text-sm text-secondary font-semibold hover:underline flex items-center gap-1">
             ดูทั้งหมด <ChevronRight size={16} />
           </Link>
         </div>
 
-        {loadingFlights ? (
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="bg-white rounded-2xl p-4 animate-pulse">
-                <div className="h-4 bg-primary/20 rounded w-2/3 mb-3" />
-                <div className="h-3 bg-primary/20 rounded w-1/2 mb-2" />
-                <div className="h-6 bg-primary/20 rounded w-1/3" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+          {flightRoutes.map((route) => (
+            <a
+              key={route.to}
+              href={buildFlightLink(route.from, route.to)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-white rounded-2xl overflow-hidden border border-primary-dark/20 hover:border-secondary hover:shadow-md transition-all group"
+            >
+              <div className="relative h-36 overflow-hidden">
+                <img
+                  src={route.image}
+                  alt={route.name}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                <div className="absolute bottom-2 left-3">
+                  <h3 className="font-bold text-white text-sm drop-shadow">{route.name}</h3>
+                  <p className="text-white/70 text-[11px] drop-shadow flex items-center gap-1">
+                    {route.from} <ArrowRight size={10} /> {route.to}
+                  </p>
+                </div>
               </div>
-            ))}
-          </div>
-        ) : flights.length === 0 ? (
-          <div className="bg-white rounded-2xl border border-primary-dark/20 p-8 text-center">
-            <p className="text-tmuted">ไม่พบข้อมูลเที่ยวบินในขณะนี้</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-            {flights.map((f, i) => (
-              <a
-                key={i}
-                href={f.affiliateLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-white rounded-2xl p-4 border border-primary-dark/20 hover:border-secondary hover:shadow-md transition-all group"
-              >
-                <div className="flex items-center gap-2 mb-2">
-                  <img src={`https://pics.avs.io/40/40/${f.airline}.png`} alt="" className="w-8 h-8 rounded object-contain" />
-                  <div className="flex items-center gap-1.5 text-tmain font-semibold text-sm">
-                    {f.origin} <ArrowRight size={14} className="text-tmuted" /> {f.destination}
-                  </div>
-                </div>
-                <p className="text-xs text-tmuted">
-                  {new Date(f.departureAt).toLocaleDateString('th-TH', { day: 'numeric', month: 'short' })}
-                  {' · '}
-                  <span className={f.transfers === 0 ? 'text-success' : ''}>{f.transfers === 0 ? 'บินตรง' : `${f.transfers} ต่อ`}</span>
-                </p>
-                <div className="flex items-center justify-between mt-2">
-                  <p className="font-bold text-secondary">฿{f.price?.toLocaleString()}</p>
-                  <span className="text-[10px] text-tmuted group-hover:text-secondary transition flex items-center gap-0.5">
-                    จองเลย <ExternalLink size={10} />
-                  </span>
-                </div>
-              </a>
-            ))}
-          </div>
-        )}
+              <div className="p-3 flex items-center justify-between">
+                <span className="text-xs text-tmuted">เปรียบเทียบราคา</span>
+                <span className="text-[10px] text-tmuted group-hover:text-secondary transition flex items-center gap-0.5">
+                  ดูเที่ยวบิน <ExternalLink size={10} />
+                </span>
+              </div>
+            </a>
+          ))}
+        </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 pb-10">
@@ -122,61 +88,36 @@ export default function TravelPreview() {
           </Link>
         </div>
 
-        {loadingHotels ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-            {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="bg-white rounded-2xl overflow-hidden animate-pulse">
-                <div className="h-36 bg-primary/20" />
-                <div className="p-3 space-y-2">
-                  <div className="h-4 bg-primary/20 rounded w-2/3" />
-                  <div className="h-5 bg-primary/20 rounded w-1/3" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+          {hotelDestinations.map((dest) => (
+            <a
+              key={dest.nameEn}
+              href={buildHotelLink(dest.nameEn)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-white rounded-2xl overflow-hidden border border-primary-dark/20 hover:border-secondary hover:shadow-md transition-all group"
+            >
+              <div className="relative h-36 overflow-hidden">
+                <img
+                  src={dest.image}
+                  alt={dest.name}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                <div className="absolute bottom-2 left-3">
+                  <h3 className="font-bold text-white text-sm drop-shadow">{dest.name}</h3>
+                  <p className="text-white/70 text-[11px] drop-shadow">{dest.nameEn}</p>
                 </div>
               </div>
-            ))}
-          </div>
-        ) : hotels.length === 0 ? (
-          <div className="bg-white rounded-2xl border border-primary-dark/20 p-8 text-center">
-            <p className="text-tmuted">ไม่พบข้อมูลโรงแรมในขณะนี้</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-            {hotels.map((h) => (
-              <a
-                key={h.id}
-                href={h.link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-white rounded-2xl overflow-hidden border border-primary-dark/20 hover:border-secondary hover:shadow-md transition-all group"
-              >
-                {h.photoUrl ? (
-                  <img src={h.photoUrl} alt={h.name} className="w-full h-36 object-cover" />
-                ) : (
-                  <div className="w-full h-36 bg-primary-light flex items-center justify-center">
-                    <Hotel size={32} className="text-primary" />
-                  </div>
-                )}
-                <div className="p-3">
-                  <h3 className="font-semibold text-tmain text-sm truncate">{h.name}</h3>
-                  <div className="flex items-center gap-1 mt-0.5">
-                    {Array.from({ length: h.stars || 0 }, (_, i) => (
-                      <Star key={i} size={10} className="text-amber-400 fill-amber-400" />
-                    ))}
-                    {h.rating > 0 && <span className="text-[10px] text-tmuted ml-1">{h.rating.toFixed(1)}</span>}
-                  </div>
-                  <div className="flex items-center justify-between mt-2">
-                    <div>
-                      <p className="text-[10px] text-tmuted">เริ่มต้น/คืน</p>
-                      <p className="font-bold text-secondary text-sm">฿{h.priceFrom?.toLocaleString() || 'N/A'}</p>
-                    </div>
-                    <span className="text-[10px] text-tmuted group-hover:text-secondary transition flex items-center gap-0.5">
-                      จองเลย <ExternalLink size={10} />
-                    </span>
-                  </div>
-                </div>
-              </a>
-            ))}
-          </div>
-        )}
+              <div className="p-3 flex items-center justify-between">
+                <span className="text-xs text-tmuted">เปรียบเทียบราคา</span>
+                <span className="text-[10px] text-tmuted group-hover:text-secondary transition flex items-center gap-0.5">
+                  ดูโรงแรม <ExternalLink size={10} />
+                </span>
+              </div>
+            </a>
+          ))}
+        </div>
       </div>
     </>
   );

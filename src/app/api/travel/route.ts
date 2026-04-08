@@ -32,8 +32,7 @@ export async function GET(request: NextRequest) {
         departureAt: f.departure_at,
         returnAt: f.return_at,
         transfers: f.number_of_changes,
-        link: `https://www.aviasales.com/search/${f.link}`,
-        affiliateLink: `https://tp.media/r?marker=${TP_MARKER}&trs=368880&p=4114&u=https%3A%2F%2Fwww.aviasales.com%2Fsearch%2F${encodeURIComponent(f.link)}`,
+        affiliateLink: `https://tp.media/r?marker=${TP_MARKER}&trs=368880&p=4114&u=https%3A%2F%2Fwww.aviasales.com%2Fsearch%2F${encodeURIComponent(f.link || '')}`,
       }));
 
       return NextResponse.json({ flights });
@@ -53,76 +52,10 @@ export async function GET(request: NextRequest) {
         departureAt: f.departure_at,
         returnAt: f.return_at,
         transfers: f.number_of_changes,
-        link: `https://www.aviasales.com/search/${f.link}`,
-        affiliateLink: `https://tp.media/r?marker=${TP_MARKER}&trs=368880&p=4114&u=https%3A%2F%2Fwww.aviasales.com%2Fsearch%2F${encodeURIComponent(f.link)}`,
+        affiliateLink: `https://tp.media/r?marker=${TP_MARKER}&trs=368880&p=4114&u=https%3A%2F%2Fwww.aviasales.com%2Fsearch%2F${encodeURIComponent(f.link || '')}`,
       }));
 
       return NextResponse.json({ flights });
-    }
-
-    if (type === 'hotels') {
-      const cityId = searchParams.get('city_id') || '12209';
-      const checkIn = searchParams.get('check_in') || '';
-      const checkOut = searchParams.get('check_out') || '';
-      const limit = searchParams.get('limit') || '10';
-
-      let url = `https://yasen.hotellook.com/tp/public/widget_location_dump.json?currency=thb&language=th&limit=${limit}&id=${cityId}&type=popularity&token=${TP_TOKEN}`;
-      if (checkIn) url += `&check_in=${checkIn}`;
-      if (checkOut) url += `&check_out=${checkOut}`;
-
-      const res = await fetch(url);
-      const data = await res.json();
-
-      const hotels = (data || []).map((h: any) => ({
-        id: h.hotel_id,
-        name: h.hotel_name,
-        stars: h.stars,
-        priceFrom: h.price_from,
-        priceAvg: h.price_avg,
-        rating: h.rating,
-        photoId: h.photo_id,
-        photoUrl: h.photo_id ? `https://photo.hotellook.com/image_v2/crop/h${h.hotel_id}_${h.photo_id}/640/480.auto` : null,
-        location: h.location,
-        link: `https://search.hotellook.com/hotels?destination=${cityId}&checkIn=${checkIn || ''}&checkOut=${checkOut || ''}&marker=${TP_MARKER}`,
-      }));
-
-      return NextResponse.json({ hotels });
-    }
-
-    if (type === 'hotels_popular') {
-      const cityId = searchParams.get('city_id') || '12209';
-      const url = `https://yasen.hotellook.com/tp/public/widget_location_dump.json?currency=thb&language=th&limit=6&id=${cityId}&type=popularity&token=${TP_TOKEN}`;
-
-      const res = await fetch(url);
-      const data = await res.json();
-
-      const hotels = (data || []).map((h: any) => ({
-        id: h.hotel_id,
-        name: h.hotel_name,
-        stars: h.stars,
-        priceFrom: h.price_from,
-        rating: h.rating,
-        photoUrl: h.photo_id ? `https://photo.hotellook.com/image_v2/crop/h${h.hotel_id}_${h.photo_id}/640/480.auto` : null,
-        link: `https://search.hotellook.com/hotels?destination=${cityId}&marker=${TP_MARKER}`,
-      }));
-
-      return NextResponse.json({ hotels });
-    }
-
-    if (type === 'city_lookup') {
-      const query = searchParams.get('query') || '';
-      const url = `https://engine.hotellook.com/api/v2/lookup.json?query=${encodeURIComponent(query)}&lang=en&lookFor=city&limit=5&token=${TP_TOKEN}`;
-      const res = await fetch(url);
-      const data = await res.json();
-
-      const cities = (data.results?.locations || []).map((c: any) => ({
-        id: c.id,
-        name: c.cityName || c.name,
-        country: c.countryName,
-        iata: c.iata?.[0] || '',
-      }));
-
-      return NextResponse.json({ cities });
     }
 
     if (type === 'airport_lookup') {
