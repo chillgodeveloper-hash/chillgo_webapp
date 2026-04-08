@@ -234,7 +234,7 @@ export default function BookingPage() {
                       >
                         <Receipt size={16} /> ใบเสร็จ
                       </Link>
-                    )}}
+                    )}
                     {booking.status === 'paid' && user?.role === 'partner' && (
                       <button
                         onClick={async () => {
