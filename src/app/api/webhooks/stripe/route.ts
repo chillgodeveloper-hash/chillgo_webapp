@@ -68,26 +68,34 @@ export async function POST(request: NextRequest) {
             } catch {}
           }
 
-          const receiptNumber = generateReceiptNumber();
+          const { data: existingReceipt } = await supabase
+            .from('receipts')
+            .select('id')
+            .eq('booking_id', bookingId)
+            .maybeSingle();
 
-          await supabase.from('receipts').insert({
-            booking_id: bookingId,
-            receipt_number: receiptNumber,
-            customer_id: booking.customer_id,
-            partner_id: booking.partner_id,
-            customer_name: customer?.full_name || '',
-            customer_email: customer?.email || '',
-            partner_name: partner?.full_name || '',
-            partner_email: partner?.email || '',
-            service_title: booking.post?.title || '',
-            booking_date: booking.booking_date,
-            booking_end_date: booking.booking_end_date,
-            guests: booking.guests,
-            amount: booking.total_price || 0,
-            payment_method: paymentMethodType,
-            stripe_payment_intent_id: paymentIntent.id,
-            status: 'paid',
-          });
+          if (!existingReceipt) {
+            const receiptNumber = generateReceiptNumber();
+
+            await supabase.from('receipts').insert({
+              booking_id: bookingId,
+              receipt_number: receiptNumber,
+              customer_id: booking.customer_id,
+              partner_id: booking.partner_id,
+              customer_name: customer?.full_name || '',
+              customer_email: customer?.email || '',
+              partner_name: partner?.full_name || '',
+              partner_email: partner?.email || '',
+              service_title: booking.post?.title || '',
+              booking_date: booking.booking_date,
+              booking_end_date: booking.booking_end_date,
+              guests: booking.guests,
+              amount: booking.total_price || 0,
+              payment_method: paymentMethodType,
+              stripe_payment_intent_id: paymentIntent.id,
+              status: 'paid',
+            });
+          }
 
           const serviceName = booking.post?.title || 'บริการ';
 

@@ -205,14 +205,19 @@ export default function PaymentPage() {
 
         setPaid(true);
 
-        setTimeout(async () => {
-          const { data: receiptData } = await supabase
-            .from('receipts')
-            .select('*')
-            .eq('booking_id', booking.id)
-            .maybeSingle();
-          if (receiptData) setReceipt(receiptData);
-        }, 3000);
+        try {
+          const receiptRes = await fetch('/api/receipts', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              bookingId: booking.id,
+              paymentIntentId: result.paymentIntent.id,
+              paymentMethod: activeTab,
+            }),
+          });
+          const receiptJson = await receiptRes.json();
+          if (receiptJson.receipt) setReceipt(receiptJson.receipt);
+        } catch {}
       } else if (result?.paymentIntent?.status === 'requires_action') {
         setPaying(false);
         return;
@@ -227,15 +232,23 @@ export default function PaymentPage() {
     const params = new URLSearchParams(window.location.search);
     if (params.get('status') === 'complete') {
       setPaid(true);
-      const fetchReceipt = async () => {
-        const { data } = await supabase
-          .from('receipts')
-          .select('*')
-          .eq('booking_id', id)
-          .maybeSingle();
-        if (data) setReceipt(data);
+      const createReceipt = async () => {
+        try {
+          const piId = params.get('payment_intent') || '';
+          const res = await fetch('/api/receipts', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              bookingId: id,
+              paymentIntentId: piId,
+              paymentMethod: 'promptpay',
+            }),
+          });
+          const json = await res.json();
+          if (json.receipt) setReceipt(json.receipt);
+        } catch {}
       };
-      setTimeout(fetchReceipt, 3000);
+      createReceipt();
     }
   }, []);
 
