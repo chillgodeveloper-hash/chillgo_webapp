@@ -6,6 +6,7 @@ import AppLayout from '@/components/layout/AppLayout';
 import { CheckCircle, XCircle, Edit, MessageCircle, X, Save } from 'lucide-react';
 import { Booking } from '@/types';
 import Link from 'next/link';
+import FlatpickrInput from '@/components/ui/FlatpickrInput';
 
 export default function AdminBookingsPage() {
   const [bookings, setBookings] = useState<Booking[]>([]);
@@ -168,7 +169,7 @@ export default function AdminBookingsPage() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="text-sm font-medium text-tmain mb-1 block">วันที่จอง</label>
-                  <input type="date" value={editForm.booking_date} onChange={(e) => setEditForm({ ...editForm, booking_date: e.target.value })} className="w-full h-12 px-3 rounded-xl border border-primary-dark/30 text-sm text-tmain outline-none focus:border-primary" />
+                  <FlatpickrInput value={editForm.booking_date} onChange={(val) => setEditForm({ ...editForm, booking_date: val })} mode="date" placeholder="เลือกวันที่" className="w-full h-12 px-3 rounded-xl border border-primary-dark/30 text-sm text-tmain outline-none focus:border-primary cursor-pointer bg-white" />
                 </div>
                 <div>
                   <label className="text-sm font-medium text-tmain mb-1 block">จำนวนคน</label>

@@ -129,7 +129,7 @@ export default function CreatePostForm({ onSuccess, editPost, onCancelEdit, isMo
 
       <input type="text" value={title} onChange={(e) => { setTitle(e.target.value); const c = checkContentViolation(e.target.value); setViolation(c.isViolation ? (c.reason || '') : ''); }} placeholder="ชื่อบริการ / หัวข้อโพสต์" className="w-full min-w-0 h-12 px-3 text-lg font-semibold border-0 border-b border-primary-dark/15 focus:border-primary outline-none mb-3 text-tmain bg-transparent" required />
 
-      <textarea value={content} onChange={(e) => { setContent(e.target.value); const c = checkContentViolation(e.target.value); setViolation(c.isViolation ? (c.reason || '') : ''); }} placeholder="รายละเอียดบริการ..." rows={3} className="w-full min-w-0 px-3 py-2 border-0 outline-none resize-none text-tmain bg-transparent mb-3" required />
+      <textarea value={content} onChange={(e) => { setContent(e.target.value); const c = checkContentViolation(e.target.value); setViolation(c.isViolation ? (c.reason || '') : ''); }} placeholder="รายละเอียดบริการ..." rows={8} className="w-full min-w-0 px-3 py-2 border border-primary-dark/15 rounded-xl outline-none resize-y text-tmain bg-transparent mb-3 focus:border-primary focus:ring-2 focus:ring-primary/20" required />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
         <div>

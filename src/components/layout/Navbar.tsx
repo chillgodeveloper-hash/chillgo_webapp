@@ -123,7 +123,6 @@ export default function Navbar() {
 
   const adminMenu = [
     { href: '/feed', label: 'หน้าหลัก' },
-    { href: '/dashboard/admin', label: 'แดชบอร์ด' },
     { href: '/dashboard/admin/bookings', label: 'การจอง' },
     { href: '/dashboard/admin/partners', label: 'พาร์ทเนอร์' },
     { href: '/chat', label: 'แชท' },

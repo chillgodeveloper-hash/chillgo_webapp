@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase-client';
 import { useAuthStore } from '@/hooks/useAuthStore';
 import { X, Calendar, Users, FileText, Send } from 'lucide-react';
 import { Post } from '@/types';
+import FlatpickrInput from '@/components/ui/FlatpickrInput';
 
 interface BookingModalProps {
   post: Post;
@@ -22,6 +23,8 @@ export default function BookingModal({ post, onClose }: BookingModalProps) {
   const { user } = useAuthStore();
   const supabase = createClient();
   const router = useRouter();
+
+  const todayStr = new Date().toISOString().split('T')[0];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -130,13 +133,13 @@ export default function BookingModal({ post, onClose }: BookingModalProps) {
               <label className="text-sm font-medium text-tmain mb-1 flex items-center gap-1.5">
                 <Calendar size={14} /> วันที่เริ่มต้น
               </label>
-              <input
-                type="date"
+              <FlatpickrInput
                 value={date}
-                onChange={(e) => setDate(e.target.value)}
-                min={new Date().toISOString().split('T')[0]}
-                className="w-full px-4 py-3 rounded-xl border border-primary-dark/30 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
-                required
+                onChange={setDate}
+                mode="date"
+                minDate={todayStr}
+                placeholder="เลือกวันที่"
+                className="w-full px-4 py-3 rounded-xl border border-primary-dark/30 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none cursor-pointer bg-white"
               />
             </div>
 
@@ -144,12 +147,13 @@ export default function BookingModal({ post, onClose }: BookingModalProps) {
               <label className="text-sm font-medium text-tmain mb-1 flex items-center gap-1.5">
                 <Calendar size={14} /> วันที่สิ้นสุด (ไม่บังคับ)
               </label>
-              <input
-                type="date"
+              <FlatpickrInput
                 value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                min={date || new Date().toISOString().split('T')[0]}
-                className="w-full px-4 py-3 rounded-xl border border-primary-dark/30 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
+                onChange={setEndDate}
+                mode="date"
+                minDate={date || todayStr}
+                placeholder="เลือกวันที่"
+                className="w-full px-4 py-3 rounded-xl border border-primary-dark/30 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none cursor-pointer bg-white"
               />
             </div>
 
@@ -182,8 +186,8 @@ export default function BookingModal({ post, onClose }: BookingModalProps) {
 
             <button
               type="submit"
-              disabled={loading}
-              className="w-full bg-primary hover:bg-primary-dark text-dark-DEFAULT font-bold py-3.5 rounded-2xl transition flex items-center justify-center gap-2 shadow-lg shadow-primary/30"
+              disabled={loading || !date}
+              className="w-full bg-primary hover:bg-primary-dark text-dark-DEFAULT font-bold py-3.5 rounded-2xl transition flex items-center justify-center gap-2 shadow-lg shadow-primary/30 disabled:opacity-40"
             >
               {loading ? (
                 <div className="w-5 h-5 border-2 border-dark-DEFAULT/30 border-t-dark-DEFAULT rounded-full animate-spin" />

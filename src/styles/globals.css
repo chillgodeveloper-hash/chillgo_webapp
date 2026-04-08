@@ -127,3 +127,103 @@ textarea::placeholder {
   border-radius: 2px;
   margin: 1rem 0;
 }
+
+.flatpickr-calendar {
+  font-family: 'Prompt', sans-serif !important;
+  border: 1px solid #FFD035 !important;
+  border-radius: 1rem !important;
+  box-shadow: 0 8px 24px rgba(255, 208, 53, 0.25) !important;
+  overflow: hidden;
+}
+
+.flatpickr-months {
+  background: #FFDE5B !important;
+  border-radius: 1rem 1rem 0 0 !important;
+}
+
+.flatpickr-months .flatpickr-month {
+  background: #FFDE5B !important;
+  color: #333333 !important;
+  fill: #333333 !important;
+}
+
+.flatpickr-current-month .flatpickr-monthDropdown-months,
+.flatpickr-current-month input.cur-year {
+  color: #333333 !important;
+  font-weight: 600 !important;
+}
+
+.flatpickr-months .flatpickr-prev-month,
+.flatpickr-months .flatpickr-next-month {
+  fill: #333333 !important;
+  color: #333333 !important;
+}
+
+.flatpickr-months .flatpickr-prev-month:hover,
+.flatpickr-months .flatpickr-next-month:hover {
+  background: rgba(255, 152, 0, 0.3) !important;
+  border-radius: 0.5rem !important;
+}
+
+.flatpickr-weekdays {
+  background: #FFDE5B !important;
+}
+
+span.flatpickr-weekday {
+  background: #FFDE5B !important;
+  color: #333333 !important;
+  font-weight: 600 !important;
+  font-size: 0.75rem !important;
+}
+
+.flatpickr-day {
+  color: #333333 !important;
+  border-radius: 0.5rem !important;
+}
+
+.flatpickr-day:hover {
+  background: #FFF4D1 !important;
+  border-color: #FFD035 !important;
+}
+
+.flatpickr-day.selected,
+.flatpickr-day.selected:hover {
+  background: #FF9800 !important;
+  border-color: #FF9800 !important;
+  color: #333333 !important;
+  font-weight: 600 !important;
+}
+
+.flatpickr-day.today {
+  border-color: #FFDE5B !important;
+}
+
+.flatpickr-day.today:hover {
+  background: #FFF4D1 !important;
+}
+
+.flatpickr-day.disabled,
+.flatpickr-day.prevMonthDay,
+.flatpickr-day.nextMonthDay {
+  color: #ccc !important;
+}
+
+.flatpickr-time {
+  border-top: 1px solid #FFD035 !important;
+}
+
+.flatpickr-time input {
+  color: #333333 !important;
+  font-weight: 500 !important;
+}
+
+.flatpickr-time .flatpickr-am-pm {
+  color: #333333 !important;
+}
+
+.flatpickr-time input:hover,
+.flatpickr-time .flatpickr-am-pm:hover,
+.flatpickr-time input:focus,
+.flatpickr-time .flatpickr-am-pm:focus {
+  background: #FFF4D1 !important;
+}

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Search, MapPin, Calendar, Clock, Map, Car } from 'lucide-react';
+import FlatpickrInput from '@/components/ui/FlatpickrInput';
 
 interface SearchHeroProps {
   onSearch: (params: { category: string; location: string; date: string; time: string }) => void;
@@ -21,6 +22,8 @@ export default function SearchHero({ onSearch, compact = false }: SearchHeroProp
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') handleSearch();
   };
+
+  const todayStr = new Date().toISOString().split('T')[0];
 
   if (compact) {
     return (
@@ -47,7 +50,7 @@ export default function SearchHero({ onSearch, compact = false }: SearchHeroProp
         </div>
 
         <div className="relative mt-3">
-          <MapPin size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-tmuted" />
+          <MapPin size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-tmuted z-10" />
           <input
             type="text"
             value={location}
@@ -60,22 +63,24 @@ export default function SearchHero({ onSearch, compact = false }: SearchHeroProp
 
         <div className="grid grid-cols-3 gap-3 mt-3">
           <div className="relative">
-            <Calendar size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-tmuted pointer-events-none" />
-            <input
-              type="date"
+            <Calendar size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-tmuted pointer-events-none z-10" />
+            <FlatpickrInput
               value={date}
-              onChange={(e) => setDate(e.target.value)}
-              min={new Date().toISOString().split('T')[0]}
-              className="w-full h-11 pl-9 pr-2 rounded-xl border border-primary-dark/30 text-sm text-tmain outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+              onChange={setDate}
+              mode="date"
+              minDate={todayStr}
+              placeholder="วันที่"
+              className="w-full h-11 pl-9 pr-2 rounded-xl border border-primary-dark/30 text-sm text-tmain outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 cursor-pointer bg-white"
             />
           </div>
           <div className="relative">
-            <Clock size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-tmuted pointer-events-none" />
-            <input
-              type="time"
+            <Clock size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-tmuted pointer-events-none z-10" />
+            <FlatpickrInput
               value={time}
-              onChange={(e) => setTime(e.target.value)}
-              className="w-full h-11 pl-9 pr-2 rounded-xl border border-primary-dark/30 text-sm text-tmain outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+              onChange={setTime}
+              mode="time"
+              placeholder="เวลา"
+              className="w-full h-11 pl-9 pr-2 rounded-xl border border-primary-dark/30 text-sm text-tmain outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 cursor-pointer bg-white"
             />
           </div>
           <button
@@ -127,7 +132,7 @@ export default function SearchHero({ onSearch, compact = false }: SearchHeroProp
           </div>
 
           <div className="relative mb-3">
-            <MapPin size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-tmuted" />
+            <MapPin size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-tmuted z-10" />
             <input
               type="text"
               value={location}
@@ -140,28 +145,24 @@ export default function SearchHero({ onSearch, compact = false }: SearchHeroProp
 
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
             <div className="relative">
-              <Calendar size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-tmuted pointer-events-none" />
-              <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
-                <span className="text-[10px] text-tmuted bg-primary-light px-1.5 py-0.5 rounded">วันที่ใช้บริการ</span>
-              </div>
-              <input
-                type="date"
+              <Calendar size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-tmuted pointer-events-none z-10" />
+              <FlatpickrInput
                 value={date}
-                onChange={(e) => setDate(e.target.value)}
-                min={new Date().toISOString().split('T')[0]}
-                className="w-full h-12 pl-10 pr-24 rounded-xl border border-primary-dark/30 text-sm text-tmain outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                onChange={setDate}
+                mode="date"
+                minDate={todayStr}
+                placeholder="วันที่ใช้บริการ"
+                className="w-full h-12 pl-10 pr-3 rounded-xl border border-primary-dark/30 text-sm text-tmain outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 cursor-pointer bg-white"
               />
             </div>
             <div className="relative">
-              <Clock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-tmuted pointer-events-none" />
-              <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
-                <span className="text-[10px] text-tmuted bg-primary-light px-1.5 py-0.5 rounded">เวลา</span>
-              </div>
-              <input
-                type="time"
+              <Clock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-tmuted pointer-events-none z-10" />
+              <FlatpickrInput
                 value={time}
-                onChange={(e) => setTime(e.target.value)}
-                className="w-full h-12 pl-10 pr-14 rounded-xl border border-primary-dark/30 text-sm text-tmain outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                onChange={setTime}
+                mode="time"
+                placeholder="เวลา"
+                className="w-full h-12 pl-10 pr-3 rounded-xl border border-primary-dark/30 text-sm text-tmain outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 cursor-pointer bg-white"
               />
             </div>
             <button
