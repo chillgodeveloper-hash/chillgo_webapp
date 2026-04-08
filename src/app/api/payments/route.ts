@@ -29,7 +29,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Booking not found or not confirmed' }, { status: 404 });
     }
 
-    const paymentIntent = await createPaymentIntent(amount, bookingId);
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('email')
+      .eq('id', session.user.id)
+      .single();
+
+    const paymentIntent = await createPaymentIntent(
+      amount,
+      bookingId,
+      profile?.email || session.user.email || ''
+    );
 
     await supabase
       .from('bookings')

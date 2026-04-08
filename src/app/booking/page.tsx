@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase-client';
 import { useAuthStore } from '@/hooks/useAuthStore';
 import AppLayout from '@/components/layout/AppLayout';
-import { Calendar, Clock, MapPin, MessageCircle, CreditCard, CheckCircle, XCircle, AlertCircle, Star, Play } from 'lucide-react';
+import { Calendar, Clock, MapPin, MessageCircle, CreditCard, CheckCircle, XCircle, AlertCircle, Star, Play, Receipt } from 'lucide-react';
 import { Booking } from '@/types';
 import Link from 'next/link';
 import ReviewModal from '@/components/review/ReviewModal';
@@ -219,7 +219,7 @@ export default function BookingPage() {
                         <MessageCircle size={16} /> แชท
                       </Link>
                     )}
-                    {booking.status === 'confirmed' && (
+                    {booking.status === 'confirmed' && user?.role === 'customer' && (
                       <Link
                         href={`/booking/${booking.id}/pay`}
                         className="flex-1 bg-primary hover:bg-primary-dark text-tmain font-medium py-2 rounded-xl text-sm text-center flex items-center justify-center gap-1.5 transition"
@@ -227,6 +227,14 @@ export default function BookingPage() {
                         <CreditCard size={16} /> ชำระเงิน
                       </Link>
                     )}
+                    {['paid', 'in_progress', 'completed'].includes(booking.status) && (
+                      <Link
+                        href={`/booking/${booking.id}/receipt`}
+                        className="flex-1 bg-primary-light text-tmain font-medium py-2 rounded-xl text-sm text-center flex items-center justify-center gap-1.5 hover:bg-primary/30 transition"
+                      >
+                        <Receipt size={16} /> ใบเสร็จ
+                      </Link>
+                    )}}
                     {booking.status === 'paid' && user?.role === 'partner' && (
                       <button
                         onClick={async () => {
