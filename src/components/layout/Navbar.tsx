@@ -110,6 +110,8 @@ export default function Navbar() {
 
   const customerMenu = [
     { href: '/feed', label: 'หน้าหลัก' },
+    { href: '/flights', label: 'เที่ยวบิน' },
+    { href: '/hotels', label: 'โรงแรม' },
     { href: '/booking', label: 'การจอง' },
     { href: '/chat', label: 'ข้อความ' },
   ];

@@ -12,6 +12,7 @@ import Footer from '@/components/layout/Footer';
 import { Post } from '@/types';
 import { ArrowUpDown } from 'lucide-react';
 import SearchFilter, { defaultFilters } from '@/components/feed/SearchFilter';
+import TravelPreview from '@/components/feed/TravelPreview';
 
 export default function FeedPage() {
   const [posts, setPosts] = useState<Post[]>([]);
@@ -148,6 +149,8 @@ export default function FeedPage() {
               </div>
             </div>
           </div>
+
+          <TravelPreview />
 
           <Footer />
         </>
