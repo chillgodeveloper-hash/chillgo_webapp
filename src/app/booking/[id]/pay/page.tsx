@@ -51,7 +51,7 @@ export default function PaymentPage() {
             .from('receipts')
             .select('*')
             .eq('booking_id', data.id)
-            .single();
+            .maybeSingle();
           if (receiptData) setReceipt(receiptData);
         }
       }
@@ -61,7 +61,7 @@ export default function PaymentPage() {
   }, [id]);
 
   const createPI = useCallback(async () => {
-    if (!booking || clientSecret) return;
+    if (!booking) return;
     try {
       const res = await fetch('/api/payments', {
         method: 'POST',
@@ -74,7 +74,7 @@ export default function PaymentPage() {
     } catch (err: any) {
       setError(err.message || 'ไม่สามารถสร้างรายการชำระเงินได้');
     }
-  }, [booking, clientSecret]);
+  }, [booking]);
 
   useEffect(() => {
     if (booking && booking.status === 'confirmed' && !clientSecret) {
@@ -165,17 +165,36 @@ export default function PaymentPage() {
         if (!cardElement) throw new Error('Card element not found');
 
         result = await stripe.confirmCardPayment(clientSecret, {
-          payment_method: { card: cardElement },
+          payment_method: {
+            card: cardElement,
+            billing_details: {
+              email: user?.email || '',
+              name: user?.full_name || '',
+            },
+          },
         });
       } else if (activeTab === 'promptpay') {
         result = await stripe.confirmPromptPayPayment(clientSecret, {
-          payment_method: {},
+          payment_method: {
+            billing_details: {
+              email: user?.email || '',
+              name: user?.full_name || '',
+            },
+          },
           return_url: `${window.location.origin}/booking/${booking.id}/pay?status=complete`,
         });
       }
 
       if (result?.error) {
-        throw new Error(result.error.message);
+        if (result.error.code === 'payment_intent_unexpected_state') {
+          setClientSecret('');
+          setError('เซสชั่นหมดอายุ กรุณากดชำระเงินอีกครั้ง');
+          setTimeout(() => createPI(), 500);
+        } else {
+          setError(result.error.message || 'เกิดข้อผิดพลาด');
+        }
+        setPaying(false);
+        return;
       }
 
       if (result?.paymentIntent?.status === 'succeeded') {
@@ -184,16 +203,19 @@ export default function PaymentPage() {
           .update({ status: 'paid', stripe_payment_intent_id: result.paymentIntent.id })
           .eq('id', booking.id);
 
-        const { data: receiptData } = await supabase
-          .from('receipts')
-          .select('*')
-          .eq('booking_id', booking.id)
-          .maybeSingle();
-
-        if (receiptData) setReceipt(receiptData);
         setPaid(true);
+
+        setTimeout(async () => {
+          const { data: receiptData } = await supabase
+            .from('receipts')
+            .select('*')
+            .eq('booking_id', booking.id)
+            .maybeSingle();
+          if (receiptData) setReceipt(receiptData);
+        }, 3000);
       } else if (result?.paymentIntent?.status === 'requires_action') {
-        setError('กรุณาสแกน QR Code เพื่อชำระเงิน');
+        setPaying(false);
+        return;
       }
     } catch (err: any) {
       setError(err.message || 'เกิดข้อผิดพลาด');
@@ -203,7 +225,7 @@ export default function PaymentPage() {
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    if (params.get('status') === 'complete' && params.get('payment_intent')) {
+    if (params.get('status') === 'complete') {
       setPaid(true);
       const fetchReceipt = async () => {
         const { data } = await supabase
@@ -213,7 +235,7 @@ export default function PaymentPage() {
           .maybeSingle();
         if (data) setReceipt(data);
       };
-      setTimeout(fetchReceipt, 2000);
+      setTimeout(fetchReceipt, 3000);
     }
   }, []);
 
@@ -320,6 +342,16 @@ export default function PaymentPage() {
               <div className="p-6 text-center">
                 <p className="text-tmuted text-sm mb-4">กำลังสร้างใบเสร็จ...</p>
                 <div className="w-8 h-8 border-2 border-primary-dark/30 border-t-secondary rounded-full animate-spin mx-auto" />
+                <p className="text-xs text-tmuted mt-3">Webhook กำลังประมวลผล อาจใช้เวลาสักครู่</p>
+                <button
+                  onClick={async () => {
+                    const { data } = await supabase.from('receipts').select('*').eq('booking_id', booking?.id).maybeSingle();
+                    if (data) setReceipt(data);
+                  }}
+                  className="mt-3 text-sm text-tmuted hover:text-tmain hover:bg-primary/20 px-4 py-1.5 rounded-lg transition"
+                >
+                  ลองโหลดใหม่
+                </button>
                 <div className="flex gap-2 mt-6">
                   <button onClick={() => router.push(`/chat/${booking?.id}`)} className="flex-1 bg-primary hover:bg-primary-dark text-tmain font-semibold py-3 rounded-xl transition">
                     เริ่มแชท

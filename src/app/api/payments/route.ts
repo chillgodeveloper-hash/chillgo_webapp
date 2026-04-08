@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createPaymentIntent } from '@/lib/stripe';
+import { stripe, createPaymentIntent } from '@/lib/stripe';
 import { createServerSupabase } from '@/lib/supabase-server';
 
 export async function POST(request: NextRequest) {
@@ -35,11 +35,21 @@ export async function POST(request: NextRequest) {
       .eq('id', session.user.id)
       .single();
 
-    const paymentIntent = await createPaymentIntent(
-      amount,
-      bookingId,
-      profile?.email || session.user.email || ''
-    );
+    const customerEmail = profile?.email || session.user.email || '';
+
+    if (booking.stripe_payment_intent_id) {
+      try {
+        const existingPI = await stripe.paymentIntents.retrieve(booking.stripe_payment_intent_id);
+        if (existingPI.status === 'requires_payment_method' || existingPI.status === 'requires_confirmation') {
+          return NextResponse.json({
+            clientSecret: existingPI.client_secret,
+            paymentIntentId: existingPI.id,
+          });
+        }
+      } catch {}
+    }
+
+    const paymentIntent = await createPaymentIntent(amount, bookingId, customerEmail);
 
     await supabase
       .from('bookings')
