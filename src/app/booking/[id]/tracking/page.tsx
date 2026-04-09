@@ -95,7 +95,7 @@ function LeafletMap({ locations, partnerName }: { locations: LocationPoint[]; pa
   }, [initMap]);
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    if (typeof window === 'undefined' || !loaded) return;
     const Leaf = (window as any).L;
     if (!Leaf || !mapInstanceRef.current || locations.length === 0) return;
 
@@ -137,7 +137,7 @@ function LeafletMap({ locations, partnerName }: { locations: LocationPoint[]; pa
 
     map.setView([last.latitude, last.longitude], map.getZoom(), { animate: true });
 
-  }, [locations, partnerName]);
+  }, [locations, partnerName, loaded]);
 
   return (
     <div className="relative w-full h-[400px] md:h-[500px] rounded-2xl overflow-hidden border border-primary-dark/20 bg-white">
