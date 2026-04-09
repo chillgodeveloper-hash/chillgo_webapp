@@ -50,6 +50,18 @@ function FormSelect({ label, name, options, value, onChange }: { label: string; 
   );
 }
 
+function CheckboxGrid({ items, selected, onToggle }: { items: string[]; selected: string[]; onToggle: (item: string) => void }) {
+  return (
+    <div className="grid grid-cols-2 gap-2">
+      {items.map(item => (
+        <button key={item} type="button" onClick={() => onToggle(item)}
+          className={`p-2.5 rounded-xl border text-xs text-left transition ${selected.includes(item) ? 'border-primary bg-primary/20 font-medium' : 'border-primary-dark/20 hover:bg-primary/10'}`}
+        >{item}</button>
+      ))}
+    </div>
+  );
+}
+
 type FormData = Record<string, any>;
 
 export default function PartnerSetupPage() {
@@ -236,24 +248,6 @@ export default function PartnerSetupPage() {
 
   if (pageLoading) return <div className="min-h-screen bg-primary-light flex items-center justify-center"><Loader2 size={40} className="text-secondary animate-spin" /></div>;
 
-  const I = (props: { label: string; name: string; placeholder?: string; type?: string; rows?: number }) => (
-    <FormInput {...props} value={form[props.name] || ''} onChange={update} />
-  );
-
-  const Sel = (props: { label: string; name: string; options: string[] }) => (
-    <FormSelect {...props} value={form[props.name] || ''} onChange={update} />
-  );
-
-  const CheckboxGrid = ({ items, stateKey }: { items: string[]; stateKey: string }) => (
-    <div className="grid grid-cols-2 gap-2">
-      {items.map(item => (
-        <button key={item} type="button" onClick={() => toggleArray(stateKey, item)}
-          className={`p-2.5 rounded-xl border text-xs text-left transition ${(form[stateKey] as string[]).includes(item) ? 'border-primary bg-primary/20 font-medium' : 'border-primary-dark/20 hover:bg-primary/10'}`}
-        >{item}</button>
-      ))}
-    </div>
-  );
-
   const categoryLabel = category === 'guide' ? 'ไกด์นำเที่ยว' : category === 'driver' ? 'คนขับรถ' : 'ล่าม / นักแปล';
 
   return (
@@ -291,49 +285,40 @@ export default function PartnerSetupPage() {
                 </div>
               </div>
               <div className="space-y-3">
-                <I label="ชื่อธุรกิจ / ชื่อบริการ" name="business_name" />
+                <FormInput label="ชื่อธุรกิจ / ชื่อบริการ" name="business_name" value={form["business_name"] || ''} onChange={update} />
                 <div className="grid grid-cols-2 gap-3">
-                  <I label="ชื่อ-นามสกุล (ไทย)" name="full_name_th" />
-                  <I label="Name (English)" name="full_name_en" />
+                  <FormInput label="ชื่อ-นามสกุล (ไทย)" name="full_name_th" value={form["full_name_th"] || ''} onChange={update} />
+                  <FormInput label="Name (English)" name="full_name_en" value={form["full_name_en"] || ''} onChange={update} />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
-                  <I label="ชื่อเล่น" name="nickname" />
-                  <I label="อายุ" name="age" type="number" />
+                  <FormInput label="ชื่อเล่น" name="nickname" value={form["nickname"] || ''} onChange={update} />
+                  <FormInput label="อายุ" name="age" type="number" value={form["age"] || ''} onChange={update} />
                 </div>
-                {category !== 'driver' && (
-                  <I label="สัญชาติ" name="nationality" />
-                )}
                 <div className="grid grid-cols-2 gap-3">
-                  <I label="เลขบัตรประชาชน" name="id_number" />
-                  <I label="วันเกิด" name="date_of_birth" type="date" />
+                  <FormInput label="เลขบัตรประชาชน" name="id_number" value={form["id_number"] || ''} onChange={update} />
+                  <FormInput label="วันเกิด" name="date_of_birth" type="date" value={form["date_of_birth"] || ''} onChange={update} />
                 </div>
                 {category === 'guide' && (
                   <div className="grid grid-cols-2 gap-3">
-                    <I label="เลขใบอนุญาตไกด์" name="guide_license_no" />
-                    <I label="ประเภทใบอนุญาต" name="guide_license_type" />
+                    <FormInput label="เลขใบอนุญาตไกด์" name="guide_license_no" value={form["guide_license_no"] || ''} onChange={update} />
+                    <FormInput label="ประเภทใบอนุญาต" name="guide_license_type" value={form["guide_license_type"] || ''} onChange={update} />
                   </div>
                 )}
                 {category === 'translator' && (
                   <div className="grid grid-cols-2 gap-3">
-                    <I label="Passport No. (ถ้ามี)" name="passport_no" />
-                    <I label="ระดับการศึกษา" name="education_level" />
+                    <FormInput label="Passport No. (ถ้ามี)" name="passport_no" value={form["passport_no"] || ''} onChange={update} />
+                    <FormInput label="ระดับการศึกษา" name="education_level" value={form["education_level"] || ''} onChange={update} />
                   </div>
                 )}
                 <div className="grid grid-cols-2 gap-3">
-                  <I label="เบอร์โทรศัพท์" name="phone" />
-                  <I label="LINE ID" name="line_id" />
+                  <FormInput label="เบอร์โทรศัพท์" name="phone" value={form["phone"] || ''} onChange={update} />
+                  <FormInput label="LINE ID" name="line_id" value={form["line_id"] || ''} onChange={update} />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
-                  <I label="WeChat ID" name="wechat_id" />
-                  <I label="Email" name="contact_email" type="email" />
+                  <FormInput label="WeChat ID" name="wechat_id" value={form["wechat_id"] || ''} onChange={update} />
+                  <FormInput label="Email" name="contact_email" type="email" value={form["contact_email"] || ''} onChange={update} />
                 </div>
-                <I label="ที่อยู่ปัจจุบัน" name="address" rows={3} />
-                {category !== 'driver' && (
-                  <div className="grid grid-cols-2 gap-3">
-                    <I label="จังหวัด" name="province" />
-                    <I label="รหัสไปรษณีย์" name="postcode" />
-                  </div>
-                )}
+                <FormInput label="ที่อยู่ปัจจุบัน" name="address" rows={3} value={form["address"] || ''} onChange={update} />
               </div>
             </>
           )}
@@ -355,22 +340,22 @@ export default function PartnerSetupPage() {
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
-                  <I label="เลขที่ใบขับขี่" name="driving_license_no" />
-                  <I label="วันหมดอายุ" name="driving_license_expiry" type="date" />
+                  <FormInput label="เลขที่ใบขับขี่" name="driving_license_no" value={form["driving_license_no"] || ''} onChange={update} />
+                  <FormInput label="วันหมดอายุ" name="driving_license_expiry" type="date" value={form["driving_license_expiry"] || ''} onChange={update} />
                 </div>
                 <hr className="border-primary-dark/10 my-2" />
                 <p className="text-sm font-semibold text-tmain">ข้อมูลรถ</p>
                 <div className="grid grid-cols-2 gap-3">
-                  <I label="ยี่ห้อ / รุ่น" name="vehicle_brand" />
-                  <I label="สีรถ" name="vehicle_color" />
+                  <FormInput label="ยี่ห้อ / รุ่น" name="vehicle_brand" value={form["vehicle_brand"] || ''} onChange={update} />
+                  <FormInput label="สีรถ" name="vehicle_color" value={form["vehicle_color"] || ''} onChange={update} />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
-                  <I label="เลขทะเบียนรถ" name="vehicle_plate" />
-                  <I label="จังหวัด (ทะเบียน)" name="vehicle_plate_province" />
+                  <FormInput label="เลขทะเบียนรถ" name="vehicle_plate" value={form["vehicle_plate"] || ''} onChange={update} />
+                  <FormInput label="จังหวัด (ทะเบียน)" name="vehicle_plate_province" value={form["vehicle_plate_province"] || ''} onChange={update} />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
-                  <I label="ปีจดทะเบียน" name="vehicle_year" type="number" />
-                  <I label="จำนวนที่นั่ง" name="vehicle_seats" type="number" />
+                  <FormInput label="ปีจดทะเบียน" name="vehicle_year" type="number" value={form["vehicle_year"] || ''} onChange={update} />
+                  <FormInput label="จำนวนที่นั่ง" name="vehicle_seats" type="number" value={form["vehicle_seats"] || ''} onChange={update} />
                 </div>
                 <div>
                   <label className="text-sm font-medium text-tmain mb-2 block">ประเภทป้ายทะเบียน</label>
@@ -389,8 +374,8 @@ export default function PartnerSetupPage() {
                   )}
                 </div>
                 <div className="grid grid-cols-2 gap-3">
-                  <I label="สถานะ พ.ร.บ." name="vehicle_insurance_compulsory" placeholder="เช่น มี / อยู่ระหว่างต่อ" />
-                  <I label="วันสิ้นสุด พ.ร.บ." name="vehicle_insurance_compulsory_expiry" type="date" />
+                  <FormInput label="สถานะ พ.ร.บ." name="vehicle_insurance_compulsory" placeholder="เช่น มี / อยู่ระหว่างต่อ" value={form["vehicle_insurance_compulsory"] || ''} onChange={update} />
+                  <FormInput label="วันสิ้นสุด พ.ร.บ." name="vehicle_insurance_compulsory_expiry" type="date" value={form["vehicle_insurance_compulsory_expiry"] || ''} onChange={update} />
                 </div>
               </div>
             </>
@@ -400,17 +385,17 @@ export default function PartnerSetupPage() {
             <>
               <h2 className="font-bold text-lg text-tmain mb-4">ความเชี่ยวชาญด้านการแปล</h2>
               <div className="space-y-3">
-                <I label="สาขาวิชา / Major" name="education_major" />
+                <FormInput label="สาขาวิชา / Major" name="education_major" value={form["education_major"] || ''} onChange={update} />
                 <div>
                   <label className="text-sm font-medium text-tmain mb-2 block">หมวดงานที่เชี่ยวชาญ</label>
-                  <CheckboxGrid items={TRANSLATOR_SPECS} stateKey="translation_specializations" />
+                  <CheckboxGrid items={TRANSLATOR_SPECS} selected={form["translation_specializations"] as string[]} onToggle={(item) => toggleArray("translation_specializations", item)} />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
-                  <I label="จำนวนคำเฉลี่ยต่อวัน" name="daily_capacity" placeholder="เช่น 3000 คำ" />
-                  <I label="ราคาเริ่มต้น (ต่อคำ/หน้า)" name="rate_per_word" placeholder="เช่น 1.5 บาท/คำ" />
+                  <FormInput label="จำนวนคำเฉลี่ยต่อวัน" name="daily_capacity" placeholder="เช่น 3000 คำ" value={form["daily_capacity"] || ''} onChange={update} />
+                  <FormInput label="ราคาเริ่มต้น (ต่อคำ/หน้า)" name="rate_per_word" placeholder="เช่น 1.5 บาท/คำ" value={form["rate_per_word"] || ''} onChange={update} />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
-                  <I label="เวลาทำงานที่ถนัด" name="working_hours" placeholder="เช่น 9:00-18:00" />
+                  <FormInput label="เวลาทำงานที่ถนัด" name="working_hours" placeholder="เช่น 9:00-18:00" value={form["working_hours"] || ''} onChange={update} />
                   <div>
                     <label className="text-sm font-medium text-tmain mb-1 block">รับงานด่วน?</label>
                     <button type="button" onClick={() => update('rush_job_available', !form.rush_job_available)} className={`w-full px-4 py-3 rounded-xl border text-sm transition ${form.rush_job_available ? 'border-primary bg-primary/20 font-medium' : 'border-primary-dark/30'}`}>
@@ -437,7 +422,7 @@ export default function PartnerSetupPage() {
                   </div>
                 ))}
                 <div className="grid grid-cols-2 gap-3">
-                  <I label="ภาษาอื่นๆ (ระบุ)" name="other_language" placeholder="เช่น ภาษาญี่ปุ่น" />
+                  <FormInput label="ภาษาอื่นๆ (ระบุ)" name="other_language" placeholder="เช่น ภาษาญี่ปุ่น" value={form["other_language"] || ''} onChange={update} />
                   <div>
                     <label className="text-sm font-medium text-tmain mb-1 block">ระดับ</label>
                     <div className="flex gap-1">
@@ -459,11 +444,11 @@ export default function PartnerSetupPage() {
               <div className="space-y-4">
                 <div>
                   <p className="text-sm font-medium text-tmain mb-2">{category === 'guide' ? 'สไตล์การนำเที่ยว' : 'สไตล์การบริการ'}</p>
-                  <CheckboxGrid items={category === 'guide' ? GUIDE_STYLES : DRIVER_STYLES} stateKey="service_styles" />
+                  <CheckboxGrid items={category === 'guide' ? GUIDE_STYLES : DRIVER_STYLES} selected={form["service_styles"] as string[]} onToggle={(item) => toggleArray("service_styles", item)} />
                 </div>
                 <div>
                   <p className="text-sm font-medium text-tmain mb-2">ทักษะพิเศษ</p>
-                  <CheckboxGrid items={category === 'guide' ? GUIDE_SKILLS : DRIVER_SKILLS} stateKey="skills" />
+                  <CheckboxGrid items={category === 'guide' ? GUIDE_SKILLS : DRIVER_SKILLS} selected={form["skills"] as string[]} onToggle={(item) => toggleArray("skills", item)} />
                 </div>
                 <div>
                   <label className="text-sm font-medium text-tmain mb-1 block">{category === 'guide' ? 'เส้นทาง / Hidden Gem ที่เชี่ยวชาญ' : 'เส้นทางที่เชี่ยวชาญ'}</label>
@@ -488,7 +473,7 @@ export default function PartnerSetupPage() {
                   </div>
                 ))}
                 <div className="grid grid-cols-2 gap-3">
-                  <I label="ภาษาอื่นๆ (ระบุ)" name="other_language" placeholder="เช่น ภาษาญี่ปุ่น" />
+                  <FormInput label="ภาษาอื่นๆ (ระบุ)" name="other_language" placeholder="เช่น ภาษาญี่ปุ่น" value={form["other_language"] || ''} onChange={update} />
                   <div>
                     <label className="text-sm font-medium text-tmain mb-1 block">ระดับ</label>
                     <div className="flex gap-1">
@@ -500,7 +485,7 @@ export default function PartnerSetupPage() {
                 </div>
                 <hr className="border-primary-dark/10" />
                 <p className="text-sm font-semibold text-tmain">ทักษะพิเศษเพิ่มเติม</p>
-                <CheckboxGrid items={TRANSLATOR_SKILLS} stateKey="skills" />
+                <CheckboxGrid items={TRANSLATOR_SKILLS} selected={form["skills"] as string[]} onToggle={(item) => toggleArray("skills", item)} />
               </div>
             </>
           )}
@@ -511,16 +496,16 @@ export default function PartnerSetupPage() {
               <p className="text-xs text-amber-600 bg-amber-50 rounded-xl p-3 mb-4">⚠ ชื่อบัญชีต้องตรงกับชื่อผู้สมัครเท่านั้น</p>
               <div className="space-y-3">
                 <div className="grid grid-cols-2 gap-3">
-                  <I label="ชื่อธนาคาร" name="bank_name" />
-                  <I label="สาขา" name="bank_branch" />
+                  <FormInput label="ชื่อธนาคาร" name="bank_name" value={form["bank_name"] || ''} onChange={update} />
+                  <FormInput label="สาขา" name="bank_branch" value={form["bank_branch"] || ''} onChange={update} />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
-                  <I label="ชื่อบัญชี" name="account_name" />
-                  <I label="เลขที่บัญชี" name="account_number" />
+                  <FormInput label="ชื่อบัญชี" name="account_name" value={form["account_name"] || ''} onChange={update} />
+                  <FormInput label="เลขที่บัญชี" name="account_number" value={form["account_number"] || ''} onChange={update} />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
-                  <Sel label="ประเภทบัญชี" name="account_type" options={ACCOUNT_TYPES} />
-                  <I label="PromptPay / พร้อมเพย์" name="promptpay" />
+                  <FormSelect label="ประเภทบัญชี" name="account_type" options={ACCOUNT_TYPES} value={form["account_type"] || ''} onChange={update} />
+                  <FormInput label="PromptPay / พร้อมเพย์" name="promptpay" value={form["promptpay"] || ''} onChange={update} />
                 </div>
                 {category === 'driver' && (
                   <>
