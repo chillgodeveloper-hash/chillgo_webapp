@@ -166,7 +166,7 @@ export default function AdminBookingsPage() {
                 <label className="text-sm font-medium text-tmain mb-1 block">พาร์ทเนอร์</label>
                 <select value={editForm.partner_id} onChange={(e) => setEditForm({ ...editForm, partner_id: e.target.value })} className="w-full h-12 px-3 rounded-xl border border-primary-dark/30 text-sm text-tmain outline-none focus:border-primary">
                   <option value="">เลือกพาร์ทเนอร์</option>
-                  {partners.map((p) => <option key={p.user_id} value={p.user_id}>{p.business_name} ({p.category === 'guide' ? 'ไกด์' : 'รถเช่า'})</option>)}
+                  {partners.map((p) => <option key={p.user_id} value={p.user_id}>{p.business_name} ({p.category === 'guide' ? 'ไกด์' : p.category === 'driver' ? 'คนขับรถ' : 'ล่าม'})</option>)}
                 </select>
               </div>
               <div className="grid grid-cols-2 gap-3">

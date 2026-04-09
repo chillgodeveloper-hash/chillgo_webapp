@@ -39,12 +39,20 @@ export default function SearchHero({ onSearch, compact = false }: SearchHeroProp
               <Map size={14} className="inline mr-1.5" />ไกด์
             </button>
             <button
-              onClick={() => setCategory('car_rental')}
+              onClick={() => setCategory('driver')}
               className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
-                category === 'car_rental' ? 'bg-secondary text-tmain shadow-sm' : 'text-tmain hover:bg-primary/30'
+                category === 'driver' ? 'bg-secondary text-tmain shadow-sm' : 'text-tmain hover:bg-primary/30'
               }`}
             >
-              <Car size={14} className="inline mr-1.5" />รถเช่า
+              <Car size={14} className="inline mr-1.5" />คนขับรถ
+            </button>
+            <button
+              onClick={() => setCategory('translator')}
+              className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+                category === 'translator' ? 'bg-secondary text-tmain shadow-sm' : 'text-tmain hover:bg-primary/30'
+              }`}
+            >
+              🌐 ล่าม
             </button>
           </div>
         </div>
@@ -106,7 +114,7 @@ export default function SearchHero({ onSearch, compact = false }: SearchHeroProp
           จัดทริปง่าย ๆ สไตล์คุณ
         </h1>
         <p className="text-tmuted text-sm md:text-lg mb-6 md:mb-8">
-          ค้นหาไกด์มืออาชีพ และรถเช่าคุณภาพ สำหรับทริปในฝัน
+          ค้นหาไกด์ คนขับรถ และล่ามมืออาชีพ สำหรับทริปในฝัน
         </p>
 
         <div className="bg-white rounded-2xl p-4 md:p-6 shadow-xl border border-primary-dark/20 w-full">
@@ -121,12 +129,20 @@ export default function SearchHero({ onSearch, compact = false }: SearchHeroProp
                 <Map size={16} /> ไกด์ท่องเที่ยว
               </button>
               <button
-                onClick={() => setCategory('car_rental')}
+                onClick={() => setCategory('driver')}
                 className={`px-4 md:px-6 py-2 md:py-2.5 rounded-lg text-sm font-semibold transition-all flex items-center gap-1.5 ${
-                  category === 'car_rental' ? 'bg-secondary text-tmain shadow-sm' : 'text-tmain hover:bg-primary/30'
+                  category === 'driver' ? 'bg-secondary text-tmain shadow-sm' : 'text-tmain hover:bg-primary/30'
                 }`}
               >
-                <Car size={16} /> รถเช่า
+                <Car size={16} /> คนขับรถ
+              </button>
+              <button
+                onClick={() => setCategory('translator')}
+                className={`px-4 md:px-6 py-2 md:py-2.5 rounded-lg text-sm font-semibold transition-all flex items-center gap-1.5 ${
+                  category === 'translator' ? 'bg-secondary text-tmain shadow-sm' : 'text-tmain hover:bg-primary/30'
+                }`}
+              >
+                🌐 ล่าม
               </button>
             </div>
           </div>

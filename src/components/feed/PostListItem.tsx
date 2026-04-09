@@ -15,7 +15,7 @@ export default function PostListItem({ post, onBook }: PostListItemProps) {
   const [liked, setLiked] = useState(false);
   const partner = post.partner_profile;
   const image = post.media_urls?.[0];
-  const categoryLabel = post.category === 'guide' ? '🗺️ ไกด์' : '🚗 รถเช่า';
+  const categoryLabel = post.category === 'guide' ? '🗺️ ไกด์' : post?.category === 'driver' ? '🚗 คนขับรถ' : '🌐 ล่าม';
 
   return (
     <div className="bg-white rounded-2xl border border-primary-dark/20 overflow-hidden hover:border-primary transition-colors animate-slide-up flex flex-col md:flex-row">

@@ -13,7 +13,8 @@ export default function Footer() {
             <h4 className="font-semibold text-tmain mb-3 text-sm">บริการ</h4>
             <div className="space-y-2">
               <Link href="/feed?category=guide" className="block text-sm text-tmuted hover:bg-primary/20 px-2 py-1 rounded transition">ไกด์ท่องเที่ยว</Link>
-              <Link href="/feed?category=car_rental" className="block text-sm text-tmuted hover:bg-primary/20 px-2 py-1 rounded transition">รถเช่า</Link>
+              <Link href="/feed?category=driver" className="block text-sm text-tmuted hover:bg-primary/20 px-2 py-1 rounded transition">คนขับรถ</Link>
+              <Link href="/feed?category=translator" className="block text-sm text-tmuted hover:bg-primary/20 px-2 py-1 rounded transition">ล่าม / นักแปล</Link>
             </div>
           </div>
           <div>

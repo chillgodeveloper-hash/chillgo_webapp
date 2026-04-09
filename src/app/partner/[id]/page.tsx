@@ -105,7 +105,7 @@ export default function PartnerProfilePage() {
                 <p className="text-sm text-tmain/70">{partner.profile?.full_name}</p>
                 <div className="flex items-center gap-3 mt-1">
                   <span className="text-xs bg-white/30 px-2 py-0.5 rounded-full text-tmain">
-                    {partner.category === 'guide' ? '🗺️ ไกด์' : '🚗 รถเช่า'}
+                    {partner.category === 'guide' ? '🗺️ ไกด์' : post?.category === 'driver' ? '🚗 คนขับรถ' : '🌐 ล่าม'}
                   </span>
                   {partner.rating > 0 && (
                     <span className="flex items-center gap-1 text-sm text-tmain">
@@ -178,7 +178,7 @@ export default function PartnerProfilePage() {
                         <div className="flex-1 min-w-0">
                           <p className="font-medium text-tmain text-sm">{wh.post?.title}</p>
                           <div className="flex flex-wrap gap-2 text-xs text-tmuted mt-1">
-                            <span>{wh.post?.category === 'guide' ? '🗺️ ไกด์' : '🚗 รถเช่า'}</span>
+                            <span>{wh.post?.category === 'guide' ? '🗺️ ไกด์' : post?.category === 'driver' ? '🚗 คนขับรถ' : '🌐 ล่าม'}</span>
                             {wh.post?.location && <span className="flex items-center gap-0.5"><MapPin size={10} /> {wh.post.location}</span>}
                             <span className="flex items-center gap-0.5"><Calendar size={10} /> {new Date(wh.completed_at).toLocaleDateString('th-TH')}</span>
                           </div>

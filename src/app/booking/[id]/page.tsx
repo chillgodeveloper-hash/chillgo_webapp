@@ -96,7 +96,7 @@ export default function BookingDetailPage() {
                 <img src={image} alt={post?.title || ''} className="w-full h-full object-cover" />
                 <div className="absolute top-3 left-3">
                   <span className="bg-white/90 text-tmain text-xs font-medium px-2.5 py-1 rounded-full">
-                    {post?.category === 'guide' ? '🗺️ ไกด์' : '🚗 รถเช่า'}
+                    {post?.category === 'guide' ? '🗺️ ไกด์' : post?.category === 'driver' ? '🚗 คนขับรถ' : '🌐 ล่าม'}
                   </span>
                 </div>
                 <div className="absolute top-3 right-3">
@@ -108,7 +108,7 @@ export default function BookingDetailPage() {
             {!image && (
               <div className="p-4 flex items-center justify-between">
                 <span className="text-xs bg-primary/20 px-2.5 py-1 rounded-full text-tmain">
-                  {post?.category === 'guide' ? '🗺️ ไกด์' : '🚗 รถเช่า'}
+                  {post?.category === 'guide' ? '🗺️ ไกด์' : post?.category === 'driver' ? '🚗 คนขับรถ' : '🌐 ล่าม'}
                 </span>
                 <span className={`text-xs px-3 py-1 rounded-full font-medium ${status.color}`}>{status.label}</span>
               </div>

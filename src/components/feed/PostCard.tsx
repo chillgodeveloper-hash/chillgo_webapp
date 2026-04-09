@@ -18,7 +18,7 @@ export default function PostCard({ post, onBook }: PostCardProps) {
   const images = post.media_urls.filter((_, i) => post.media_types[i] === 'image');
   const videos = post.media_urls.filter((_, i) => post.media_types[i] === 'video');
 
-  const categoryLabel = post.category === 'guide' ? '🗺️ ไกด์' : '🚗 รถเช่า';
+  const categoryLabel = post.category === 'guide' ? '🗺️ ไกด์' : post?.category === 'driver' ? '🚗 คนขับรถ' : '🌐 ล่าม';
   const categoryColor = post.category === 'guide' ? 'bg-secondary/10 text-secondary' : 'bg-info/10 text-info';
 
   return (

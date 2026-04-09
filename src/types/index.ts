@@ -1,6 +1,6 @@
 export type UserRole = 'admin' | 'partner' | 'customer';
 
-export type PartnerCategory = 'guide' | 'car_rental';
+export type PartnerCategory = 'guide' | 'driver' | 'translator';
 
 export type BookingStatus =
   | 'pending'

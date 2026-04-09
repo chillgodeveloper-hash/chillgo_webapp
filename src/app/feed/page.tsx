@@ -122,30 +122,38 @@ export default function FeedPage() {
 
           <div className="max-w-7xl mx-auto px-4 py-12">
             <h2 className="font-display text-2xl font-bold text-tmain mb-6 text-center">บริการยอดนิยม</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div
                 onClick={() => handleSearch({ category: 'guide', location: '', date: '', time: '' })}
-                className="bg-white rounded-2xl border border-primary-dark/20 p-6 text-center cursor-pointer hover:border-primary hover:shadow-md transition-all"
+                className="bg-white rounded-2xl border border-primary-dark/20 p-5 text-center cursor-pointer hover:border-primary hover:shadow-md transition-all"
               >
-                <div className="text-5xl mb-3">🗺️</div>
-                <h3 className="font-bold text-tmain text-lg">ไกด์ท่องเที่ยว</h3>
-                <p className="text-sm text-tmuted mt-1">ไกด์มืออาชีพพาเที่ยวทั่วไทย</p>
+                <div className="text-4xl mb-2">🗺️</div>
+                <h3 className="font-bold text-tmain text-sm">ไกด์ท่องเที่ยว</h3>
+                <p className="text-xs text-tmuted mt-1">ไกด์มืออาชีพพาเที่ยวทั่วไทย</p>
               </div>
               <div
-                onClick={() => handleSearch({ category: 'car_rental', location: '', date: '', time: '' })}
-                className="bg-white rounded-2xl border border-primary-dark/20 p-6 text-center cursor-pointer hover:border-primary hover:shadow-md transition-all"
+                onClick={() => handleSearch({ category: 'driver', location: '', date: '', time: '' })}
+                className="bg-white rounded-2xl border border-primary-dark/20 p-5 text-center cursor-pointer hover:border-primary hover:shadow-md transition-all"
               >
-                <div className="text-5xl mb-3">🚗</div>
-                <h3 className="font-bold text-tmain text-lg">รถเช่า</h3>
-                <p className="text-sm text-tmuted mt-1">รถเช่าคุณภาพทั่วประเทศ</p>
+                <div className="text-4xl mb-2">🚗</div>
+                <h3 className="font-bold text-tmain text-sm">คนขับรถ</h3>
+                <p className="text-xs text-tmuted mt-1">คนขับรถมืออาชีพทั่วประเทศ</p>
+              </div>
+              <div
+                onClick={() => handleSearch({ category: 'translator', location: '', date: '', time: '' })}
+                className="bg-white rounded-2xl border border-primary-dark/20 p-5 text-center cursor-pointer hover:border-primary hover:shadow-md transition-all"
+              >
+                <div className="text-4xl mb-2">🌐</div>
+                <h3 className="font-bold text-tmain text-sm">ล่าม / นักแปล</h3>
+                <p className="text-xs text-tmuted mt-1">แปลเอกสาร ล่ามสด ซับไตเติ้ล</p>
               </div>
               <div
                 onClick={() => { fetchPosts({ category: '', location: '', date: '', time: '' }); setSearchParams({ category: '', location: '', date: '', time: '' }); }}
-                className="bg-white rounded-2xl border border-primary-dark/20 p-6 text-center cursor-pointer hover:border-primary hover:shadow-md transition-all"
+                className="bg-white rounded-2xl border border-primary-dark/20 p-5 text-center cursor-pointer hover:border-primary hover:shadow-md transition-all"
               >
-                <div className="text-5xl mb-3">🔍</div>
-                <h3 className="font-bold text-tmain text-lg">ดูทั้งหมด</h3>
-                <p className="text-sm text-tmuted mt-1">เรียกดูบริการทั้งหมด</p>
+                <div className="text-4xl mb-2">🔍</div>
+                <h3 className="font-bold text-tmain text-sm">ดูทั้งหมด</h3>
+                <p className="text-xs text-tmuted mt-1">เรียกดูบริการทั้งหมด</p>
               </div>
             </div>
           </div>

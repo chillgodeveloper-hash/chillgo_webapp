@@ -4,11 +4,11 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase-client';
 import { useAuthStore } from '@/hooks/useAuthStore';
-import { Map, Car, ShoppingBag, ArrowRight, LogOut } from 'lucide-react';
+import { Map, Car, ShoppingBag, ArrowRight, LogOut, Languages } from 'lucide-react';
 
 export default function RoleSelectionPage() {
   const [selectedRole, setSelectedRole] = useState<'customer' | 'partner' | null>(null);
-  const [selectedCategory, setSelectedCategory] = useState<'guide' | 'car_rental' | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<'guide' | 'driver' | 'translator' | null>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const supabase = createClient();
@@ -50,13 +50,19 @@ export default function RoleSelectionPage() {
     }
   };
 
+  const categories = [
+    { key: 'guide' as const, icon: Map, label: 'ไกด์นำเที่ยว', desc: 'นำเที่ยว ให้ข้อมูล ดูแลลูกค้า', color: 'text-secondary' },
+    { key: 'driver' as const, icon: Car, label: 'คนขับรถ', desc: 'ขับรถนำเที่ยว รับ-ส่ง ลูกค้า', color: 'text-info' },
+    { key: 'translator' as const, icon: Languages, label: 'ล่าม / นักแปล', desc: 'แปลเอกสาร ล่ามสด ซับไตเติ้ล', color: 'text-purple-500' },
+  ];
+
   return (
     <div className="min-h-screen bg-primary-light flex items-center justify-center p-6">
       <div className="max-w-lg w-full">
         <div className="flex justify-end mb-4">
           <button
             onClick={handleLogout}
-            className="flex items-center gap-1.5 text-sm text-danger hover:bg-danger/10/80 transition px-3 py-2 rounded-xl hover:bg-danger/5"
+            className="flex items-center gap-1.5 text-sm text-danger hover:bg-danger/10 transition px-3 py-2 rounded-xl"
           >
             <LogOut size={16} /> ออกจากระบบ
           </button>
@@ -84,7 +90,7 @@ export default function RoleSelectionPage() {
               </div>
               <div>
                 <h3 className="text-lg font-bold text-tmain">ลูกค้า (Customer)</h3>
-                <p className="text-sm text-tmuted">ค้นหาและจองบริการไกด์ รถเช่า</p>
+                <p className="text-sm text-tmuted">ค้นหาและจองบริการไกด์ คนขับรถ ล่าม</p>
               </div>
             </div>
           </button>
@@ -105,7 +111,7 @@ export default function RoleSelectionPage() {
               </div>
               <div>
                 <h3 className="text-lg font-bold text-tmain">พาร์ทเนอร์ (Partner)</h3>
-                <p className="text-sm text-tmuted">เสนอบริการไกด์หรือรถเช่าของคุณ</p>
+                <p className="text-sm text-tmuted">เสนอบริการไกด์ คนขับรถ หรือล่าม</p>
               </div>
             </div>
           </button>
@@ -114,29 +120,21 @@ export default function RoleSelectionPage() {
         {selectedRole === 'partner' && (
           <div className="bg-white rounded-2xl p-6 mb-6 border border-primary-dark/30 animate-fade-in">
             <h3 className="font-bold text-tmain mb-4">เลือกประเภทบริการ</h3>
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                onClick={() => setSelectedCategory('guide')}
-                className={`p-4 rounded-xl border-2 text-center transition-all ${
-                  selectedCategory === 'guide'
-                    ? 'border-primary bg-primary-light'
-                    : 'border-primary-dark/30 hover:border-primary/50'
-                }`}
-              >
-                <Map size={32} className="mx-auto mb-2 text-secondary" />
-                <p className="font-semibold text-sm">ไกด์</p>
-              </button>
-              <button
-                onClick={() => setSelectedCategory('car_rental')}
-                className={`p-4 rounded-xl border-2 text-center transition-all ${
-                  selectedCategory === 'car_rental'
-                    ? 'border-primary bg-primary-light'
-                    : 'border-primary-dark/30 hover:border-primary/50'
-                }`}
-              >
-                <Car size={32} className="mx-auto mb-2 text-info" />
-                <p className="font-semibold text-sm">รถเช่า</p>
-              </button>
+            <div className="grid grid-cols-3 gap-3">
+              {categories.map((cat) => (
+                <button
+                  key={cat.key}
+                  onClick={() => setSelectedCategory(cat.key)}
+                  className={`p-4 rounded-xl border-2 text-center transition-all ${
+                    selectedCategory === cat.key
+                      ? 'border-primary bg-primary-light'
+                      : 'border-primary-dark/30 hover:border-primary/50'
+                  }`}
+                >
+                  <cat.icon size={28} className={`mx-auto mb-2 ${cat.color}`} />
+                  <p className="font-semibold text-xs">{cat.label}</p>
+                </button>
+              ))}
             </div>
           </div>
         )}

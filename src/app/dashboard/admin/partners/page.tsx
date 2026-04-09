@@ -93,7 +93,7 @@ export default function AdminPartnersPage() {
                       <span className={`text-xs px-2 py-0.5 rounded-full ${
                         partner.category === 'guide' ? 'bg-secondary/10 text-secondary' : 'bg-info/10 text-info'
                       }`}>
-                        {partner.category === 'guide' ? '🗺️ ไกด์' : '🚗 รถเช่า'}
+                        {partner.category === 'guide' ? '🗺️ ไกด์' : category === 'driver' ? '🚗 คนขับรถ' : '🌐 ล่าม'}
                       </span>
                       {partner.rating > 0 && (
                         <span className="text-xs text-tmuted flex items-center gap-0.5">

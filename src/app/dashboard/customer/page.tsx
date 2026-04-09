@@ -316,7 +316,7 @@ function SwitchRoleModal({ onClose }: { onClose: () => void }) {
   const { user, setUser, setPartnerProfile } = useAuthStore();
   const supabase = createClient();
   const router = useRouter();
-  const [selectedCategory, setSelectedCategory] = useState<'guide' | 'car_rental' | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<'guide' | 'driver' | 'translator' | null>(null);
   const [loading, setLoading] = useState(false);
 
   const currentRole = user?.role;
@@ -393,11 +393,11 @@ function SwitchRoleModal({ onClose }: { onClose: () => void }) {
                 <Map size={32} className="text-secondary" />
               </div>
               <p className="text-tmain font-semibold mb-2">เปลี่ยนเป็นโหมดพาร์ทเนอร์</p>
-              <p className="text-sm text-tmuted">เสนอบริการไกด์หรือรถเช่าของคุณ</p>
+              <p className="text-sm text-tmuted">เสนอบริการไกด์หรือคนขับรถ หรือล่ามของคุณ</p>
             </div>
 
             <p className="text-sm font-medium text-tmain">เลือกประเภทบริการ</p>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-3 gap-3">
               <button
                 onClick={() => setSelectedCategory('guide')}
                 className={`p-4 rounded-xl border-2 text-center transition-all ${
@@ -407,18 +407,29 @@ function SwitchRoleModal({ onClose }: { onClose: () => void }) {
                 }`}
               >
                 <Map size={28} className="mx-auto mb-2 text-secondary" />
-                <p className="font-semibold text-sm text-tmain">ไกด์</p>
+                <p className="font-semibold text-xs text-tmain">ไกด์</p>
               </button>
               <button
-                onClick={() => setSelectedCategory('car_rental')}
+                onClick={() => setSelectedCategory('driver')}
                 className={`p-4 rounded-xl border-2 text-center transition-all ${
-                  selectedCategory === 'car_rental'
+                  selectedCategory === 'driver'
                     ? 'border-primary bg-primary/20'
                     : 'border-primary-dark/30 hover:bg-primary/10'
                 }`}
               >
                 <ShoppingBag size={28} className="mx-auto mb-2 text-info" />
-                <p className="font-semibold text-sm text-tmain">รถเช่า</p>
+                <p className="font-semibold text-xs text-tmain">คนขับรถ</p>
+              </button>
+              <button
+                onClick={() => setSelectedCategory('translator')}
+                className={`p-4 rounded-xl border-2 text-center transition-all ${
+                  selectedCategory === 'translator'
+                    ? 'border-primary bg-primary/20'
+                    : 'border-primary-dark/30 hover:bg-primary/10'
+                }`}
+              >
+                <ShoppingBag size={28} className="mx-auto mb-2 text-purple-500" />
+                <p className="font-semibold text-xs text-tmain">ล่าม</p>
               </button>
             </div>
 

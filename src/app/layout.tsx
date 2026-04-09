@@ -3,7 +3,7 @@ import '@/styles/globals.css';
 
 export const metadata: Metadata = {
   title: 'ChillGo Travel - จัดทริปง่าย ๆ สไตล์คุณ',
-  description: 'แพลตฟอร์มจองไกด์และรถเช่าสำหรับทริปในฝัน',
+  description: 'แพลตฟอร์มจองไกด์ คนขับรถ และล่ามสำหรับทริปในฝัน',
   icons: {
     icon: '/favicon.ico',
     apple: '/apple-touch-icon.png',
