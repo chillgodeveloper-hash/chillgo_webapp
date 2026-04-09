@@ -6,17 +6,17 @@ import { Plane, Hotel, ArrowRight, ExternalLink, ChevronRight } from 'lucide-rea
 const MARKER = process.env.NEXT_PUBLIC_TRAVELPAYOUTS_MARKER || '';
 
 const flightRoutes = [
-  { from: 'BKK', to: 'CNX', name: 'เชียงใหม่', nameEn: 'Chiang Mai', image: 'https://images.unsplash.com/photo-1598935898639-81586f7d2129?w=640&h=480&fit=crop' },
-  { from: 'BKK', to: 'HKT', name: 'ภูเก็ต', nameEn: 'Phuket', image: 'https://images.unsplash.com/photo-1589394815804-964ed0be2eb5?w=640&h=480&fit=crop' },
-  { from: 'BKK', to: 'KBV', name: 'กระบี่', nameEn: 'Krabi', image: 'https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?w=640&h=480&fit=crop' },
-  { from: 'BKK', to: 'USM', name: 'สมุย', nameEn: 'Koh Samui', image: 'https://images.unsplash.com/photo-1537956965359-7573183d1f57?w=640&h=480&fit=crop' },
+  { from: 'BKK', to: 'CNX', name: 'เชียงใหม่', nameEn: 'Chiang Mai', image: 'https://source.unsplash.com/640x480/?chiang+mai+temple' },
+  { from: 'BKK', to: 'HKT', name: 'ภูเก็ต', nameEn: 'Phuket', image: 'https://source.unsplash.com/640x480/?phuket+beach' },
+  { from: 'BKK', to: 'KBV', name: 'กระบี่', nameEn: 'Krabi', image: 'https://source.unsplash.com/640x480/?krabi+island' },
+  { from: 'BKK', to: 'USM', name: 'สมุย', nameEn: 'Koh Samui', image: 'https://source.unsplash.com/640x480/?koh+samui+tropical' },
 ];
 
 const hotelDestinations = [
-  { name: 'กรุงเทพ', nameEn: 'Bangkok', image: 'https://images.unsplash.com/photo-1508009603885-50cf7c579365?w=640&h=480&fit=crop' },
-  { name: 'พัทยา', nameEn: 'Pattaya', image: 'https://images.unsplash.com/photo-1565361849078-294849288de5?w=640&h=480&fit=crop' },
-  { name: 'หัวหิน', nameEn: 'Hua Hin', image: 'https://images.unsplash.com/photo-1540541338287-41700207dee6?w=640&h=480&fit=crop' },
-  { name: 'เชียงราย', nameEn: 'Chiang Rai', image: 'https://images.unsplash.com/photo-1512553135590-0af2655d4198?w=640&h=480&fit=crop' },
+  { name: 'กรุงเทพ', nameEn: 'Bangkok', image: 'https://source.unsplash.com/640x480/?bangkok+grand+palace' },
+  { name: 'พัทยา', nameEn: 'Pattaya', image: 'https://source.unsplash.com/640x480/?pattaya+city+night' },
+  { name: 'หัวหิน', nameEn: 'Hua Hin', image: 'https://source.unsplash.com/640x480/?hua+hin+seaside' },
+  { name: 'เชียงราย', nameEn: 'Chiang Rai', image: 'https://source.unsplash.com/640x480/?chiang+rai+white+temple' },
 ];
 
 export default function TravelPreview() {
@@ -42,8 +42,8 @@ export default function TravelPreview() {
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
           {flightRoutes.map((route) => (
             <a key={route.to} href={buildFlightLink(route.from, route.to)} target="_blank" rel="noopener noreferrer" className="bg-white rounded-2xl overflow-hidden border border-primary-dark/20 hover:border-secondary hover:shadow-md transition-all group">
-              <div className="relative h-36 overflow-hidden">
-                <img src={route.image} alt={route.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+              <div className="relative h-36 overflow-hidden bg-gradient-to-br from-primary/30 to-secondary/30">
+                <img src={route.image} alt={route.name} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
                 <div className="absolute bottom-2 left-3">
                   <h3 className="font-bold text-white text-sm drop-shadow">{route.name}</h3>
@@ -66,8 +66,8 @@ export default function TravelPreview() {
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
           {hotelDestinations.map((dest) => (
             <a key={dest.nameEn} href={buildHotelLink(dest.nameEn)} target="_blank" rel="noopener noreferrer" className="bg-white rounded-2xl overflow-hidden border border-primary-dark/20 hover:border-secondary hover:shadow-md transition-all group">
-              <div className="relative h-36 overflow-hidden">
-                <img src={dest.image} alt={dest.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+              <div className="relative h-36 overflow-hidden bg-gradient-to-br from-primary/30 to-secondary/30">
+                <img src={dest.image} alt={dest.name} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
                 <div className="absolute bottom-2 left-3">
                   <h3 className="font-bold text-white text-sm drop-shadow">{dest.name}</h3>

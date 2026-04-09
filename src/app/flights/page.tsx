@@ -8,24 +8,24 @@ import FlatpickrInput from '@/components/ui/FlatpickrInput';
 const MARKER = process.env.NEXT_PUBLIC_TRAVELPAYOUTS_MARKER || '';
 
 const popularRoutes = [
-  { from: 'BKK', to: 'CNX', name: 'เชียงใหม่', nameEn: 'Chiang Mai', image: 'https://images.unsplash.com/photo-1598935898639-81586f7d2129?w=640&h=480&fit=crop', desc: 'ดอยสุเทพ วัดเก่า คาเฟ่สุดชิล' },
-  { from: 'BKK', to: 'HKT', name: 'ภูเก็ต', nameEn: 'Phuket', image: 'https://images.unsplash.com/photo-1589394815804-964ed0be2eb5?w=640&h=480&fit=crop', desc: 'หาดทรายขาว ทะเลอันดามัน ป่าตอง' },
-  { from: 'BKK', to: 'KBV', name: 'กระบี่', nameEn: 'Krabi', image: 'https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?w=640&h=480&fit=crop', desc: 'ทะเลแหวก เกาะพีพี ปีนหน้าผา' },
-  { from: 'BKK', to: 'USM', name: 'สมุย', nameEn: 'Koh Samui', image: 'https://images.unsplash.com/photo-1537956965359-7573183d1f57?w=640&h=480&fit=crop', desc: 'เกาะสวรรค์ รีสอร์ทหรู หินตาหินยาย' },
-  { from: 'BKK', to: 'HDY', name: 'หาดใหญ่', nameEn: 'Hat Yai', image: 'https://images.unsplash.com/photo-1562602833-0f4ab2fc46e5?w=640&h=480&fit=crop', desc: 'ตลาดกิมหยง ไก่ทอด ตลาดสดใหญ่' },
-  { from: 'BKK', to: 'CEI', name: 'เชียงราย', nameEn: 'Chiang Rai', image: 'https://images.unsplash.com/photo-1512553135590-0af2655d4198?w=640&h=480&fit=crop', desc: 'วัดร่องขุ่น สิงห์ปาร์ค ดอยตุง' },
-  { from: 'BKK', to: 'URT', name: 'สุราษฎร์ธานี', nameEn: 'Surat Thani', image: 'https://images.unsplash.com/photo-1504214208698-ea1916a2195a?w=640&h=480&fit=crop', desc: 'ประตูสู่เกาะสมุย เขื่อนรัชชประภา' },
-  { from: 'BKK', to: 'NST', name: 'นครศรีธรรมราช', nameEn: 'Nakhon Si Thammarat', image: 'https://images.unsplash.com/photo-1528181304800-259b08848526?w=640&h=480&fit=crop', desc: 'วัดพระมหาธาตุ ขนมจีน เขาหลวง' },
-  { from: 'BKK', to: 'UBP', name: 'อุบลราชธานี', nameEn: 'Ubon Ratchathani', image: 'https://images.unsplash.com/photo-1506665531195-3566af2b4dfa?w=640&h=480&fit=crop', desc: 'สามพันโบก ผาแต้ม แก่งหินผาสาด' },
-  { from: 'BKK', to: 'UTH', name: 'อุดรธานี', nameEn: 'Udon Thani', image: 'https://images.unsplash.com/photo-1583417319070-4a69db38a482?w=640&h=480&fit=crop', desc: 'ทะเลบัวแดง วัดป่าบ้านตาด' },
-  { from: 'BKK', to: 'KKC', name: 'ขอนแก่น', nameEn: 'Khon Kaen', image: 'https://images.unsplash.com/photo-1563492065599-3520f775eeed?w=640&h=480&fit=crop', desc: 'พระธาตุขามแก่น บึงแก่นนคร' },
-  { from: 'BKK', to: 'TST', name: 'ตรัง', nameEn: 'Trang', image: 'https://images.unsplash.com/photo-1519451241324-20b4ea2c4220?w=640&h=480&fit=crop', desc: 'เกาะลิบง ถ้ำมรกต หมูย่างเมืองตรัง' },
-  { from: 'BKK', to: 'LOE', name: 'เลย', nameEn: 'Loei', image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=640&h=480&fit=crop', desc: 'ภูกระดึง เชียงคาน ผีตาโขน' },
-  { from: 'BKK', to: 'HHQ', name: 'หัวหิน', nameEn: 'Hua Hin', image: 'https://images.unsplash.com/photo-1540541338287-41700207dee6?w=640&h=480&fit=crop', desc: 'ชายทะเลหลวง วังไกลกังวล ตลาดโต้รุ่ง' },
-  { from: 'BKK', to: 'UTP', name: 'พัทยา', nameEn: 'Pattaya', image: 'https://images.unsplash.com/photo-1565361849078-294849288de5?w=640&h=480&fit=crop', desc: 'วอล์คกิ้งสตรีท เกาะล้าน ชายหาด' },
-  { from: 'BKK', to: 'PHS', name: 'พิษณุโลก', nameEn: 'Phitsanulok', image: 'https://images.unsplash.com/photo-1569154941061-e231b4725ef1?w=640&h=480&fit=crop', desc: 'พระพุทธชินราช น้ำตกแก่งโสภา' },
-  { from: 'BKK', to: 'NAK', name: 'นครราชสีมา', nameEn: 'Nakhon Ratchasima', image: 'https://images.unsplash.com/photo-1552733407-5d5c46c3bb3b?w=640&h=480&fit=crop', desc: 'เขาใหญ่ พิมาย ย่าโม' },
-  { from: 'BKK', to: 'RNT', name: 'ระนอง', nameEn: 'Ranong', image: 'https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=640&h=480&fit=crop', desc: 'บ่อน้ำร้อน เกาะพยาม น้ำตก' },
+  { from: 'BKK', to: 'CNX', name: 'เชียงใหม่', nameEn: 'Chiang Mai', image: 'https://source.unsplash.com/640x480/?chiang+mai+temple', desc: 'ดอยสุเทพ วัดเก่า คาเฟ่สุดชิล' },
+  { from: 'BKK', to: 'HKT', name: 'ภูเก็ต', nameEn: 'Phuket', image: 'https://source.unsplash.com/640x480/?phuket+beach', desc: 'หาดทรายขาว ทะเลอันดามัน ป่าตอง' },
+  { from: 'BKK', to: 'KBV', name: 'กระบี่', nameEn: 'Krabi', image: 'https://source.unsplash.com/640x480/?krabi+island', desc: 'ทะเลแหวก เกาะพีพี ปีนหน้าผา' },
+  { from: 'BKK', to: 'USM', name: 'สมุย', nameEn: 'Koh Samui', image: 'https://source.unsplash.com/640x480/?koh+samui+tropical', desc: 'เกาะสวรรค์ รีสอร์ทหรู หินตาหินยาย' },
+  { from: 'BKK', to: 'HDY', name: 'หาดใหญ่', nameEn: 'Hat Yai', image: 'https://source.unsplash.com/640x480/?hat+yai+thailand', desc: 'ตลาดกิมหยง ไก่ทอด ตลาดสดใหญ่' },
+  { from: 'BKK', to: 'CEI', name: 'เชียงราย', nameEn: 'Chiang Rai', image: 'https://source.unsplash.com/640x480/?white+temple+chiang+rai', desc: 'วัดร่องขุ่น สิงห์ปาร์ค ดอยตุง' },
+  { from: 'BKK', to: 'URT', name: 'สุราษฎร์ธานี', nameEn: 'Surat Thani', image: 'https://source.unsplash.com/640x480/?cheow+lan+lake+thailand', desc: 'ประตูสู่เกาะสมุย เขื่อนรัชชประภา' },
+  { from: 'BKK', to: 'NST', name: 'นครศรีธรรมราช', nameEn: 'Nakhon Si Thammarat', image: 'https://source.unsplash.com/640x480/?thailand+southern+temple', desc: 'วัดพระมหาธาตุ ขนมจีน เขาหลวง' },
+  { from: 'BKK', to: 'UBP', name: 'อุบลราชธานี', nameEn: 'Ubon Ratchathani', image: 'https://source.unsplash.com/640x480/?mekong+river+thailand', desc: 'สามพันโบก ผาแต้ม แก่งหินผาสาด' },
+  { from: 'BKK', to: 'UTH', name: 'อุดรธานี', nameEn: 'Udon Thani', image: 'https://source.unsplash.com/640x480/?red+lotus+lake+thailand', desc: 'ทะเลบัวแดง วัดป่าบ้านตาด' },
+  { from: 'BKK', to: 'KKC', name: 'ขอนแก่น', nameEn: 'Khon Kaen', image: 'https://source.unsplash.com/640x480/?isan+thailand+landscape', desc: 'พระธาตุขามแก่น บึงแก่นนคร' },
+  { from: 'BKK', to: 'TST', name: 'ตรัง', nameEn: 'Trang', image: 'https://source.unsplash.com/640x480/?trang+emerald+cave+thailand', desc: 'เกาะลิบง ถ้ำมรกต หมูย่างเมืองตรัง' },
+  { from: 'BKK', to: 'LOE', name: 'เลย', nameEn: 'Loei', image: 'https://source.unsplash.com/640x480/?phu+kradueng+thailand', desc: 'ภูกระดึง เชียงคาน ผีตาโขน' },
+  { from: 'BKK', to: 'HHQ', name: 'หัวหิน', nameEn: 'Hua Hin', image: 'https://source.unsplash.com/640x480/?hua+hin+beach+thailand', desc: 'ชายทะเลหลวง วังไกลกังวล ตลาดโต้รุ่ง' },
+  { from: 'BKK', to: 'UTP', name: 'พัทยา', nameEn: 'Pattaya', image: 'https://source.unsplash.com/640x480/?pattaya+skyline+beach', desc: 'วอล์คกิ้งสตรีท เกาะล้าน ชายหาด' },
+  { from: 'BKK', to: 'PHS', name: 'พิษณุโลก', nameEn: 'Phitsanulok', image: 'https://source.unsplash.com/640x480/?thailand+buddha+golden', desc: 'พระพุทธชินราช น้ำตกแก่งโสภา' },
+  { from: 'BKK', to: 'NAK', name: 'นครราชสีมา', nameEn: 'Nakhon Ratchasima', image: 'https://source.unsplash.com/640x480/?khao+yai+national+park', desc: 'เขาใหญ่ พิมาย ย่าโม' },
+  { from: 'BKK', to: 'RNT', name: 'ระนอง', nameEn: 'Ranong', image: 'https://source.unsplash.com/640x480/?ranong+hot+spring+thailand', desc: 'บ่อน้ำร้อน เกาะพยาม น้ำตก' },
 ];
 
 export default function FlightsPage() {
@@ -98,8 +98,8 @@ export default function FlightsPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {filtered.map((route) => (
             <a key={route.to} href={buildLink(route.from, route.to)} target="_blank" rel="noopener noreferrer" className="bg-white rounded-2xl overflow-hidden border border-primary-dark/20 hover:border-secondary hover:shadow-lg transition-all group">
-              <div className="relative h-44 overflow-hidden">
-                <img src={route.image} alt={route.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+              <div className="relative h-44 overflow-hidden bg-gradient-to-br from-primary/30 to-secondary/30">
+                <img src={route.image} alt={route.name} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                 <div className="absolute bottom-3 left-3">
                   <h3 className="font-bold text-white text-lg drop-shadow">{route.name}</h3>
