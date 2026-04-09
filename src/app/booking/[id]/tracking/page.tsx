@@ -1,13 +1,13 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase-client';
 import { useAuthStore } from '@/hooks/useAuthStore';
 import { useGeoTracking } from '@/hooks/useGeoTracking';
 import AppLayout from '@/components/layout/AppLayout';
 import Link from 'next/link';
-import { ArrowLeft, MapPin, Navigation, Clock, Wifi, WifiOff, Radio, ExternalLink, Smartphone } from 'lucide-react';
+import { ArrowLeft, MapPin, Navigation, Clock, Wifi, WifiOff, Radio, ExternalLink, Smartphone, CheckCircle } from 'lucide-react';
 
 interface LocationPoint {
   id: string;
@@ -184,11 +184,15 @@ export default function TrackingPage() {
   const { id: bookingId } = useParams();
   const { user } = useAuthStore();
   const supabase = createClient();
+  const router = useRouter();
 
   const [booking, setBooking] = useState<any>(null);
   const [locations, setLocations] = useState<LocationPoint[]>([]);
   const [loading, setLoading] = useState(true);
   const [partnerName, setPartnerName] = useState('');
+  const [startedAt, setStartedAt] = useState<string | null>(null);
+  const [elapsed, setElapsed] = useState('');
+  const [endingJob, setEndingJob] = useState(false);
 
   const isPartner = user?.role === 'partner' && booking?.partner_id === user?.id;
   const isInProgress = booking?.status === 'in_progress';
@@ -213,11 +217,35 @@ export default function TrackingPage() {
         setBooking(data);
         const { data: profile } = await supabase.from('profiles').select('full_name').eq('id', data.partner_id).single();
         if (profile) setPartnerName(profile.full_name);
+
+        const { data: wh } = await supabase.from('work_history').select('started_at, completed_at').eq('booking_id', bookingId).maybeSingle();
+        if (wh?.started_at) setStartedAt(wh.started_at);
       }
       setLoading(false);
     };
     fetchBooking();
   }, [bookingId]);
+
+  useEffect(() => {
+    if (!startedAt) return;
+
+    const calcElapsed = () => {
+      const start = new Date(startedAt).getTime();
+      const now = Date.now();
+      const diff = Math.max(0, Math.floor((now - start) / 1000));
+      const h = Math.floor(diff / 3600);
+      const m = Math.floor((diff % 3600) / 60);
+      if (h > 0) {
+        setElapsed(`${h} ชม. ${m} นาที`);
+      } else {
+        setElapsed(`${m} นาที`);
+      }
+    };
+
+    calcElapsed();
+    const timer = setInterval(calcElapsed, 60000);
+    return () => clearInterval(timer);
+  }, [startedAt]);
 
   useEffect(() => {
     if (!bookingId) return;
@@ -368,8 +396,10 @@ export default function TrackingPage() {
                   <p className="text-sm font-medium text-tmain">{lastLocation.latitude.toFixed(5)}, {lastLocation.longitude.toFixed(5)}</p>
                 </div>
                 <div className="bg-primary-light rounded-xl p-3">
-                  <p className="text-xs text-tmuted">จำนวนจุดที่บันทึก</p>
-                  <p className="text-sm font-medium text-tmain">{locations.length} จุด</p>
+                  <p className="text-xs text-tmuted">เวลาทำงาน</p>
+                  <p className="text-sm font-medium text-tmain flex items-center gap-1">
+                    <Clock size={12} /> {elapsed || '—'}
+                  </p>
                 </div>
               </div>
 
@@ -398,6 +428,35 @@ export default function TrackingPage() {
             <div className="bg-primary-light rounded-xl p-4 text-center">
               <p className="text-sm text-tmuted">งานเสร็จสิ้นแล้ว — แสดงเส้นทางที่บันทึกไว้ทั้งหมด {locations.length} จุด</p>
             </div>
+          )}
+
+          {isPartner && isInProgress && (
+            <button
+              disabled={endingJob}
+              onClick={async () => {
+                if (!confirm('ยืนยันจบงาน?')) return;
+                setEndingJob(true);
+                try {
+                  await geo.stopTracking();
+                  await supabase.from('bookings').update({ status: 'completed' }).eq('id', bookingId);
+                  await supabase.from('work_history').update({ status: 'completed', completed_at: new Date().toISOString() }).eq('booking_id', bookingId);
+                  await supabase.from('notifications').insert({
+                    user_id: booking.customer_id,
+                    title: 'งานเสร็จสิ้น',
+                    message: `งาน "${booking.post?.title}" เสร็จสิ้นแล้ว กรุณารีวิว`,
+                    type: 'booking',
+                    link: `/booking/${bookingId}`,
+                  });
+                  router.push(`/booking/${bookingId}`);
+                } catch (err) {
+                  console.error(err);
+                  setEndingJob(false);
+                }
+              }}
+              className="w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-3 rounded-2xl text-sm flex items-center justify-center gap-2 transition disabled:opacity-50"
+            >
+              <CheckCircle size={18} /> {endingJob ? 'กำลังจบงาน...' : 'จบงาน'}
+            </button>
           )}
         </div>
       </div>
