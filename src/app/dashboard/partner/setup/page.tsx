@@ -86,6 +86,8 @@ export default function PartnerSetupPage() {
     vehicle_plate_type: '', vehicle_insurance_compulsory: '', vehicle_insurance_compulsory_expiry: '', vehicle_insurance_voluntary: '',
     passport_no: '', education_level: '', education_major: '',
     translation_specializations: [] as string[],
+    translation_pairs: [] as any[],
+    test_scores: [] as any[],
     daily_capacity: '', rate_per_word: '', working_hours: '', rush_job_available: false,
     terms_accepted: false,
   });
@@ -221,6 +223,8 @@ export default function PartnerSetupPage() {
         updateData.education_level = form.education_level;
         updateData.education_major = form.education_major;
         updateData.translation_specializations = form.translation_specializations;
+        updateData.translation_pairs = form.translation_pairs;
+        updateData.test_scores = form.test_scores;
         updateData.daily_capacity = form.daily_capacity;
         updateData.rate_per_word = form.rate_per_word;
         updateData.working_hours = form.working_hours;
@@ -274,29 +278,29 @@ export default function PartnerSetupPage() {
 
           {step === 1 && (
             <>
-              <h2 className="font-bold text-lg text-tmain mb-4">ข้อมูลส่วนบุคคล</h2>
+              <h2 className="font-bold text-lg text-tmain mb-4">{category === 'translator' ? 'ข้อมูลส่วนบุคคล / Personal Information' : 'ข้อมูลส่วนบุคคล'}</h2>
               <div className="flex justify-center mb-4">
                 <div className="relative">
                   <div onClick={() => avatarRef.current?.click()} className="w-24 h-24 rounded-full bg-primary/10 border-3 border-primary flex items-center justify-center cursor-pointer overflow-hidden hover:opacity-80 transition">
                     {avatarPreview ? <img src={avatarPreview} alt="" className="w-full h-full object-cover" /> : <Camera size={28} className="text-primary-text" />}
                   </div>
                   <input ref={avatarRef} type="file" accept="image/*" onChange={handleAvatarSelect} className="hidden" />
-                  <p className="text-xs text-tmuted text-center mt-1">รูปโปรไฟล์</p>
+                  <p className="text-xs text-tmuted text-center mt-1">{category === 'translator' ? 'รูปโปรไฟล์ / Profile Photo' : 'รูปโปรไฟล์'}</p>
                 </div>
               </div>
               <div className="space-y-3">
-                <FormInput label="ชื่อธุรกิจ / ชื่อบริการ" name="business_name" value={form["business_name"] || ''} onChange={update} />
+                <FormInput label={category === 'translator' ? 'ชื่อธุรกิจ / Business Name' : 'ชื่อธุรกิจ / ชื่อบริการ'} name="business_name" value={form["business_name"] || ''} onChange={update} />
                 <div className="grid grid-cols-2 gap-3">
                   <FormInput label="ชื่อ-นามสกุล (ไทย)" name="full_name_th" value={form["full_name_th"] || ''} onChange={update} />
-                  <FormInput label="Name (English)" name="full_name_en" value={form["full_name_en"] || ''} onChange={update} />
+                  <FormInput label="Name-Surname (English)" name="full_name_en" value={form["full_name_en"] || ''} onChange={update} />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
-                  <FormInput label="ชื่อเล่น" name="nickname" value={form["nickname"] || ''} onChange={update} />
-                  <FormInput label="อายุ" name="age" type="number" value={form["age"] || ''} onChange={update} />
+                  <FormInput label={category === 'translator' ? 'ชื่อเล่น / Nickname' : 'ชื่อเล่น'} name="nickname" value={form["nickname"] || ''} onChange={update} />
+                  <FormInput label={category === 'translator' ? 'อายุ / Age' : 'อายุ'} name="age" type="number" value={form["age"] || ''} onChange={update} />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
-                  <FormInput label="เลขบัตรประชาชน" name="id_number" value={form["id_number"] || ''} onChange={update} />
-                  <FormInput label="วันเกิด" name="date_of_birth" type="date" value={form["date_of_birth"] || ''} onChange={update} />
+                  <FormInput label={category === 'translator' ? 'เลขบัตรประชาชน / ID No.' : 'เลขบัตรประชาชน'} name="id_number" value={form["id_number"] || ''} onChange={update} />
+                  <FormInput label={category === 'translator' ? 'วันเกิด / Date of Birth' : 'วันเกิด'} name="date_of_birth" type="date" value={form["date_of_birth"] || ''} onChange={update} />
                 </div>
                 {category === 'guide' && (
                   <div className="grid grid-cols-2 gap-3">
@@ -305,20 +309,23 @@ export default function PartnerSetupPage() {
                   </div>
                 )}
                 {category === 'translator' && (
-                  <div className="grid grid-cols-2 gap-3">
-                    <FormInput label="Passport No. (ถ้ามี)" name="passport_no" value={form["passport_no"] || ''} onChange={update} />
-                    <FormInput label="ระดับการศึกษา" name="education_level" value={form["education_level"] || ''} onChange={update} />
-                  </div>
+                  <>
+                    <div className="grid grid-cols-2 gap-3">
+                      <FormInput label="Passport No. / หนังสือเดินทาง (ถ้ามี)" name="passport_no" value={form["passport_no"] || ''} onChange={update} />
+                      <FormInput label="ระดับการศึกษา / Education" name="education_level" value={form["education_level"] || ''} onChange={update} />
+                    </div>
+                    <FormInput label="สาขาวิชา / Major" name="education_major" value={form["education_major"] || ''} onChange={update} />
+                  </>
                 )}
                 <div className="grid grid-cols-2 gap-3">
-                  <FormInput label="เบอร์โทรศัพท์" name="phone" value={form["phone"] || ''} onChange={update} />
+                  <FormInput label={category === 'translator' ? 'เบอร์โทรศัพท์ / Phone' : 'เบอร์โทรศัพท์'} name="phone" value={form["phone"] || ''} onChange={update} />
                   <FormInput label="LINE ID" name="line_id" value={form["line_id"] || ''} onChange={update} />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <FormInput label="WeChat ID" name="wechat_id" value={form["wechat_id"] || ''} onChange={update} />
                   <FormInput label="Email" name="contact_email" type="email" value={form["contact_email"] || ''} onChange={update} />
                 </div>
-                <FormInput label="ที่อยู่ปัจจุบัน" name="address" rows={3} value={form["address"] || ''} onChange={update} />
+                <FormInput label={category === 'translator' ? 'ที่อยู่ปัจจุบัน / Current Address' : 'ที่อยู่ปัจจุบัน'} name="address" rows={3} value={form["address"] || ''} onChange={update} />
               </div>
             </>
           )}
@@ -383,25 +390,71 @@ export default function PartnerSetupPage() {
 
           {step === 2 && category === 'translator' && (
             <>
-              <h2 className="font-bold text-lg text-tmain mb-4">ความเชี่ยวชาญด้านการแปล</h2>
-              <div className="space-y-3">
-                <FormInput label="สาขาวิชา / Major" name="education_major" value={form["education_major"] || ''} onChange={update} />
+              <h2 className="font-bold text-lg text-tmain mb-4">คู่ภาษาและใบรับรอง / Language Pairs & Certifications</h2>
+              <div className="space-y-4">
                 <div>
-                  <label className="text-sm font-medium text-tmain mb-2 block">หมวดงานที่เชี่ยวชาญ</label>
-                  <CheckboxGrid items={TRANSLATOR_SPECS} selected={form["translation_specializations"] as string[]} onToggle={(item) => toggleArray("translation_specializations", item)} />
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <FormInput label="จำนวนคำเฉลี่ยต่อวัน" name="daily_capacity" placeholder="เช่น 3000 คำ" value={form["daily_capacity"] || ''} onChange={update} />
-                  <FormInput label="ราคาเริ่มต้น (ต่อคำ/หน้า)" name="rate_per_word" placeholder="เช่น 1.5 บาท/คำ" value={form["rate_per_word"] || ''} onChange={update} />
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <FormInput label="เวลาทำงานที่ถนัด" name="working_hours" placeholder="เช่น 9:00-18:00" value={form["working_hours"] || ''} onChange={update} />
-                  <div>
-                    <label className="text-sm font-medium text-tmain mb-1 block">รับงานด่วน?</label>
-                    <button type="button" onClick={() => update('rush_job_available', !form.rush_job_available)} className={`w-full px-4 py-3 rounded-xl border text-sm transition ${form.rush_job_available ? 'border-primary bg-primary/20 font-medium' : 'border-primary-dark/30'}`}>
-                      {form.rush_job_available ? '✓ รับงานด่วน' : 'ไม่รับงานด่วน'}
-                    </button>
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-sm font-semibold text-tmain">คู่ภาษาที่แปลได้ / Translation Language Pairs</p>
+                    <button type="button" onClick={() => update('translation_pairs', [...form.translation_pairs, { source: '', target: '', level: '', mode: 'ทั้งคู่', experience: '' }])} className="text-xs bg-primary/20 hover:bg-primary/30 text-tmain px-3 py-1.5 rounded-lg transition font-medium">+ เพิ่มคู่ภาษา</button>
                   </div>
+                  {form.translation_pairs.length === 0 && (
+                    <p className="text-xs text-tmuted bg-primary-light rounded-xl p-3 text-center">กด "เพิ่มคู่ภาษา" เพื่อเริ่มเพิ่มข้อมูล</p>
+                  )}
+                  {form.translation_pairs.map((pair: any, i: number) => (
+                    <div key={i} className="bg-primary-light rounded-xl p-3 mb-2 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-medium text-tmuted">คู่ที่ {i + 1}</span>
+                        <button type="button" onClick={() => update('translation_pairs', form.translation_pairs.filter((_: any, idx: number) => idx !== i))} className="text-xs text-red-500 hover:text-red-700">ลบ</button>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <input placeholder="ภาษาต้นทาง / Source" value={pair.source} onChange={e => { const arr = [...form.translation_pairs]; arr[i] = { ...arr[i], source: e.target.value }; update('translation_pairs', arr); }} className="px-3 py-2 rounded-lg border border-primary-dark/30 text-xs outline-none focus:border-primary" />
+                        <input placeholder="ภาษาปลายทาง / Target" value={pair.target} onChange={e => { const arr = [...form.translation_pairs]; arr[i] = { ...arr[i], target: e.target.value }; update('translation_pairs', arr); }} className="px-3 py-2 rounded-lg border border-primary-dark/30 text-xs outline-none focus:border-primary" />
+                      </div>
+                      <div className="grid grid-cols-3 gap-2">
+                        <select value={pair.level} onChange={e => { const arr = [...form.translation_pairs]; arr[i] = { ...arr[i], level: e.target.value }; update('translation_pairs', arr); }} className="px-2 py-2 rounded-lg border border-primary-dark/30 text-xs outline-none bg-white">
+                          <option value="">ระดับ / Level</option>
+                          <option value="Beginner">Beginner</option>
+                          <option value="Intermediate">Intermediate</option>
+                          <option value="Advanced">Advanced</option>
+                        </select>
+                        <select value={pair.mode} onChange={e => { const arr = [...form.translation_pairs]; arr[i] = { ...arr[i], mode: e.target.value }; update('translation_pairs', arr); }} className="px-2 py-2 rounded-lg border border-primary-dark/30 text-xs outline-none bg-white">
+                          <option value="แปล">แปล / Translate</option>
+                          <option value="ตรวจแก้">ตรวจแก้ / Proofread</option>
+                          <option value="ทั้งคู่">ทั้งคู่ / Both</option>
+                        </select>
+                        <input placeholder="ประสบการณ์ (ปี)" value={pair.experience} onChange={e => { const arr = [...form.translation_pairs]; arr[i] = { ...arr[i], experience: e.target.value }; update('translation_pairs', arr); }} className="px-2 py-2 rounded-lg border border-primary-dark/30 text-xs outline-none focus:border-primary" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <hr className="border-primary-dark/10" />
+
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-sm font-semibold text-tmain">คะแนนสอบวัดระดับ / Test Scores & Certifications</p>
+                    <button type="button" onClick={() => update('test_scores', [...form.test_scores, { test_name: '', score: '', institution: '', year: '', expiry: '' }])} className="text-xs bg-primary/20 hover:bg-primary/30 text-tmain px-3 py-1.5 rounded-lg transition font-medium">+ เพิ่มใบรับรอง</button>
+                  </div>
+                  {form.test_scores.length === 0 && (
+                    <p className="text-xs text-tmuted bg-primary-light rounded-xl p-3 text-center">กด "เพิ่มใบรับรอง" เพื่อเริ่มเพิ่มข้อมูล</p>
+                  )}
+                  {form.test_scores.map((ts: any, i: number) => (
+                    <div key={i} className="bg-primary-light rounded-xl p-3 mb-2 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-medium text-tmuted">ใบรับรองที่ {i + 1}</span>
+                        <button type="button" onClick={() => update('test_scores', form.test_scores.filter((_: any, idx: number) => idx !== i))} className="text-xs text-red-500 hover:text-red-700">ลบ</button>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <input placeholder="ชื่อข้อสอบ / Test Name" value={ts.test_name} onChange={e => { const arr = [...form.test_scores]; arr[i] = { ...arr[i], test_name: e.target.value }; update('test_scores', arr); }} className="px-3 py-2 rounded-lg border border-primary-dark/30 text-xs outline-none focus:border-primary" />
+                        <input placeholder="คะแนน / Score" value={ts.score} onChange={e => { const arr = [...form.test_scores]; arr[i] = { ...arr[i], score: e.target.value }; update('test_scores', arr); }} className="px-3 py-2 rounded-lg border border-primary-dark/30 text-xs outline-none focus:border-primary" />
+                      </div>
+                      <div className="grid grid-cols-3 gap-2">
+                        <input placeholder="สถาบัน / Institution" value={ts.institution} onChange={e => { const arr = [...form.test_scores]; arr[i] = { ...arr[i], institution: e.target.value }; update('test_scores', arr); }} className="px-3 py-2 rounded-lg border border-primary-dark/30 text-xs outline-none focus:border-primary" />
+                        <input placeholder="ปีที่สอบ / Year" value={ts.year} onChange={e => { const arr = [...form.test_scores]; arr[i] = { ...arr[i], year: e.target.value }; update('test_scores', arr); }} className="px-3 py-2 rounded-lg border border-primary-dark/30 text-xs outline-none focus:border-primary" />
+                        <input type="date" placeholder="หมดอายุ" value={ts.expiry} onChange={e => { const arr = [...form.test_scores]; arr[i] = { ...arr[i], expiry: e.target.value }; update('test_scores', arr); }} className="px-3 py-2 rounded-lg border border-primary-dark/30 text-xs outline-none focus:border-primary" />
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             </>
@@ -460,51 +513,51 @@ export default function PartnerSetupPage() {
 
           {step === 3 && category === 'translator' && (
             <>
-              <h2 className="font-bold text-lg text-tmain mb-4">ภาษาและทักษะเสริม</h2>
-              <div className="space-y-3">
-                {LANG_LIST.map(lang => (
-                  <div key={lang}>
-                    <p className="text-sm font-medium text-tmain mb-1.5">{lang}</p>
-                    <div className="flex gap-2">
-                      {LANG_LEVELS.map(level => (
-                        <button key={level} type="button" onClick={() => updateLang(lang, level)} className={`flex-1 py-2 rounded-lg border text-xs transition ${form.languages[lang] === level ? 'border-primary bg-primary/20 font-medium' : 'border-primary-dark/20'}`}>{level}</button>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-                <div className="grid grid-cols-2 gap-3">
-                  <FormInput label="ภาษาอื่นๆ (ระบุ)" name="other_language" placeholder="เช่น ภาษาญี่ปุ่น" value={form["other_language"] || ''} onChange={update} />
-                  <div>
-                    <label className="text-sm font-medium text-tmain mb-1 block">ระดับ</label>
-                    <div className="flex gap-1">
-                      {LANG_LEVELS.map(level => (
-                        <button key={level} type="button" onClick={() => update('other_language_level', level)} className={`flex-1 py-2 rounded-lg border text-[10px] transition ${form.other_language_level === level ? 'border-primary bg-primary/20 font-medium' : 'border-primary-dark/20'}`}>{level}</button>
-                      ))}
-                    </div>
-                  </div>
+              <h2 className="font-bold text-lg text-tmain mb-4">หมวดงานและทักษะ / Specialization & Skills</h2>
+              <div className="space-y-4">
+                <div>
+                  <p className="text-sm font-semibold text-tmain mb-2">หมวดงานที่เชี่ยวชาญ / Translation Specialization</p>
+                  <CheckboxGrid items={TRANSLATOR_SPECS} selected={form["translation_specializations"] as string[]} onToggle={(item) => toggleArray("translation_specializations", item)} />
                 </div>
                 <hr className="border-primary-dark/10" />
-                <p className="text-sm font-semibold text-tmain">ทักษะพิเศษเพิ่มเติม</p>
-                <CheckboxGrid items={TRANSLATOR_SKILLS} selected={form["skills"] as string[]} onToggle={(item) => toggleArray("skills", item)} />
+                <div>
+                  <p className="text-sm font-semibold text-tmain mb-2">ทักษะพิเศษเพิ่มเติม / Extra Skills</p>
+                  <CheckboxGrid items={TRANSLATOR_SKILLS} selected={form["skills"] as string[]} onToggle={(item) => toggleArray("skills", item)} />
+                </div>
+                <hr className="border-primary-dark/10" />
+                <p className="text-sm font-semibold text-tmain">ข้อมูลการทำงาน / Work Info</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <FormInput label="จำนวนคำเฉลี่ยต่อวัน / Daily Capacity" name="daily_capacity" placeholder="เช่น 3000 คำ" value={form["daily_capacity"] || ''} onChange={update} />
+                  <FormInput label="ราคาเริ่มต้น / Rate (per word/page)" name="rate_per_word" placeholder="เช่น 1.5 บาท/คำ" value={form["rate_per_word"] || ''} onChange={update} />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <FormInput label="เวลาทำงานที่ถนัด / Working Hours" name="working_hours" placeholder="เช่น 9:00-18:00" value={form["working_hours"] || ''} onChange={update} />
+                  <div>
+                    <label className="text-sm font-medium text-tmain mb-1 block">รับงานด่วน? / Rush Job</label>
+                    <button type="button" onClick={() => update('rush_job_available', !form.rush_job_available)} className={`w-full px-4 py-3 rounded-xl border text-sm transition ${form.rush_job_available ? 'border-primary bg-primary/20 font-medium' : 'border-primary-dark/30'}`}>
+                      {form.rush_job_available ? '✓ รับงานด่วน' : 'ไม่รับงานด่วน'}
+                    </button>
+                  </div>
+                </div>
               </div>
             </>
           )}
 
           {((step === 4 && (category === 'guide' || category === 'driver')) || (step === 4 && category === 'translator')) && (
             <>
-              <h2 className="font-bold text-lg text-tmain mb-4">ข้อมูลบัญชีธนาคาร</h2>
-              <p className="text-xs text-amber-600 bg-amber-50 rounded-xl p-3 mb-4">⚠ ชื่อบัญชีต้องตรงกับชื่อผู้สมัครเท่านั้น</p>
+              <h2 className="font-bold text-lg text-tmain mb-4">{category === 'translator' ? 'ข้อมูลบัญชีธนาคาร / Bank Account Information' : 'ข้อมูลบัญชีธนาคาร'}</h2>
+              <p className="text-xs text-amber-600 bg-amber-50 rounded-xl p-3 mb-4">{category === 'translator' ? '⚠ ชื่อบัญชีต้องตรงกับชื่อผู้สมัครเท่านั้น / Account name must match applicant\'s name' : '⚠ ชื่อบัญชีต้องตรงกับชื่อผู้สมัครเท่านั้น'}</p>
               <div className="space-y-3">
                 <div className="grid grid-cols-2 gap-3">
-                  <FormInput label="ชื่อธนาคาร" name="bank_name" value={form["bank_name"] || ''} onChange={update} />
-                  <FormInput label="สาขา" name="bank_branch" value={form["bank_branch"] || ''} onChange={update} />
+                  <FormInput label={category === 'translator' ? 'ชื่อธนาคาร / Bank Name' : 'ชื่อธนาคาร'} name="bank_name" value={form["bank_name"] || ''} onChange={update} />
+                  <FormInput label={category === 'translator' ? 'สาขา / Branch' : 'สาขา'} name="bank_branch" value={form["bank_branch"] || ''} onChange={update} />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
-                  <FormInput label="ชื่อบัญชี" name="account_name" value={form["account_name"] || ''} onChange={update} />
-                  <FormInput label="เลขที่บัญชี" name="account_number" value={form["account_number"] || ''} onChange={update} />
+                  <FormInput label={category === 'translator' ? 'ชื่อบัญชี / Account Name' : 'ชื่อบัญชี'} name="account_name" value={form["account_name"] || ''} onChange={update} />
+                  <FormInput label={category === 'translator' ? 'เลขที่บัญชี / Account No.' : 'เลขที่บัญชี'} name="account_number" value={form["account_number"] || ''} onChange={update} />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
-                  <FormSelect label="ประเภทบัญชี" name="account_type" options={ACCOUNT_TYPES} value={form["account_type"] || ''} onChange={update} />
+                  <FormSelect label={category === 'translator' ? 'ประเภทบัญชี / Account Type' : 'ประเภทบัญชี'} name="account_type" options={ACCOUNT_TYPES} value={form["account_type"] || ''} onChange={update} />
                   <FormInput label="PromptPay / พร้อมเพย์" name="promptpay" value={form["promptpay"] || ''} onChange={update} />
                 </div>
                 {category === 'driver' && (
