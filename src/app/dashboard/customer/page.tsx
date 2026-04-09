@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase-client';
 import { useAuthStore } from '@/hooks/useAuthStore';
@@ -15,15 +15,26 @@ import {
 type ModalType = 'edit' | 'security' | 'notifications' | 'help' | 'switch-role' | 'switch-partner' | null;
 
 export default function CustomerDashboard() {
-  const { user, setUser, setPartnerProfile } = useAuthStore();
+  const { user, setUser, partnerProfile, setPartnerProfile } = useAuthStore();
   const supabase = createClient();
   const router = useRouter();
   const [activeModal, setActiveModal] = useState<ModalType>(null);
+
+  useEffect(() => {
+    if (!user || user.role !== 'partner') return;
+    const fetchPP = async () => {
+      const { data } = await supabase.from('partner_profiles').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(1).single();
+      if (data) setPartnerProfile(data);
+    };
+    fetchPP();
+  }, [user]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
     router.push('/auth/login');
   };
+
+  const categoryLabel = partnerProfile?.category === 'guide' ? 'ไกด์' : partnerProfile?.category === 'driver' ? 'คนขับรถ' : partnerProfile?.category === 'translator' ? 'ล่าม' : '';
 
   return (
     <AppLayout>
@@ -40,9 +51,16 @@ export default function CustomerDashboard() {
             <div>
               <h2 className="text-xl font-bold text-tmain">{user?.full_name}</h2>
               <p className="text-sm text-tmuted">{user?.email}</p>
-              <span className="inline-block mt-1 text-xs bg-primary-light text-primary-text px-3 py-0.5 rounded-full font-medium capitalize">
-                {user?.role}
-              </span>
+              <div className="flex items-center gap-2 mt-1">
+                <span className="text-xs bg-primary-light text-primary-text px-3 py-0.5 rounded-full font-medium capitalize">
+                  {user?.role}
+                </span>
+                {user?.role === 'partner' && categoryLabel && (
+                  <span className="text-xs bg-secondary/20 text-tmain px-3 py-0.5 rounded-full font-medium">
+                    {categoryLabel}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -130,7 +148,7 @@ function ModalWrapper({ title, onClose, children }: { title: string; onClose: ()
 }
 
 function EditProfileModal({ onClose }: { onClose: () => void }) {
-  const { user, setUser } = useAuthStore();
+  const { user, setUser, partnerProfile, setPartnerProfile } = useAuthStore();
   const supabase = createClient();
   const [fullName, setFullName] = useState(user?.full_name || '');
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
@@ -139,6 +157,23 @@ function EditProfileModal({ onClose }: { onClose: () => void }) {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
   const fileRef = useRef<HTMLInputElement>(null);
+
+  const isPartner = user?.role === 'partner' && partnerProfile;
+  const [pp, setPP] = useState<Record<string, any>>({
+    business_name: partnerProfile?.business_name || '',
+    description: (partnerProfile as any)?.description || '',
+    phone: (partnerProfile as any)?.phone || '',
+    line_id: (partnerProfile as any)?.line_id || '',
+    wechat_id: (partnerProfile as any)?.wechat_id || '',
+    contact_email: (partnerProfile as any)?.contact_email || '',
+    address: (partnerProfile as any)?.address || '',
+    special_routes: (partnerProfile as any)?.special_routes || '',
+    bank_name: (partnerProfile as any)?.bank_name || '',
+    bank_branch: (partnerProfile as any)?.bank_branch || '',
+    account_name: (partnerProfile as any)?.account_name || '',
+    account_number: (partnerProfile as any)?.account_number || '',
+    promptpay: (partnerProfile as any)?.promptpay || '',
+  });
 
   const handleAvatarSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -165,6 +200,27 @@ function EditProfileModal({ onClose }: { onClose: () => void }) {
       const { error: updateError } = await supabase.from('profiles').update({ full_name: fullName, avatar_url: avatarUrl }).eq('id', user.id);
       if (updateError) throw updateError;
       setUser({ ...user, full_name: fullName, avatar_url: avatarUrl });
+
+      if (isPartner && partnerProfile) {
+        const { error: ppError } = await supabase.from('partner_profiles').update({
+          business_name: pp.business_name,
+          description: pp.description,
+          phone: pp.phone,
+          line_id: pp.line_id,
+          wechat_id: pp.wechat_id,
+          contact_email: pp.contact_email,
+          address: pp.address,
+          special_routes: pp.special_routes,
+          bank_name: pp.bank_name,
+          bank_branch: pp.bank_branch,
+          account_name: pp.account_name,
+          account_number: pp.account_number,
+          promptpay: pp.promptpay,
+        }).eq('id', partnerProfile.id);
+        if (ppError) throw ppError;
+        setPartnerProfile({ ...partnerProfile, ...pp } as any);
+      }
+
       setSuccess(true);
       setTimeout(() => onClose(), 1000);
     } catch (err: any) {
@@ -174,6 +230,17 @@ function EditProfileModal({ onClose }: { onClose: () => void }) {
     }
   };
 
+  const PInput = ({ label, name, rows }: { label: string; name: string; rows?: number }) => (
+    <div>
+      <label className="text-sm font-medium text-tmain mb-1 block">{label}</label>
+      {rows ? (
+        <textarea value={pp[name] || ''} onChange={e => setPP(prev => ({ ...prev, [name]: e.target.value }))} rows={rows} className="w-full px-4 py-2.5 rounded-xl border border-primary-dark/30 focus:border-primary outline-none text-sm resize-none" />
+      ) : (
+        <input type="text" value={pp[name] || ''} onChange={e => setPP(prev => ({ ...prev, [name]: e.target.value }))} className="w-full px-4 py-2.5 rounded-xl border border-primary-dark/30 focus:border-primary outline-none text-sm" />
+      )}
+    </div>
+  );
+
   return (
     <ModalWrapper title="แก้ไขโปรไฟล์" onClose={onClose}>
       {success ? (
@@ -182,7 +249,7 @@ function EditProfileModal({ onClose }: { onClose: () => void }) {
           <p className="font-semibold text-tmain">บันทึกสำเร็จ!</p>
         </div>
       ) : (
-        <div className="space-y-5">
+        <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-1">
           {error && <div className="bg-danger/10 border border-danger/20 text-danger rounded-xl p-3 text-sm">{error}</div>}
           <div className="flex justify-center">
             <div className="relative">
@@ -197,13 +264,44 @@ function EditProfileModal({ onClose }: { onClose: () => void }) {
           </div>
           <div>
             <label className="text-sm font-medium text-tmain mb-1 block">ชื่อ-นามสกุล</label>
-            <input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-primary-dark/30 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none" />
+            <input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} className="w-full px-4 py-2.5 rounded-xl border border-primary-dark/30 focus:border-primary outline-none text-sm" />
           </div>
           <div>
             <label className="text-sm font-medium text-tmain mb-1 block">อีเมล</label>
-            <input type="text" value={user?.email || ''} disabled className="w-full px-4 py-3 rounded-xl border border-primary-dark/30 bg-primary-light/70 text-tmuted" />
+            <input type="text" value={user?.email || ''} disabled className="w-full px-4 py-2.5 rounded-xl border border-primary-dark/30 bg-primary-light/70 text-tmuted text-sm" />
           </div>
-          <button onClick={handleSave} disabled={loading || !fullName.trim()} className="w-full bg-primary hover:bg-primary-dark text-dark-DEFAULT font-semibold py-3 rounded-xl transition flex items-center justify-center gap-2 disabled:opacity-40">
+
+          {isPartner && (
+            <>
+              <hr className="border-primary-dark/10" />
+              <p className="text-sm font-semibold text-tmain">ข้อมูลพาร์ทเนอร์</p>
+              <PInput label="ชื่อธุรกิจ / ชื่อบริการ" name="business_name" />
+              <PInput label="คำอธิบาย / แนะนำตัว" name="description" rows={3} />
+              <div className="grid grid-cols-2 gap-3">
+                <PInput label="เบอร์โทรศัพท์" name="phone" />
+                <PInput label="LINE ID" name="line_id" />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <PInput label="WeChat ID" name="wechat_id" />
+                <PInput label="Email ติดต่อ" name="contact_email" />
+              </div>
+              <PInput label="ที่อยู่" name="address" rows={2} />
+              <PInput label="เส้นทาง / พื้นที่ให้บริการ" name="special_routes" rows={2} />
+              <hr className="border-primary-dark/10" />
+              <p className="text-sm font-semibold text-tmain">บัญชีธนาคาร</p>
+              <div className="grid grid-cols-2 gap-3">
+                <PInput label="ชื่อธนาคาร" name="bank_name" />
+                <PInput label="สาขา" name="bank_branch" />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <PInput label="ชื่อบัญชี" name="account_name" />
+                <PInput label="เลขที่บัญชี" name="account_number" />
+              </div>
+              <PInput label="PromptPay / พร้อมเพย์" name="promptpay" />
+            </>
+          )}
+
+          <button onClick={handleSave} disabled={loading || !fullName.trim()} className="w-full bg-primary hover:bg-primary-dark text-dark-DEFAULT font-semibold py-3 rounded-xl transition flex items-center justify-center gap-2 disabled:opacity-40 sticky bottom-0">
             {loading ? <div className="w-5 h-5 border-2 border-dark-DEFAULT/30 border-t-dark-DEFAULT rounded-full animate-spin" /> : <><Save size={18} /> บันทึก</>}
           </button>
         </div>
