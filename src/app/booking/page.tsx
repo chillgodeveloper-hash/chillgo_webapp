@@ -214,6 +214,18 @@ export default function BookingPage() {
                   </Link>
 
                   <div className="flex gap-2 pt-3 border-t border-primary-dark/15">
+                    {booking.status === 'pending' && user?.role === 'customer' && (
+                      <button
+                        onClick={async () => {
+                          if (!confirm('ยืนยันยกเลิกการจอง?')) return;
+                          await supabase.from('bookings').update({ status: 'cancelled' }).eq('id', booking.id);
+                          fetchBookings();
+                        }}
+                        className="flex-1 bg-danger/10 text-red-600 font-medium py-2 rounded-xl text-sm text-center flex items-center justify-center gap-1.5 hover:bg-danger/20 transition"
+                      >
+                        <XCircle size={16} /> ยกเลิกการจอง
+                      </button>
+                    )}
                     {['confirmed', 'paid', 'in_progress'].includes(booking.status) && (
                       <Link
                         href={`/chat/${booking.id}`}

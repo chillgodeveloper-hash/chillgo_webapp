@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase-client';
 import AppLayout from '@/components/layout/AppLayout';
-import { CheckCircle, XCircle, Edit, MessageCircle, X, Save } from 'lucide-react';
+import { CheckCircle, XCircle, Edit, MessageCircle, X, Save, Navigation } from 'lucide-react';
 import { Booking } from '@/types';
 import Link from 'next/link';
 import FlatpickrInput from '@/components/ui/FlatpickrInput';
@@ -141,6 +141,9 @@ export default function AdminBookingsPage() {
                       <button onClick={() => openEdit(booking)} className="flex items-center gap-1 bg-secondary/20 text-tmain px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-secondary/30 transition"><Edit size={14} /> แก้ไข</button>
                     )}
                     <Link href={`/chat/${booking.id}`} className="flex items-center gap-1 bg-info/20 text-tmain px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-info/30 transition"><MessageCircle size={14} /> แชท</Link>
+                    {booking.status === 'in_progress' && (
+                      <Link href={`/booking/${booking.id}/tracking`} className="flex items-center gap-1 bg-success/20 text-tmain px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-success/30 transition"><Navigation size={14} /> GPS</Link>
+                    )}
                   </div>
                 </div>
               ))}

@@ -5,7 +5,8 @@ export const metadata: Metadata = {
   title: 'ChillGo Travel - จัดทริปง่าย ๆ สไตล์คุณ',
   description: 'แพลตฟอร์มจองไกด์และรถเช่าสำหรับทริปในฝัน',
   icons: {
-    icon: '/icon.svg',
+    icon: '/favicon.ico',
+    apple: '/apple-touch-icon.png',
   },
 };
 
