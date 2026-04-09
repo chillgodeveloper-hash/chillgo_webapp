@@ -17,9 +17,10 @@ interface GeoState {
   accuracy: number | null;
   error: string | null;
   lastSent: string | null;
+  wakeLockActive: boolean;
 }
 
-export function useGeoTracking({ bookingId, userId, enabled, intervalMs = 30000 }: GeoTrackingOptions) {
+export function useGeoTracking({ bookingId, userId, enabled, intervalMs = 10000 }: GeoTrackingOptions) {
   const [state, setState] = useState<GeoState>({
     tracking: false,
     lat: null,
@@ -27,12 +28,50 @@ export function useGeoTracking({ bookingId, userId, enabled, intervalMs = 30000 
     accuracy: null,
     error: null,
     lastSent: null,
+    wakeLockActive: false,
   });
 
   const watchIdRef = useRef<number | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const latestCoordsRef = useRef<{ lat: number; lng: number; accuracy: number } | null>(null);
+  const wakeLockRef = useRef<any>(null);
   const supabase = createClient();
+
+  const requestWakeLock = useCallback(async () => {
+    try {
+      if ('wakeLock' in navigator) {
+        wakeLockRef.current = await (navigator as any).wakeLock.request('screen');
+        setState(prev => ({ ...prev, wakeLockActive: true }));
+
+        wakeLockRef.current.addEventListener('release', () => {
+          setState(prev => ({ ...prev, wakeLockActive: false }));
+        });
+      }
+    } catch {}
+  }, []);
+
+  const releaseWakeLock = useCallback(async () => {
+    try {
+      if (wakeLockRef.current) {
+        await wakeLockRef.current.release();
+        wakeLockRef.current = null;
+        setState(prev => ({ ...prev, wakeLockActive: false }));
+      }
+    } catch {}
+  }, []);
+
+  useEffect(() => {
+    if (!enabled) return;
+
+    const handleVisibilityChange = async () => {
+      if (document.visibilityState === 'visible' && enabled && !wakeLockRef.current) {
+        await requestWakeLock();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => { document.removeEventListener('visibilitychange', handleVisibilityChange); };
+  }, [enabled, requestWakeLock]);
 
   const sendLocation = useCallback(async () => {
     const coords = latestCoordsRef.current;
@@ -51,11 +90,13 @@ export function useGeoTracking({ bookingId, userId, enabled, intervalMs = 30000 
     }
   }, [bookingId, userId]);
 
-  const startTracking = useCallback(() => {
+  const startTracking = useCallback(async () => {
     if (!navigator.geolocation) {
       setState(prev => ({ ...prev, error: 'เบราว์เซอร์ไม่รองรับ GPS' }));
       return;
     }
+
+    await requestWakeLock();
 
     watchIdRef.current = navigator.geolocation.watchPosition(
       (pos) => {
@@ -82,9 +123,9 @@ export function useGeoTracking({ bookingId, userId, enabled, intervalMs = 30000 
 
     sendLocation();
     intervalRef.current = setInterval(sendLocation, intervalMs);
-  }, [sendLocation, intervalMs]);
+  }, [sendLocation, intervalMs, requestWakeLock]);
 
-  const stopTracking = useCallback(() => {
+  const stopTracking = useCallback(async () => {
     if (watchIdRef.current !== null) {
       navigator.geolocation.clearWatch(watchIdRef.current);
       watchIdRef.current = null;
@@ -93,8 +134,9 @@ export function useGeoTracking({ bookingId, userId, enabled, intervalMs = 30000 
       clearInterval(intervalRef.current);
       intervalRef.current = null;
     }
+    await releaseWakeLock();
     setState(prev => ({ ...prev, tracking: false }));
-  }, []);
+  }, [releaseWakeLock]);
 
   useEffect(() => {
     if (enabled) {

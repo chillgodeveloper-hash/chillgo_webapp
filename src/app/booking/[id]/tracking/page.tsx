@@ -7,7 +7,7 @@ import { useAuthStore } from '@/hooks/useAuthStore';
 import { useGeoTracking } from '@/hooks/useGeoTracking';
 import AppLayout from '@/components/layout/AppLayout';
 import Link from 'next/link';
-import { ArrowLeft, MapPin, Navigation, Clock, Wifi, WifiOff, Radio, ExternalLink } from 'lucide-react';
+import { ArrowLeft, MapPin, Navigation, Clock, Wifi, WifiOff, Radio, ExternalLink, Smartphone } from 'lucide-react';
 
 interface LocationPoint {
   id: string;
@@ -17,7 +17,7 @@ interface LocationPoint {
   created_at: string;
 }
 
-function LeafletMap({ locations, partnerName }: { locations: LocationPoint[]; partnerName: string }) {
+function LeafletMap({ locations, partnerName, onMapReady }: { locations: LocationPoint[]; partnerName: string; onMapReady?: (centerFn: () => void) => void }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
   const markerInstanceRef = useRef<any>(null);
@@ -46,6 +46,15 @@ function LeafletMap({ locations, partnerName }: { locations: LocationPoint[]; pa
     setLoaded(true);
 
     setTimeout(() => { map.invalidateSize(); }, 300);
+
+    if (onMapReady) {
+      onMapReady(() => {
+        const m = markerInstanceRef.current;
+        if (m && mapInstanceRef.current) {
+          mapInstanceRef.current.setView(m.getLatLng(), 16, { animate: true });
+        }
+      });
+    }
   }, []);
 
   useEffect(() => {
@@ -142,6 +151,23 @@ function LeafletMap({ locations, partnerName }: { locations: LocationPoint[]; pa
   return (
     <div className="relative w-full h-[400px] md:h-[500px] rounded-2xl overflow-hidden border border-primary-dark/20 bg-white">
       <div ref={containerRef} className="w-full h-full" style={{ zIndex: 1 }} />
+      {loaded && locations.length > 0 && (
+        <button
+          onClick={() => {
+            const m = markerInstanceRef.current;
+            if (m && mapInstanceRef.current) {
+              mapInstanceRef.current.setView(m.getLatLng(), 16, { animate: true });
+            }
+          }}
+          className="absolute bottom-4 right-4 z-[1000] bg-white hover:bg-primary-light text-tmain w-10 h-10 rounded-full shadow-lg border border-primary-dark/20 flex items-center justify-center transition"
+          title="กลับมาตำแหน่งปัจจุบัน"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="3" />
+            <path d="M12 2v4M12 18v4M2 12h4M18 12h4" />
+          </svg>
+        </button>
+      )}
       {!loaded && (
         <div className="absolute inset-0 bg-primary-light flex items-center justify-center z-10">
           <div className="text-center">
@@ -295,6 +321,18 @@ export default function TrackingPage() {
                 {geo.lastSent && (
                   <p className="text-xs text-green-600 mt-1 ml-7">ส่งล่าสุด: {new Date(geo.lastSent).toLocaleTimeString('th-TH')}</p>
                 )}
+              </div>
+            )}
+
+            {isPartner && isInProgress && (
+              <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 mt-3">
+                <div className="flex items-start gap-2">
+                  <Smartphone size={18} className="text-amber-600 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="text-sm font-medium text-amber-800">โปรดเปิดหน้าจอนี้ไว้</p>
+                    <p className="text-xs text-amber-600 mt-0.5">เพื่อส่งตำแหน่งให้ลูกค้าอย่างต่อเนื่อง {geo.wakeLockActive ? '— หน้าจอจะไม่ดับอัตโนมัติ ✓' : ''}</p>
+                  </div>
+                </div>
               </div>
             )}
 
