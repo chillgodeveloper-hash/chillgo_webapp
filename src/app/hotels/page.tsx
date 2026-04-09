@@ -12,8 +12,8 @@ const popularDestinations = [
   { name: 'เชียงใหม่', nameEn: 'Chiang Mai', image: 'https://images.unsplash.com/photo-1598935898639-81586f7d2129?w=640&h=480&fit=crop', desc: 'ดอยสุเทพ ย่านเมืองเก่า คาเฟ่สุดชิล' },
   { name: 'ภูเก็ต', nameEn: 'Phuket', image: 'https://images.unsplash.com/photo-1589394815804-964ed0be2eb5?w=640&h=480&fit=crop', desc: 'หาดทรายขาว น้ำทะเลใส ไนท์ไลฟ์คึกคัก' },
   { name: 'กระบี่', nameEn: 'Krabi', image: 'https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?w=640&h=480&fit=crop', desc: 'ทะเลแหวก เกาะพีพี หน้าผาหินปูน' },
-  { name: 'พัทยา', nameEn: 'Pattaya', image: 'https://images.unsplash.com/photo-1565361849078-294849288de5?w=640&h=480&fit=crop', desc: 'ชายหาดใกล้กรุงเทพ วอล์คกิ้งสตรีท เกาะล้าน' },
-  { name: 'เชียงราย', nameEn: 'Chiang Rai', image: 'https://images.unsplash.com/photo-1512553135590-0af2655d4198?w=640&h=480&fit=crop', desc: 'วัดร่องขุ่น สิงห์ปาร์ค ดอยตุง' },
+  { name: 'พัทยา', nameEn: 'Pattaya', image: 'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=640&h=480&fit=crop', desc: 'ชายหาดใกล้กรุงเทพ วอล์คกิ้งสตรีท เกาะล้าน' },
+  { name: 'เชียงราย', nameEn: 'Chiang Rai', image: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=640&h=480&fit=crop', desc: 'วัดร่องขุ่น สิงห์ปาร์ค ดอยตุง' },
   { name: 'สมุย', nameEn: 'Koh Samui', image: 'https://images.unsplash.com/photo-1537956965359-7573183d1f57?w=640&h=480&fit=crop', desc: 'เกาะสวรรค์อ่าวไทย รีสอร์ทหรู หาดสวย' },
   { name: 'หัวหิน', nameEn: 'Hua Hin', image: 'https://images.unsplash.com/photo-1540541338287-41700207dee6?w=640&h=480&fit=crop', desc: 'ชายทะเลหลวง ตลาดโต้รุ่ง วังไกลกังวล' },
   { name: 'เกาะช้าง', nameEn: 'Koh Chang', image: 'https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=640&h=480&fit=crop', desc: 'เกาะใหญ่อันดับ 2 น้ำตกสวย ป่าเขียว' },
@@ -24,7 +24,7 @@ const popularDestinations = [
   { name: 'ปาย', nameEn: 'Pai', image: 'https://images.unsplash.com/photo-1583417319070-4a69db38a482?w=640&h=480&fit=crop', desc: 'สะพานปาย ทุ่งดอกบัวตอง กาแฟดี' },
   { name: 'เขาหลัก', nameEn: 'Khao Lak', image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=640&h=480&fit=crop', desc: 'หาดสงบ ดำน้ำหมู่เกาะสิมิลัน' },
   { name: 'น่าน', nameEn: 'Nan', image: 'https://images.unsplash.com/photo-1528181304800-259b08848526?w=640&h=480&fit=crop', desc: 'เมืองเก่า วัดภูมินทร์ ดอยเสมอดาว' },
-  { name: 'ระยอง', nameEn: 'Rayong', image: 'https://images.unsplash.com/photo-1562602833-0f4ab2fc46e5?w=640&h=480&fit=crop', desc: 'เกาะเสม็ด หาดแม่รำพึง สวนผลไม้' },
+  { name: 'ระยอง', nameEn: 'Rayong', image: 'https://images.unsplash.com/photo-1519046904884-53103b34b206?w=640&h=480&fit=crop', desc: 'เกาะเสม็ด หาดแม่รำพึง สวนผลไม้' },
   { name: 'ตราด', nameEn: 'Trat', image: 'https://images.unsplash.com/photo-1552733407-5d5c46c3bb3b?w=640&h=480&fit=crop', desc: 'ประตูสู่เกาะช้าง เกาะหมาก เกาะกูด' },
 ];
 

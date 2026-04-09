@@ -15,8 +15,8 @@ const flightRoutes = [
 const hotelDestinations = [
   { name: 'กรุงเทพ', nameEn: 'Bangkok', image: 'https://images.unsplash.com/photo-1508009603885-50cf7c579365?w=640&h=480&fit=crop' },
   { name: 'หัวหิน', nameEn: 'Hua Hin', image: 'https://images.unsplash.com/photo-1540541338287-41700207dee6?w=640&h=480&fit=crop' },
-  { name: 'เชียงราย', nameEn: 'Chiang Rai', image: 'https://images.unsplash.com/photo-1512553135590-0af2655d4198?w=640&h=480&fit=crop' },
-  { name: 'พัทยา', nameEn: 'Pattaya', image: 'https://images.unsplash.com/photo-1565361849078-294849288de5?w=640&h=480&fit=crop' },
+  { name: 'เชียงราย', nameEn: 'Chiang Rai', image: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=640&h=480&fit=crop' },
+  { name: 'พัทยา', nameEn: 'Pattaya', image: 'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=640&h=480&fit=crop' },
 ];
 
 export default function TravelPreview() {
