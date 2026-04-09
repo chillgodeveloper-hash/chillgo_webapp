@@ -64,7 +64,7 @@ export default function ReceiptPage() {
       <body>
         <div class="receipt">
           <div class="header">
-            <div class="logo">#ChillGo</div>
+            <div class="logo">ChillGo Travel</div>
             <div class="subtitle">ใบเสร็จรับเงิน / Receipt</div>
           </div>
           <div class="receipt-number">
@@ -91,7 +91,7 @@ export default function ReceiptPage() {
           </div>
           <div class="status">✓ ชำระเงินเรียบร้อยแล้ว</div>
           <div class="footer">
-            <p>#ChillGo — จัดทริปง่าย ๆ สไตล์คุณ</p>
+            <p>ChillGo Travel — จัดทริปง่าย ๆ สไตล์คุณ</p>
             <p>support@chillgo.com | Line: @chillgo</p>
             <p>เอกสารนี้ออกโดยระบบอัตโนมัติ</p>
           </div>
@@ -129,7 +129,7 @@ export default function ReceiptPage() {
           <div ref={receiptRef}>
             <div className="bg-white rounded-2xl border border-primary-dark/20 overflow-hidden">
               <div className="bg-gradient-to-r from-primary via-primary-dark to-secondary p-6 text-center">
-                <h1 className="font-display text-2xl font-extrabold text-tmain">#ChillGo</h1>
+                <img src="/logo.png" alt="ChillGo" className="h-14 w-auto mx-auto" />
                 <p className="text-sm text-tmain/70">ใบเสร็จรับเงิน</p>
               </div>
 
@@ -221,7 +221,7 @@ export default function ReceiptPage() {
                 </div>
 
                 <p className="text-center text-[11px] text-tmuted mt-4">
-                  #ChillGo — จัดทริปง่าย ๆ สไตล์คุณ | support@chillgo.com
+                  ChillGo Travel — จัดทริปง่าย ๆ สไตล์คุณ | support@chillgo.com
                 </p>
               </div>
             </div>

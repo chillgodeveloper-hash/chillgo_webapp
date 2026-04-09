@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import '@/styles/globals.css';
 
 export const metadata: Metadata = {
-  title: '#ChillGo - จัดทริปง่าย ๆ สไตล์คุณ',
+  title: 'ChillGo Travel - จัดทริปง่าย ๆ สไตล์คุณ',
   description: 'แพลตฟอร์มจองไกด์และรถเช่าสำหรับทริปในฝัน',
   icons: {
     icon: '/icon.svg',

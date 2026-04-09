@@ -83,7 +83,7 @@ export default function RegisterPage() {
           <div className="absolute bottom-32 left-20 w-64 h-64 bg-orange-300 rounded-full blur-3xl" />
         </div>
         <div className="relative z-10 text-center px-12">
-          <h1 className="font-display text-6xl font-extrabold text-dark-DEFAULT mb-4">#ChillGo</h1>
+          <img src="/logo.png" alt="ChillGo" className="h-28 w-auto mx-auto mb-4" />
           <p className="text-xl text-dark-DEFAULT/70 font-medium">เริ่มต้นการเดินทางของคุณ</p>
         </div>
       </div>
@@ -91,7 +91,7 @@ export default function RegisterPage() {
       <div className="w-full lg:w-1/2 flex items-center justify-center p-6">
         <div className="w-full max-w-md">
           <div className="lg:hidden text-center mb-8">
-            <h1 className="font-display text-4xl font-extrabold text-primary-text">#ChillGo</h1>
+            <img src="/logo.png" alt="ChillGo" className="h-20 w-auto mx-auto" />
           </div>
 
           <div className="bg-white rounded-3xl shadow-xl p-8">

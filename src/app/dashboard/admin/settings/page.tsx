@@ -25,7 +25,7 @@ export default function AdminSettingsPage() {
                 <label className="text-sm font-medium text-tmuted block mb-1">ชื่อแพลตฟอร์ม</label>
                 <input
                   type="text"
-                  defaultValue="#ChillGo"
+                  defaultValue="ChillGo Travel"
                   className="w-full px-4 py-2.5 rounded-xl border border-primary-dark/30 focus:border-primary outline-none text-sm"
                 />
               </div>

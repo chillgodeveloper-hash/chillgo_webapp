@@ -64,7 +64,7 @@ export default function RoleSelectionPage() {
 
         <div className="text-center mb-8">
           <h1 className="font-display text-3xl font-bold text-tmain">คุณต้องการใช้งานในฐานะ?</h1>
-          <p className="text-tmuted mt-2">เลือกบทบาทของคุณใน #ChillGo</p>
+          <p className="text-tmuted mt-2">เลือกบทบาทของคุณใน ChillGo</p>
         </div>
 
         <div className="space-y-4 mb-6">

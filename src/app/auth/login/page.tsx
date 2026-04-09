@@ -33,7 +33,7 @@ export default function LoginPage() {
       <nav className="sticky top-0 z-50 bg-primary shadow-md shadow-primary-dark/20">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex items-center justify-between h-16">
-            <Link href="/feed" className="font-display text-2xl font-extrabold text-tmain">#ChillGo</Link>
+            <Link href="/feed" className="flex items-center"><img src="/logo.png" alt="ChillGo" className="h-10 w-auto" /></Link>
             <div className="flex items-center gap-2">
               <Link href="/feed" className="px-4 py-2 text-sm font-medium text-tmain hover:bg-primary-dark/50 rounded-lg transition">หน้าหลัก</Link>
               <Link href="/auth/register" className="px-4 py-2 text-sm font-semibold bg-secondary text-tmain rounded-lg hover:bg-secondary/90 transition">สมัครสมาชิก</Link>
@@ -46,7 +46,7 @@ export default function LoginPage() {
         <div className="w-full max-w-md">
           <div className="bg-white rounded-3xl shadow-xl border border-primary-dark/20 p-8">
             <div className="text-center mb-6">
-              <h1 className="font-display text-3xl font-extrabold text-secondary mb-1">#ChillGo</h1>
+              <img src="/logo.png" alt="ChillGo" className="h-16 w-auto mx-auto mb-2" />
               <h2 className="text-xl font-bold text-tmain">เข้าสู่ระบบ</h2>
               <p className="text-tmuted text-sm mt-1">ยินดีต้อนรับกลับมา!</p>
             </div>

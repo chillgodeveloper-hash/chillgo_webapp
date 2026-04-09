@@ -6,7 +6,7 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           <div>
-            <h3 className="font-display text-xl font-extrabold text-secondary mb-2">#ChillGo</h3>
+            <img src="/logo.png" alt="ChillGo" className="h-12 w-auto mb-2" />
             <p className="text-sm text-tmuted">จัดทริปง่าย ๆ สไตล์คุณ</p>
           </div>
           <div>
@@ -33,7 +33,7 @@ export default function Footer() {
           </div>
         </div>
         <div className="border-t border-primary-dark/10 mt-6 pt-6 text-center">
-          <p className="text-xs text-tmuted">&copy; 2025 #ChillGo. All rights reserved.</p>
+          <p className="text-xs text-tmuted">&copy; 2025 ChillGo Travel. All rights reserved.</p>
         </div>
       </div>
     </footer>
