@@ -126,7 +126,7 @@ export default function PartnersReportPage() {
                         <span className={`text-xs px-2 py-0.5 rounded-full ${
                           p.category === 'guide' ? 'bg-secondary/20 text-tmain' : 'bg-info/20 text-tmain'
                         }`}>
-                          {p.category === 'guide' ? '🗺️ ไกด์' : category === 'driver' ? '🚗 คนขับรถ' : '🌐 ล่าม'}
+                          {p.category === 'guide' ? '🗺️ ไกด์' : p.category === 'driver' ? '🚗 คนขับรถ' : '🌐 ล่าม'}
                         </span>
                       </td>
                       <td className="py-3 px-4 text-center">
