@@ -10,7 +10,7 @@ import { useState, useRef, useEffect } from 'react';
 export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
-  const { user } = useAuthStore();
+  const { user, partnerProfile } = useAuthStore();
   const supabase = createClient();
   const [profileOpen, setProfileOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -271,6 +271,11 @@ export default function Navbar() {
                       <p className="text-sm font-medium text-tmain">{user.full_name}</p>
                       <p className="text-xs text-tmuted">{user.email}</p>
                       <span className="inline-block mt-1 text-xs bg-primary-light text-primary-text px-2 py-0.5 rounded-full capitalize">{user.role}</span>
+                      {user.role === 'partner' && partnerProfile?.category && (
+                        <span className="inline-block mt-1 ml-1 text-xs bg-secondary/20 text-tmain px-2 py-0.5 rounded-full">
+                          {partnerProfile.category === 'guide' ? 'ไกด์' : partnerProfile.category === 'driver' ? 'คนขับรถ' : 'ล่าม'}
+                        </span>
+                      )}
                     </div>
                     <Link
                       href="/dashboard/customer"

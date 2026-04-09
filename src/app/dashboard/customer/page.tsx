@@ -23,7 +23,7 @@ export default function CustomerDashboard() {
   useEffect(() => {
     if (!user || user.role !== 'partner') return;
     const fetchPP = async () => {
-      const { data } = await supabase.from('partner_profiles').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(1).single();
+      const { data } = await supabase.from('partner_profiles').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(1).maybeSingle();
       if (data) setPartnerProfile(data);
     };
     fetchPP();
@@ -445,7 +445,7 @@ function SwitchRoleModal({ onClose }: { onClose: () => void }) {
       setUser({ ...user, role: 'customer' });
       setPartnerProfile(null);
       onClose();
-      router.push('/feed');
+      window.location.href = '/feed';
     } else {
       if (!selectedCategory) { setLoading(false); return; }
       const { data: existingPP } = await supabase
@@ -460,7 +460,7 @@ function SwitchRoleModal({ onClose }: { onClose: () => void }) {
         setUser({ ...user, role: 'partner' });
         setPartnerProfile(existingPP);
         onClose();
-        router.push('/feed');
+        window.location.href = '/feed';
       } else {
         await supabase.from('partner_profiles').insert({
           user_id: user.id, category: selectedCategory, business_name: user.full_name,
@@ -469,7 +469,7 @@ function SwitchRoleModal({ onClose }: { onClose: () => void }) {
         await supabase.from('profiles').update({ role: 'partner' }).eq('id', user.id);
         setUser({ ...user, role: 'partner' });
         onClose();
-        router.push('/dashboard/partner/setup');
+        window.location.href = '/dashboard/partner/setup';
       }
     }
     setLoading(false);
@@ -541,7 +541,7 @@ function SwitchPartnerModal({ onClose }: { onClose: () => void }) {
     if (existingPP) {
       setPartnerProfile(existingPP);
       onClose();
-      router.push('/feed');
+      window.location.href = '/feed';
     } else {
       await supabase.from('partner_profiles').insert({
         user_id: user.id, category: selectedCategory, business_name: user.full_name,
@@ -550,7 +550,7 @@ function SwitchPartnerModal({ onClose }: { onClose: () => void }) {
       const { data: newPP } = await supabase.from('partner_profiles').select('*').eq('user_id', user.id).eq('category', selectedCategory).single();
       if (newPP) setPartnerProfile(newPP);
       onClose();
-      router.push('/dashboard/partner/setup');
+      window.location.href = '/dashboard/partner/setup';
     }
     setLoading(false);
   };

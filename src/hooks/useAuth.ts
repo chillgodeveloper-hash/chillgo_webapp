@@ -42,7 +42,9 @@ export function useAuth(requireRole?: string) {
             .from('partner_profiles')
             .select('*')
             .eq('user_id', profile.id)
-            .single();
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .maybeSingle();
           setPartnerProfile(partnerProfile);
 
           if (partnerProfile && partnerProfile.portfolio_images?.length === 0) {
