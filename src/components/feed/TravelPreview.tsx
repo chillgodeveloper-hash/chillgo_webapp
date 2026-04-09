@@ -8,21 +8,21 @@ const MARKER = process.env.NEXT_PUBLIC_TRAVELPAYOUTS_MARKER || '';
 const flightRoutes = [
   { from: 'BKK', to: 'CNX', name: 'เชียงใหม่', nameEn: 'Chiang Mai', image: 'https://photo.hotellook.com/static/cities/960x720/CNX.jpg' },
   { from: 'BKK', to: 'HKT', name: 'ภูเก็ต', nameEn: 'Phuket', image: 'https://photo.hotellook.com/static/cities/960x720/HKT.jpg' },
-  { from: 'BKK', to: 'NRT', name: 'โตเกียว', nameEn: 'Tokyo', image: 'https://photo.hotellook.com/static/cities/960x720/TYO.jpg' },
-  { from: 'BKK', to: 'ICN', name: 'โซล', nameEn: 'Seoul', image: 'https://photo.hotellook.com/static/cities/960x720/SEL.jpg' },
+  { from: 'BKK', to: 'KBV', name: 'กระบี่', nameEn: 'Krabi', image: 'https://photo.hotellook.com/static/cities/960x720/KBV.jpg' },
+  { from: 'BKK', to: 'USM', name: 'สมุย', nameEn: 'Koh Samui', image: 'https://photo.hotellook.com/static/cities/960x720/USM.jpg' },
 ];
 
 const hotelDestinations = [
   { name: 'กรุงเทพ', nameEn: 'Bangkok', image: 'https://photo.hotellook.com/static/cities/960x720/BKK.jpg' },
-  { name: 'เชียงใหม่', nameEn: 'Chiang Mai', image: 'https://photo.hotellook.com/static/cities/960x720/CNX.jpg' },
-  { name: 'ภูเก็ต', nameEn: 'Phuket', image: 'https://photo.hotellook.com/static/cities/960x720/HKT.jpg' },
-  { name: 'กระบี่', nameEn: 'Krabi', image: 'https://photo.hotellook.com/static/cities/960x720/KBV.jpg' },
+  { name: 'พัทยา', nameEn: 'Pattaya', image: 'https://photo.hotellook.com/static/cities/960x720/UTP.jpg' },
+  { name: 'หัวหิน', nameEn: 'Hua Hin', image: 'https://photo.hotellook.com/static/cities/960x720/HHQ.jpg' },
+  { name: 'เชียงราย', nameEn: 'Chiang Rai', image: 'https://photo.hotellook.com/static/cities/960x720/CEI.jpg' },
 ];
 
 export default function TravelPreview() {
   const buildFlightLink = (from: string, to: string) => {
     let url = `https://www.aviasales.com/search/${from}${to}1`;
-    if (MARKER) url = `https://tp.media/r?marker=${MARKER}&trs=368880&p=4114&u=${encodeURIComponent(url)}`;
+    if (MARKER) url += `?marker=${MARKER}`;
     return url;
   };
 
@@ -43,35 +43,20 @@ export default function TravelPreview() {
             ดูทั้งหมด <ChevronRight size={16} />
           </Link>
         </div>
-
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
           {flightRoutes.map((route) => (
-            <a
-              key={route.to}
-              href={buildFlightLink(route.from, route.to)}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="bg-white rounded-2xl overflow-hidden border border-primary-dark/20 hover:border-secondary hover:shadow-md transition-all group"
-            >
+            <a key={route.to} href={buildFlightLink(route.from, route.to)} target="_blank" rel="noopener noreferrer" className="bg-white rounded-2xl overflow-hidden border border-primary-dark/20 hover:border-secondary hover:shadow-md transition-all group">
               <div className="relative h-36 overflow-hidden">
-                <img
-                  src={route.image}
-                  alt={route.name}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                />
+                <img src={route.image} alt={route.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
                 <div className="absolute bottom-2 left-3">
                   <h3 className="font-bold text-white text-sm drop-shadow">{route.name}</h3>
-                  <p className="text-white/70 text-[11px] drop-shadow flex items-center gap-1">
-                    {route.from} <ArrowRight size={10} /> {route.to}
-                  </p>
+                  <p className="text-white/70 text-[11px] drop-shadow flex items-center gap-1">{route.from} <ArrowRight size={10} /> {route.to}</p>
                 </div>
               </div>
               <div className="p-3 flex items-center justify-between">
                 <span className="text-xs text-tmuted">เปรียบเทียบราคา</span>
-                <span className="text-[10px] text-tmuted group-hover:text-secondary transition flex items-center gap-0.5">
-                  ดูเที่ยวบิน <ExternalLink size={10} />
-                </span>
+                <span className="text-[10px] text-tmuted group-hover:text-secondary transition flex items-center gap-0.5">ดูเที่ยวบิน <ExternalLink size={10} /></span>
               </div>
             </a>
           ))}
@@ -87,22 +72,11 @@ export default function TravelPreview() {
             ดูทั้งหมด <ChevronRight size={16} />
           </Link>
         </div>
-
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
           {hotelDestinations.map((dest) => (
-            <a
-              key={dest.nameEn}
-              href={buildHotelLink(dest.nameEn)}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="bg-white rounded-2xl overflow-hidden border border-primary-dark/20 hover:border-secondary hover:shadow-md transition-all group"
-            >
+            <a key={dest.nameEn} href={buildHotelLink(dest.nameEn)} target="_blank" rel="noopener noreferrer" className="bg-white rounded-2xl overflow-hidden border border-primary-dark/20 hover:border-secondary hover:shadow-md transition-all group">
               <div className="relative h-36 overflow-hidden">
-                <img
-                  src={dest.image}
-                  alt={dest.name}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                />
+                <img src={dest.image} alt={dest.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
                 <div className="absolute bottom-2 left-3">
                   <h3 className="font-bold text-white text-sm drop-shadow">{dest.name}</h3>
@@ -111,9 +85,7 @@ export default function TravelPreview() {
               </div>
               <div className="p-3 flex items-center justify-between">
                 <span className="text-xs text-tmuted">เปรียบเทียบราคา</span>
-                <span className="text-[10px] text-tmuted group-hover:text-secondary transition flex items-center gap-0.5">
-                  ดูโรงแรม <ExternalLink size={10} />
-                </span>
+                <span className="text-[10px] text-tmuted group-hover:text-secondary transition flex items-center gap-0.5">ดูโรงแรม <ExternalLink size={10} /></span>
               </div>
             </a>
           ))}
