@@ -6,17 +6,17 @@ import { Plane, Hotel, ArrowRight, ExternalLink, ChevronRight } from 'lucide-rea
 const MARKER = process.env.NEXT_PUBLIC_TRAVELPAYOUTS_MARKER || '';
 
 const flightRoutes = [
-  { from: 'BKK', to: 'CNX', name: 'เชียงใหม่', nameEn: 'Chiang Mai', image: 'https://photo.hotellook.com/static/cities/960x720/CNX.jpg' },
-  { from: 'BKK', to: 'HKT', name: 'ภูเก็ต', nameEn: 'Phuket', image: 'https://photo.hotellook.com/static/cities/960x720/HKT.jpg' },
-  { from: 'BKK', to: 'KBV', name: 'กระบี่', nameEn: 'Krabi', image: 'https://photo.hotellook.com/static/cities/960x720/KBV.jpg' },
-  { from: 'BKK', to: 'USM', name: 'สมุย', nameEn: 'Koh Samui', image: 'https://photo.hotellook.com/static/cities/960x720/USM.jpg' },
+  { from: 'BKK', to: 'CNX', name: 'เชียงใหม่', nameEn: 'Chiang Mai', image: 'https://images.unsplash.com/photo-1598935898639-81586f7d2129?w=640&h=480&fit=crop' },
+  { from: 'BKK', to: 'HKT', name: 'ภูเก็ต', nameEn: 'Phuket', image: 'https://images.unsplash.com/photo-1589394815804-964ed0be2eb5?w=640&h=480&fit=crop' },
+  { from: 'BKK', to: 'KBV', name: 'กระบี่', nameEn: 'Krabi', image: 'https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?w=640&h=480&fit=crop' },
+  { from: 'BKK', to: 'USM', name: 'สมุย', nameEn: 'Koh Samui', image: 'https://images.unsplash.com/photo-1537956965359-7573183d1f57?w=640&h=480&fit=crop' },
 ];
 
 const hotelDestinations = [
-  { name: 'กรุงเทพ', nameEn: 'Bangkok', image: 'https://photo.hotellook.com/static/cities/960x720/BKK.jpg' },
-  { name: 'พัทยา', nameEn: 'Pattaya', image: 'https://photo.hotellook.com/static/cities/960x720/UTP.jpg' },
-  { name: 'หัวหิน', nameEn: 'Hua Hin', image: 'https://photo.hotellook.com/static/cities/960x720/HHQ.jpg' },
-  { name: 'เชียงราย', nameEn: 'Chiang Rai', image: 'https://photo.hotellook.com/static/cities/960x720/CEI.jpg' },
+  { name: 'กรุงเทพ', nameEn: 'Bangkok', image: 'https://images.unsplash.com/photo-1508009603885-50cf7c579365?w=640&h=480&fit=crop' },
+  { name: 'พัทยา', nameEn: 'Pattaya', image: 'https://images.unsplash.com/photo-1565361849078-294849288de5?w=640&h=480&fit=crop' },
+  { name: 'หัวหิน', nameEn: 'Hua Hin', image: 'https://images.unsplash.com/photo-1540541338287-41700207dee6?w=640&h=480&fit=crop' },
+  { name: 'เชียงราย', nameEn: 'Chiang Rai', image: 'https://images.unsplash.com/photo-1512553135590-0af2655d4198?w=640&h=480&fit=crop' },
 ];
 
 export default function TravelPreview() {
@@ -36,12 +36,8 @@ export default function TravelPreview() {
     <>
       <div className="max-w-7xl mx-auto px-4 py-10">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="font-display text-2xl font-bold text-tmain flex items-center gap-2">
-            <Plane size={24} className="text-secondary" /> เที่ยวบินยอดนิยม
-          </h2>
-          <Link href="/flights" className="text-sm text-secondary font-semibold hover:underline flex items-center gap-1">
-            ดูทั้งหมด <ChevronRight size={16} />
-          </Link>
+          <h2 className="font-display text-2xl font-bold text-tmain flex items-center gap-2"><Plane size={24} className="text-secondary" /> เที่ยวบินยอดนิยม</h2>
+          <Link href="/flights" className="text-sm text-secondary font-semibold hover:underline flex items-center gap-1">ดูทั้งหมด <ChevronRight size={16} /></Link>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
           {flightRoutes.map((route) => (
@@ -62,15 +58,10 @@ export default function TravelPreview() {
           ))}
         </div>
       </div>
-
       <div className="max-w-7xl mx-auto px-4 pb-10">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="font-display text-2xl font-bold text-tmain flex items-center gap-2">
-            <Hotel size={24} className="text-secondary" /> โรงแรมยอดนิยม
-          </h2>
-          <Link href="/hotels" className="text-sm text-secondary font-semibold hover:underline flex items-center gap-1">
-            ดูทั้งหมด <ChevronRight size={16} />
-          </Link>
+          <h2 className="font-display text-2xl font-bold text-tmain flex items-center gap-2"><Hotel size={24} className="text-secondary" /> โรงแรมยอดนิยม</h2>
+          <Link href="/hotels" className="text-sm text-secondary font-semibold hover:underline flex items-center gap-1">ดูทั้งหมด <ChevronRight size={16} /></Link>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
           {hotelDestinations.map((dest) => (
