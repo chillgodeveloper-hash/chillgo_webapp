@@ -4,9 +4,10 @@ import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase-client';
 import { useAuthStore } from '@/hooks/useAuthStore';
 import AppLayout from '@/components/layout/AppLayout';
-import { Calendar, Clock, MapPin, MessageCircle, CreditCard, CheckCircle, XCircle, AlertCircle, Star, Play, Receipt } from 'lucide-react';
+import { Calendar, Clock, MapPin, MessageCircle, CreditCard, CheckCircle, XCircle, AlertCircle, Star, Play, Receipt, Navigation } from 'lucide-react';
 import { Booking } from '@/types';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import ReviewModal from '@/components/review/ReviewModal';
 
 const statusConfig: Record<string, { label: string; color: string; icon: any }> = {
@@ -26,8 +27,10 @@ export default function BookingPage() {
   const [activeTab, setActiveTab] = useState<'active' | 'completed'>('active');
   const [reviewBooking, setReviewBooking] = useState<Booking | null>(null);
   const [reviewedIds, setReviewedIds] = useState<string[]>([]);
+  const [startingJob, setStartingJob] = useState<string | null>(null);
   const { user } = useAuthStore();
   const supabase = createClient();
+  const router = useRouter();
 
   const fetchBookings = async () => {
     if (!user) return;
@@ -237,27 +240,65 @@ export default function BookingPage() {
                     )}
                     {booking.status === 'paid' && user?.role === 'partner' && (
                       <button
+                        disabled={startingJob === booking.id}
                         onClick={async () => {
-                          await supabase.from('bookings').update({ status: 'in_progress' }).eq('id', booking.id);
-                          await supabase.from('notifications').insert({
-                            user_id: booking.customer_id,
-                            title: 'เริ่มงานแล้ว',
-                            message: `พาร์ทเนอร์เริ่มงานสำหรับ "${booking.post?.title}" แล้ว`,
-                            type: 'booking',
-                            link: '/booking',
-                          });
-                          await supabase.from('work_history').insert({
-                            partner_id: booking.partner_id,
-                            booking_id: booking.id,
-                            post_id: booking.post_id,
-                            customer_id: booking.customer_id,
-                            status: 'in_progress',
-                          });
-                          fetchBookings();
+                          setStartingJob(booking.id);
+                          try {
+                            let firstLat: number | null = null;
+                            let firstLng: number | null = null;
+                            let firstAcc: number | null = null;
+
+                            if (navigator.geolocation) {
+                              try {
+                                const pos = await new Promise<GeolocationPosition>((resolve, reject) => {
+                                  navigator.geolocation.getCurrentPosition(resolve, reject, {
+                                    enableHighAccuracy: true,
+                                    timeout: 10000,
+                                    maximumAge: 0,
+                                  });
+                                });
+                                firstLat = pos.coords.latitude;
+                                firstLng = pos.coords.longitude;
+                                firstAcc = pos.coords.accuracy;
+                              } catch {}
+                            }
+
+                            await supabase.from('bookings').update({ status: 'in_progress' }).eq('id', booking.id);
+                            await supabase.from('notifications').insert({
+                              user_id: booking.customer_id,
+                              title: 'เริ่มงานแล้ว',
+                              message: `พาร์ทเนอร์เริ่มงานสำหรับ "${booking.post?.title}" แล้ว`,
+                              type: 'booking',
+                              link: `/booking/${booking.id}/tracking`,
+                            });
+                            await supabase.from('work_history').insert({
+                              partner_id: booking.partner_id,
+                              booking_id: booking.id,
+                              post_id: booking.post_id,
+                              customer_id: booking.customer_id,
+                              status: 'in_progress',
+                            });
+
+                            if (firstLat !== null && firstLng !== null) {
+                              await supabase.from('booking_locations').insert({
+                                booking_id: booking.id,
+                                user_id: user.id,
+                                latitude: firstLat,
+                                longitude: firstLng,
+                                accuracy: firstAcc,
+                              });
+                            }
+
+                            router.push(`/booking/${booking.id}/tracking`);
+                          } catch (err) {
+                            console.error(err);
+                          } finally {
+                            setStartingJob(null);
+                          }
                         }}
-                        className="flex-1 bg-success/20 text-tmain font-medium py-2 rounded-xl text-sm text-center flex items-center justify-center gap-1.5 hover:bg-success/30 transition"
+                        className="flex-1 bg-success/20 text-tmain font-medium py-2 rounded-xl text-sm text-center flex items-center justify-center gap-1.5 hover:bg-success/30 transition disabled:opacity-50"
                       >
-                        <Play size={16} /> เริ่มงาน
+                        <Play size={16} /> {startingJob === booking.id ? 'กำลังเริ่ม...' : 'เริ่มงาน'}
                       </button>
                     )}
                     {booking.status === 'in_progress' && user?.role === 'partner' && (
@@ -270,7 +311,7 @@ export default function BookingPage() {
                             title: 'งานเสร็จสิ้น',
                             message: `งาน "${booking.post?.title}" เสร็จสิ้นแล้ว กรุณารีวิว`,
                             type: 'booking',
-                            link: '/booking',
+                            link: `/booking/${booking.id}`,
                           });
                           fetchBookings();
                         }}
@@ -280,12 +321,12 @@ export default function BookingPage() {
                       </button>
                     )}
                     {booking.status === 'in_progress' && (
-                      <button
-                        onClick={() => alert('🛠️ ระบบ GPS Tracking อยู่ระหว่างการพัฒนา')}
+                      <Link
+                        href={`/booking/${booking.id}/tracking`}
                         className="flex-1 bg-primary/20 text-tmain font-medium py-2 rounded-xl text-sm text-center flex items-center justify-center gap-1.5 hover:bg-primary/30 transition"
                       >
-                        <MapPin size={16} /> GPS
-                      </button>
+                        <Navigation size={16} /> GPS
+                      </Link>
                     )}
                     {['paid', 'completed'].includes(booking.status) && !reviewedIds.includes(booking.id) && user?.role !== 'partner' && (
                       <button

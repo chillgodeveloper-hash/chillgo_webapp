@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase-client';
 import { useAuthStore } from '@/hooks/useAuthStore';
 import AppLayout from '@/components/layout/AppLayout';
 import Link from 'next/link';
-import { Calendar, Users, MapPin, CreditCard, MessageCircle, ArrowLeft, Clock, Star, Globe } from 'lucide-react';
+import { Calendar, Users, MapPin, CreditCard, MessageCircle, ArrowLeft, Clock, Star, Globe, Navigation } from 'lucide-react';
 
 const statusMap: Record<string, { label: string; color: string }> = {
   pending: { label: 'รออนุมัติ', color: 'bg-yellow-100 text-yellow-700' },
@@ -218,6 +218,14 @@ export default function BookingDetailPage() {
                 className="flex-1 bg-primary hover:bg-primary-dark text-tmain font-semibold py-3 rounded-xl text-sm text-center flex items-center justify-center gap-1.5 transition"
               >
                 <CreditCard size={16} /> ชำระเงิน
+              </Link>
+            )}
+            {booking.status === 'in_progress' && (
+              <Link
+                href={`/booking/${booking.id}/tracking`}
+                className="flex-1 bg-success/20 text-tmain font-medium py-3 rounded-xl text-sm text-center flex items-center justify-center gap-1.5 hover:bg-success/30 transition"
+              >
+                <Navigation size={16} /> GPS Tracking
               </Link>
             )}
           </div>
