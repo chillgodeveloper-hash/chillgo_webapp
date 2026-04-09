@@ -12,7 +12,7 @@ import {
   MessageSquare, Navigation
 } from 'lucide-react';
 
-type ModalType = 'edit' | 'security' | 'notifications' | 'help' | 'switch-role' | null;
+type ModalType = 'edit' | 'security' | 'notifications' | 'help' | 'switch-role' | 'switch-partner' | null;
 
 export default function CustomerDashboard() {
   const { user, setUser, setPartnerProfile } = useAuthStore();
@@ -70,13 +70,29 @@ export default function CustomerDashboard() {
           </button>
         </div>
 
-        <button
-          onClick={() => setActiveModal('switch-role')}
-          className="w-full mt-4 flex items-center justify-center gap-2 bg-secondary hover:bg-secondary/90 text-tmain font-semibold py-3 rounded-2xl transition shadow-sm"
-        >
-          <RefreshCw size={18} />
-          {user?.role === 'partner' ? 'เปลี่ยนเป็นลูกค้า' : 'เปลี่ยนเป็นพาร์ทเนอร์'}
-        </button>
+        {user?.role === 'partner' ? (
+          <div className="flex gap-3 mt-4">
+            <button
+              onClick={() => setActiveModal('switch-role')}
+              className="flex-1 flex items-center justify-center gap-2 bg-secondary hover:bg-secondary/90 text-tmain font-semibold py-3 rounded-2xl transition shadow-sm"
+            >
+              <RefreshCw size={16} /> เปลี่ยนเป็นลูกค้า
+            </button>
+            <button
+              onClick={() => setActiveModal('switch-partner')}
+              className="flex-1 flex items-center justify-center gap-2 bg-white border border-secondary/40 text-tmain font-semibold py-3 rounded-2xl hover:bg-secondary/10 transition"
+            >
+              <RefreshCw size={16} /> เปลี่ยน Partner
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={() => setActiveModal('switch-role')}
+            className="w-full mt-4 flex items-center justify-center gap-2 bg-secondary hover:bg-secondary/90 text-tmain font-semibold py-3 rounded-2xl transition shadow-sm"
+          >
+            <RefreshCw size={18} /> เปลี่ยนเป็นพาร์ทเนอร์
+          </button>
+        )}
 
         <button
           onClick={handleLogout}
@@ -91,6 +107,7 @@ export default function CustomerDashboard() {
       {activeModal === 'notifications' && <NotificationsModal onClose={() => setActiveModal(null)} />}
       {activeModal === 'help' && <HelpModal onClose={() => setActiveModal(null)} />}
       {activeModal === 'switch-role' && <SwitchRoleModal onClose={() => setActiveModal(null)} />}
+      {activeModal === 'switch-partner' && <SwitchPartnerModal onClose={() => setActiveModal(null)} />}
     </AppLayout>
   );
 }
@@ -319,14 +336,13 @@ function SwitchRoleModal({ onClose }: { onClose: () => void }) {
   const [selectedCategory, setSelectedCategory] = useState<'guide' | 'driver' | 'translator' | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const currentRole = user?.role;
-  const targetRole = currentRole === 'partner' ? 'customer' : 'partner';
+  const isPartner = user?.role === 'partner';
 
   const handleSwitch = async () => {
     if (!user) return;
     setLoading(true);
 
-    if (targetRole === 'customer') {
+    if (isPartner) {
       await supabase.from('profiles').update({ role: 'customer' }).eq('id', user.id);
       setUser({ ...user, role: 'customer' });
       setPartnerProfile(null);
@@ -334,27 +350,23 @@ function SwitchRoleModal({ onClose }: { onClose: () => void }) {
       router.push('/feed');
     } else {
       if (!selectedCategory) { setLoading(false); return; }
-
-      const { data: existingPartner } = await supabase
+      const { data: existingPP } = await supabase
         .from('partner_profiles')
         .select('*')
         .eq('user_id', user.id)
-        .single();
+        .eq('category', selectedCategory)
+        .maybeSingle();
 
-      if (existingPartner) {
+      if (existingPP) {
         await supabase.from('profiles').update({ role: 'partner' }).eq('id', user.id);
         setUser({ ...user, role: 'partner' });
-        setPartnerProfile(existingPartner);
+        setPartnerProfile(existingPP);
         onClose();
         router.push('/feed');
       } else {
         await supabase.from('partner_profiles').insert({
-          user_id: user.id,
-          category: selectedCategory,
-          business_name: user.full_name,
-          description: '',
-          portfolio_images: [],
-          is_verified: false,
+          user_id: user.id, category: selectedCategory, business_name: user.full_name,
+          description: '', portfolio_images: [], is_verified: false,
         });
         await supabase.from('profiles').update({ role: 'partner' }).eq('id', user.id);
         setUser({ ...user, role: 'partner' });
@@ -362,14 +374,13 @@ function SwitchRoleModal({ onClose }: { onClose: () => void }) {
         router.push('/dashboard/partner/setup');
       }
     }
-
     setLoading(false);
   };
 
   return (
-    <ModalWrapper title={targetRole === 'customer' ? 'เปลี่ยนเป็นลูกค้า' : 'เปลี่ยนเป็นพาร์ทเนอร์'} onClose={onClose}>
+    <ModalWrapper title={isPartner ? 'เปลี่ยนเป็นลูกค้า' : 'เปลี่ยนเป็นพาร์ทเนอร์'} onClose={onClose}>
       <div className="space-y-4">
-        {targetRole === 'customer' ? (
+        {isPartner ? (
           <>
             <div className="text-center py-4">
               <div className="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-3">
@@ -378,11 +389,7 @@ function SwitchRoleModal({ onClose }: { onClose: () => void }) {
               <p className="text-tmain font-semibold mb-2">เปลี่ยนเป็นโหมดลูกค้า</p>
               <p className="text-sm text-tmuted">คุณจะสามารถค้นหาและจองบริการได้ โปรไฟล์พาร์ทเนอร์ของคุณจะยังอยู่ สามารถสลับกลับได้ทุกเมื่อ</p>
             </div>
-            <button
-              onClick={handleSwitch}
-              disabled={loading}
-              className="w-full bg-primary hover:bg-primary-dark text-tmain font-semibold py-3 rounded-xl transition flex items-center justify-center gap-2 disabled:opacity-40"
-            >
+            <button onClick={handleSwitch} disabled={loading} className="w-full bg-primary hover:bg-primary-dark text-tmain font-semibold py-3 rounded-xl transition flex items-center justify-center gap-2 disabled:opacity-40">
               {loading ? <div className="w-5 h-5 border-2 border-tmain/30 border-t-tmain rounded-full animate-spin" /> : <><RefreshCw size={18} /> เปลี่ยนเลย</>}
             </button>
           </>
@@ -393,55 +400,86 @@ function SwitchRoleModal({ onClose }: { onClose: () => void }) {
                 <Map size={32} className="text-secondary" />
               </div>
               <p className="text-tmain font-semibold mb-2">เปลี่ยนเป็นโหมดพาร์ทเนอร์</p>
-              <p className="text-sm text-tmuted">เสนอบริการไกด์หรือคนขับรถ หรือล่ามของคุณ</p>
+              <p className="text-sm text-tmuted">เลือกประเภทบริการที่ต้องการ</p>
             </div>
-
-            <p className="text-sm font-medium text-tmain">เลือกประเภทบริการ</p>
             <div className="grid grid-cols-3 gap-3">
-              <button
-                onClick={() => setSelectedCategory('guide')}
-                className={`p-4 rounded-xl border-2 text-center transition-all ${
-                  selectedCategory === 'guide'
-                    ? 'border-primary bg-primary/20'
-                    : 'border-primary-dark/30 hover:bg-primary/10'
-                }`}
-              >
-                <Map size={28} className="mx-auto mb-2 text-secondary" />
-                <p className="font-semibold text-xs text-tmain">ไกด์</p>
-              </button>
-              <button
-                onClick={() => setSelectedCategory('driver')}
-                className={`p-4 rounded-xl border-2 text-center transition-all ${
-                  selectedCategory === 'driver'
-                    ? 'border-primary bg-primary/20'
-                    : 'border-primary-dark/30 hover:bg-primary/10'
-                }`}
-              >
-                <ShoppingBag size={28} className="mx-auto mb-2 text-info" />
-                <p className="font-semibold text-xs text-tmain">คนขับรถ</p>
-              </button>
-              <button
-                onClick={() => setSelectedCategory('translator')}
-                className={`p-4 rounded-xl border-2 text-center transition-all ${
-                  selectedCategory === 'translator'
-                    ? 'border-primary bg-primary/20'
-                    : 'border-primary-dark/30 hover:bg-primary/10'
-                }`}
-              >
-                <ShoppingBag size={28} className="mx-auto mb-2 text-purple-500" />
-                <p className="font-semibold text-xs text-tmain">ล่าม</p>
-              </button>
+              {([['guide', '🗺️', 'ไกด์', 'text-secondary'], ['driver', '🚗', 'คนขับรถ', 'text-info'], ['translator', '🌐', 'ล่าม', 'text-purple-500']] as const).map(([key, icon, label]) => (
+                <button key={key} onClick={() => setSelectedCategory(key)} className={`p-4 rounded-xl border-2 text-center transition-all ${selectedCategory === key ? 'border-primary bg-primary/20' : 'border-primary-dark/30 hover:bg-primary/10'}`}>
+                  <span className="text-2xl block mb-1">{icon}</span>
+                  <p className="font-semibold text-xs text-tmain">{label}</p>
+                </button>
+              ))}
             </div>
-
-            <button
-              onClick={handleSwitch}
-              disabled={loading || !selectedCategory}
-              className="w-full bg-primary hover:bg-primary-dark text-tmain font-semibold py-3 rounded-xl transition flex items-center justify-center gap-2 disabled:opacity-40"
-            >
+            <button onClick={handleSwitch} disabled={loading || !selectedCategory} className="w-full bg-primary hover:bg-primary-dark text-tmain font-semibold py-3 rounded-xl transition flex items-center justify-center gap-2 disabled:opacity-40">
               {loading ? <div className="w-5 h-5 border-2 border-tmain/30 border-t-tmain rounded-full animate-spin" /> : <><RefreshCw size={18} /> เปลี่ยนเลย</>}
             </button>
           </>
         )}
+      </div>
+    </ModalWrapper>
+  );
+}
+
+function SwitchPartnerModal({ onClose }: { onClose: () => void }) {
+  const { user, setUser, partnerProfile, setPartnerProfile } = useAuthStore();
+  const supabase = createClient();
+  const router = useRouter();
+  const [selectedCategory, setSelectedCategory] = useState<'guide' | 'driver' | 'translator' | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const currentCategory = partnerProfile?.category;
+
+  const handleSwitch = async () => {
+    if (!user || !selectedCategory) return;
+    setLoading(true);
+
+    const { data: existingPP } = await supabase
+      .from('partner_profiles')
+      .select('*')
+      .eq('user_id', user.id)
+      .eq('category', selectedCategory)
+      .maybeSingle();
+
+    if (existingPP) {
+      setPartnerProfile(existingPP);
+      onClose();
+      router.push('/feed');
+    } else {
+      await supabase.from('partner_profiles').insert({
+        user_id: user.id, category: selectedCategory, business_name: user.full_name,
+        description: '', portfolio_images: [], is_verified: false,
+      });
+      const { data: newPP } = await supabase.from('partner_profiles').select('*').eq('user_id', user.id).eq('category', selectedCategory).single();
+      if (newPP) setPartnerProfile(newPP);
+      onClose();
+      router.push('/dashboard/partner/setup');
+    }
+    setLoading(false);
+  };
+
+  const categories = [
+    { key: 'guide' as const, icon: '🗺️', label: 'ไกด์นำเที่ยว' },
+    { key: 'driver' as const, icon: '🚗', label: 'คนขับรถ' },
+    { key: 'translator' as const, icon: '🌐', label: 'ล่าม / นักแปล' },
+  ];
+
+  return (
+    <ModalWrapper title="เปลี่ยนประเภทพาร์ทเนอร์" onClose={onClose}>
+      <div className="space-y-4">
+        <p className="text-sm text-tmuted text-center">ประเภทปัจจุบัน: <span className="font-semibold text-tmain">{currentCategory === 'guide' ? 'ไกด์' : currentCategory === 'driver' ? 'คนขับรถ' : 'ล่าม'}</span></p>
+        <p className="text-sm font-medium text-tmain">เลือกประเภทที่ต้องการเปลี่ยน</p>
+        <div className="grid grid-cols-3 gap-3">
+          {categories.filter(c => c.key !== currentCategory).map(cat => (
+            <button key={cat.key} onClick={() => setSelectedCategory(cat.key)} className={`p-4 rounded-xl border-2 text-center transition-all ${selectedCategory === cat.key ? 'border-primary bg-primary/20' : 'border-primary-dark/30 hover:bg-primary/10'}`}>
+              <span className="text-2xl block mb-1">{cat.icon}</span>
+              <p className="font-semibold text-xs text-tmain">{cat.label}</p>
+            </button>
+          ))}
+        </div>
+        <p className="text-xs text-tmuted text-center">ถ้ายังไม่เคยลงทะเบียนประเภทนี้ จะไปหน้าลงทะเบียนให้อัตโนมัติ</p>
+        <button onClick={handleSwitch} disabled={loading || !selectedCategory} className="w-full bg-primary hover:bg-primary-dark text-tmain font-semibold py-3 rounded-xl transition flex items-center justify-center gap-2 disabled:opacity-40">
+          {loading ? <div className="w-5 h-5 border-2 border-tmain/30 border-t-tmain rounded-full animate-spin" /> : <><RefreshCw size={18} /> เปลี่ยนเลย</>}
+        </button>
       </div>
     </ModalWrapper>
   );
