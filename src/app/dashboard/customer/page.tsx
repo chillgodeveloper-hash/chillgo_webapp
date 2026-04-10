@@ -23,8 +23,13 @@ export default function CustomerDashboard() {
   useEffect(() => {
     if (!user || user.role !== 'partner') return;
     const fetchPP = async () => {
+      const activeId = localStorage.getItem('active_partner_id');
+      if (activeId) {
+        const { data } = await supabase.from('partner_profiles').select('*').eq('id', activeId).maybeSingle();
+        if (data) { setPartnerProfile(data); return; }
+      }
       const { data } = await supabase.from('partner_profiles').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(1).maybeSingle();
-      if (data) setPartnerProfile(data);
+      if (data) { localStorage.setItem('active_partner_id', data.id); setPartnerProfile(data); }
     };
     fetchPP();
   }, [user]);
@@ -456,6 +461,7 @@ function SwitchRoleModal({ onClose }: { onClose: () => void }) {
         .maybeSingle();
 
       if (existingPP) {
+        localStorage.setItem('active_partner_id', existingPP.id);
         await supabase.from('profiles').update({ role: 'partner' }).eq('id', user.id);
         setUser({ ...user, role: 'partner' });
         setPartnerProfile(existingPP);
@@ -466,21 +472,12 @@ function SwitchRoleModal({ onClose }: { onClose: () => void }) {
           window.location.href = '/dashboard/partner/setup';
         }
       } else {
-        const { data: oldUnfinished } = await supabase
-          .from('partner_profiles')
-          .select('id, portfolio_images')
-          .eq('user_id', user.id)
-          .filter('portfolio_images', 'eq', '{}');
-        if (oldUnfinished) {
-          for (const old of oldUnfinished) {
-            await supabase.from('partner_profiles').delete().eq('id', old.id);
-          }
-        }
-
         await supabase.from('partner_profiles').insert({
           user_id: user.id, category: selectedCategory, business_name: user.full_name,
           description: '', portfolio_images: [], is_verified: false,
         });
+        const { data: newPP } = await supabase.from('partner_profiles').select('*').eq('user_id', user.id).eq('category', selectedCategory).single();
+        if (newPP) localStorage.setItem('active_partner_id', newPP.id);
         await supabase.from('profiles').update({ role: 'partner' }).eq('id', user.id);
         setUser({ ...user, role: 'partner' });
         onClose();
@@ -554,34 +551,24 @@ function SwitchPartnerModal({ onClose }: { onClose: () => void }) {
       .maybeSingle();
 
     if (existingPP) {
+      localStorage.setItem('active_partner_id', existingPP.id);
+      setPartnerProfile(existingPP);
+      onClose();
       if (existingPP.portfolio_images && existingPP.portfolio_images.length > 0) {
-        setPartnerProfile(existingPP);
-        onClose();
         window.location.href = '/feed';
       } else {
-        setPartnerProfile(existingPP);
-        onClose();
         window.location.href = '/dashboard/partner/setup';
       }
     } else {
-      const { data: oldUnfinished } = await supabase
-        .from('partner_profiles')
-        .select('id, portfolio_images')
-        .eq('user_id', user.id)
-        .filter('portfolio_images', 'eq', '{}');
-
-      if (oldUnfinished) {
-        for (const old of oldUnfinished) {
-          await supabase.from('partner_profiles').delete().eq('id', old.id);
-        }
-      }
-
       await supabase.from('partner_profiles').insert({
         user_id: user.id, category: selectedCategory, business_name: user.full_name,
         description: '', portfolio_images: [], is_verified: false,
       });
       const { data: newPP } = await supabase.from('partner_profiles').select('*').eq('user_id', user.id).eq('category', selectedCategory).single();
-      if (newPP) setPartnerProfile(newPP);
+      if (newPP) {
+        localStorage.setItem('active_partner_id', newPP.id);
+        setPartnerProfile(newPP);
+      }
       onClose();
       window.location.href = '/dashboard/partner/setup';
     }

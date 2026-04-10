@@ -45,14 +45,28 @@ export function useAuth(requireRole?: string) {
             .order('created_at', { ascending: false });
 
           if (allPPs && allPPs.length > 0) {
-            const unfinished = allPPs.find((p: any) => !p.portfolio_images || p.portfolio_images.length === 0);
-            if (unfinished) {
-              setPartnerProfile(unfinished);
-              setLoading(false);
-              router.push('/dashboard/partner/setup');
-              return;
+            const activeId = typeof window !== 'undefined' ? localStorage.getItem('active_partner_id') : null;
+            const activePP = activeId ? allPPs.find((p: any) => p.id === activeId) : null;
+
+            if (activePP) {
+              setPartnerProfile(activePP);
+              if (!activePP.portfolio_images || activePP.portfolio_images.length === 0) {
+                setLoading(false);
+                router.push('/dashboard/partner/setup');
+                return;
+              }
+            } else {
+              const unfinished = allPPs.find((p: any) => !p.portfolio_images || p.portfolio_images.length === 0);
+              if (unfinished) {
+                if (typeof window !== 'undefined') localStorage.setItem('active_partner_id', unfinished.id);
+                setPartnerProfile(unfinished);
+                setLoading(false);
+                router.push('/dashboard/partner/setup');
+                return;
+              }
+              if (typeof window !== 'undefined') localStorage.setItem('active_partner_id', allPPs[0].id);
+              setPartnerProfile(allPPs[0]);
             }
-            setPartnerProfile(allPPs[0]);
           }
         }
 

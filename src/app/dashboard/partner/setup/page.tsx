@@ -127,8 +127,16 @@ export default function PartnerSetupPage() {
           .order('created_at', { ascending: false });
 
         if (allPPs && allPPs.length > 0) {
-          const unfinished = allPPs.find((p: any) => !p.portfolio_images || p.portfolio_images.length === 0);
-          pp = unfinished || allPPs[0];
+          const activeId = localStorage.getItem('active_partner_id');
+          const activePP = activeId ? allPPs.find((p: any) => p.id === activeId) : null;
+
+          if (activePP) {
+            pp = activePP;
+          } else {
+            const unfinished = allPPs.find((p: any) => !p.portfolio_images || p.portfolio_images.length === 0);
+            pp = unfinished || allPPs[0];
+            localStorage.setItem('active_partner_id', pp.id);
+          }
           setPartnerProfile(pp);
         }
       }
