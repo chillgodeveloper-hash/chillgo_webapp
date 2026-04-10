@@ -806,7 +806,7 @@ export default function PartnerSetupPage() {
                 ถัดไป <ArrowRight size={18} />
               </button>
             ) : (
-              <button onClick={handleSubmit} disabled={!form.terms_accepted || portfolioFiles.length === 0 || loading} className="flex-1 bg-primary hover:bg-primary-dark text-dark-DEFAULT font-bold py-3 rounded-2xl transition flex items-center justify-center gap-2 disabled:opacity-40">
+              <button onClick={handleSubmit} disabled={!form.terms_accepted || (category !== 'guide' && portfolioFiles.length === 0) || loading} className="flex-1 bg-primary hover:bg-primary-dark text-dark-DEFAULT font-bold py-3 rounded-2xl transition flex items-center justify-center gap-2 disabled:opacity-40">
                 {loading ? <div className="w-5 h-5 border-2 border-dark-DEFAULT/30 border-t-dark-DEFAULT rounded-full animate-spin" /> : <><CheckCircle size={18} /> ลงทะเบียน</>}
               </button>
             )}
