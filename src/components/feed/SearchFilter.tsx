@@ -29,6 +29,7 @@ export const defaultFilters: FilterState = {
 
 export default function SearchFilter({ filters, onChange, onReset }: SearchFilterProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [sliderValue, setSliderValue] = useState(filters.rating);
 
   const update = (key: keyof FilterState, value: any) => {
     onChange({ ...filters, [key]: value });
@@ -64,7 +65,7 @@ export default function SearchFilter({ filters, onChange, onReset }: SearchFilte
       </div>
 
       <div>
-        <label className="text-sm font-medium text-tmain mb-2 block">คะแนนขั้นต่ำ: {filters.rating > 0 ? `${filters.rating} ดาวขึ้นไป` : 'ทั้งหมด'}</label>
+        <label className="text-sm font-medium text-tmain mb-2 block">คะแนนขั้นต่ำ: {sliderValue > 0 ? `${sliderValue} ดาวขึ้นไป` : 'ทั้งหมด'}</label>
         <div className="flex items-center gap-3">
           <span className="text-xs text-tmuted">0</span>
           <div className="flex-1 relative">
@@ -73,19 +74,21 @@ export default function SearchFilter({ filters, onChange, onReset }: SearchFilte
               min={0}
               max={5}
               step={0.5}
-              value={filters.rating}
-              onChange={(e) => update('rating', parseFloat(e.target.value))}
+              value={sliderValue}
+              onChange={(e) => setSliderValue(parseFloat(e.target.value))}
+              onMouseUp={() => update('rating', sliderValue)}
+              onTouchEnd={() => update('rating', sliderValue)}
               className="w-full h-2 bg-primary/30 rounded-lg appearance-none cursor-pointer accent-secondary [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:bg-secondary [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:cursor-pointer"
             />
           </div>
           <span className="text-xs text-tmuted">5</span>
         </div>
-        {filters.rating > 0 && (
+        {sliderValue > 0 && (
           <div className="flex items-center gap-1 mt-1.5">
             {Array.from({ length: 5 }).map((_, i) => (
-              <Star key={i} size={14} className={i < Math.floor(filters.rating) ? 'text-amber-500 fill-amber-500' : i < filters.rating ? 'text-amber-500 fill-amber-200' : 'text-primary-dark/30'} />
+              <Star key={i} size={14} className={i < Math.floor(sliderValue) ? 'text-amber-500 fill-amber-500' : i < sliderValue ? 'text-amber-500 fill-amber-200' : 'text-primary-dark/30'} />
             ))}
-            <span className="text-xs text-amber-600 ml-1 font-medium">{filters.rating}+</span>
+            <span className="text-xs text-amber-600 ml-1 font-medium">{sliderValue}+</span>
           </div>
         )}
       </div>

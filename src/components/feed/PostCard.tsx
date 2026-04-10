@@ -106,13 +106,11 @@ export default function PostCard({ post, onBook }: PostCardProps) {
           </div>
         )}
 
-        {partner?.rating !== undefined && partner.rating > 0 && (
-          <div className="flex items-center gap-1 mb-3">
-            <Star size={14} className="text-amber-500 fill-amber-500" />
-            <span className="text-sm font-medium">{partner.rating.toFixed(1)}</span>
-            <span className="text-xs text-tmuted">({partner.total_reviews} รีวิว)</span>
-          </div>
-        )}
+        <div className="flex items-center gap-1 mb-3">
+          <Star size={14} className="text-amber-500 fill-amber-500" />
+          <span className="text-sm font-medium">{partner?.rating > 0 ? partner.rating.toFixed(1) : '-'}</span>
+          <span className="text-xs text-tmuted">{partner?.total_reviews > 0 ? `(${partner.total_reviews} รีวิว)` : 'ยังไม่มีรีวิว'}</span>
+        </div>
 
         <div className="flex items-center justify-between pt-3 border-t border-primary-dark/15">
           <div className="flex items-center gap-4">

@@ -127,6 +127,97 @@ export default function PartnerProfilePage() {
             </div>
           )}
 
+          <div className="px-6 py-4 border-b border-primary-dark/10 space-y-3">
+            <h3 className="font-semibold text-tmain text-sm">ข้อมูลติดต่อ</h3>
+            <div className="grid grid-cols-2 gap-2 text-sm">
+              {partner.phone && <p className="text-tmuted">📞 {partner.phone}</p>}
+              {partner.line_id && <p className="text-tmuted">💬 LINE: {partner.line_id}</p>}
+              {partner.wechat_id && <p className="text-tmuted">💬 WeChat: {partner.wechat_id}</p>}
+              {partner.contact_email && <p className="text-tmuted">✉️ {partner.contact_email}</p>}
+              {partner.address && <p className="text-tmuted col-span-2">📍 {partner.address}</p>}
+              {partner.province && <p className="text-tmuted">🏙️ จังหวัด: {partner.province}</p>}
+            </div>
+
+            {partner.languages && Object.keys(partner.languages).length > 0 && (
+              <div>
+                <h3 className="font-semibold text-tmain text-sm mt-3 mb-1">ภาษา</h3>
+                <div className="flex flex-wrap gap-1.5">
+                  {Object.entries(partner.languages).map(([lang, level]: [string, any]) => (
+                    <span key={lang} className="text-xs bg-primary/20 text-tmain px-2.5 py-1 rounded-full">{lang}: {level}</span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {partner.service_styles && partner.service_styles.length > 0 && (
+              <div>
+                <h3 className="font-semibold text-tmain text-sm mt-3 mb-1">สไตล์บริการ</h3>
+                <div className="flex flex-wrap gap-1.5">
+                  {partner.service_styles.map((s: string) => (
+                    <span key={s} className="text-xs bg-secondary/10 text-secondary px-2.5 py-1 rounded-full font-medium">{s}</span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {partner.skills && partner.skills.length > 0 && (
+              <div>
+                <h3 className="font-semibold text-tmain text-sm mt-3 mb-1">ทักษะพิเศษ</h3>
+                <div className="flex flex-wrap gap-1.5">
+                  {partner.skills.map((s: string) => (
+                    <span key={s} className="text-xs bg-info/10 text-info px-2.5 py-1 rounded-full font-medium">{s}</span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {partner.special_routes && (
+              <div>
+                <h3 className="font-semibold text-tmain text-sm mt-3 mb-1">เส้นทาง / พื้นที่ให้บริการ</h3>
+                <p className="text-sm text-tmuted">{partner.special_routes}</p>
+              </div>
+            )}
+
+            {partner.category === 'guide' && partner.guide_license_no && (
+              <div>
+                <h3 className="font-semibold text-tmain text-sm mt-3 mb-1">ใบอนุญาตไกด์</h3>
+                <p className="text-sm text-tmuted">เลขที่: {partner.guide_license_no} {partner.guide_license_type && `(${partner.guide_license_type})`}</p>
+              </div>
+            )}
+
+            {partner.category === 'driver' && (
+              <div className="space-y-1">
+                <h3 className="font-semibold text-tmain text-sm mt-3 mb-1">ข้อมูลรถ</h3>
+                {partner.vehicle_brand && <p className="text-sm text-tmuted">🚗 {partner.vehicle_brand} {partner.vehicle_color && `สี${partner.vehicle_color}`}</p>}
+                {partner.vehicle_plate && <p className="text-sm text-tmuted">🔢 ทะเบียน: {partner.vehicle_plate} {partner.vehicle_plate_province}</p>}
+                {partner.vehicle_seats && <p className="text-sm text-tmuted">💺 {partner.vehicle_seats} ที่นั่ง</p>}
+                {partner.vehicle_plate_type && <p className="text-sm text-tmuted">🏷️ {partner.vehicle_plate_type}</p>}
+              </div>
+            )}
+
+            {partner.category === 'translator' && partner.translation_specializations && partner.translation_specializations.length > 0 && (
+              <div>
+                <h3 className="font-semibold text-tmain text-sm mt-3 mb-1">หมวดงานที่เชี่ยวชาญ</h3>
+                <div className="flex flex-wrap gap-1.5">
+                  {partner.translation_specializations.map((s: string) => (
+                    <span key={s} className="text-xs bg-purple-100 text-purple-700 px-2.5 py-1 rounded-full font-medium">{s}</span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {partner.category === 'translator' && partner.translation_pairs && partner.translation_pairs.length > 0 && (
+              <div>
+                <h3 className="font-semibold text-tmain text-sm mt-3 mb-1">คู่ภาษาที่แปลได้</h3>
+                <div className="space-y-1">
+                  {partner.translation_pairs.map((p: any, i: number) => (
+                    <p key={i} className="text-sm text-tmuted">{p.source} → {p.target} ({p.level}) — {p.mode} {p.experience && `| ${p.experience} ปี`}</p>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
           <div className="flex border-b border-primary-dark/10">
             <button
               onClick={() => setActiveTab('portfolio')}

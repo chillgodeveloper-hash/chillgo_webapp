@@ -70,12 +70,10 @@ export default function PostListItem({ post, onBook }: PostListItemProps) {
               <MapPin size={14} /> {post.location}
             </span>
           )}
-          {partner?.rating !== undefined && partner.rating > 0 && (
-            <span className="flex items-center gap-1 text-amber-600 font-medium">
+          <span className="flex items-center gap-1 text-amber-600 font-medium">
               <Star size={14} className="text-amber-500 fill-amber-500" />
-              {partner.rating.toFixed(1)} ({partner.total_reviews} รีวิว)
+              {partner?.rating > 0 ? `${partner.rating.toFixed(1)} (${partner.total_reviews} รีวิว)` : 'ยังไม่มีรีวิว'}
             </span>
-          )}
           {(post as any).available_start && (post as any).available_end ? (
             <span className="flex items-center gap-1">
               <Calendar size={14} />

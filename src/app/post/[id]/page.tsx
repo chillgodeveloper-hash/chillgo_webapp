@@ -8,7 +8,7 @@ import AppLayout from '@/components/layout/AppLayout';
 import BookingModal from '@/components/booking/BookingModal';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowLeft, MapPin, Star, ChevronLeft, ChevronRight, Heart, Share2, MessageCircle, Globe } from 'lucide-react';
+import { ArrowLeft, MapPin, Star, ChevronLeft, ChevronRight, Share2, Globe } from 'lucide-react';
 
 export default function PostDetailPage() {
   const { id } = useParams();
@@ -17,7 +17,6 @@ export default function PostDetailPage() {
   const [relatedPosts, setRelatedPosts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentImage, setCurrentImage] = useState(0);
-  const [liked, setLiked] = useState(false);
   const [showBooking, setShowBooking] = useState(false);
   const { user } = useAuthStore();
   const supabase = createClient();
@@ -141,24 +140,26 @@ export default function PostDetailPage() {
               <span className="flex items-center gap-1 text-sm text-tmuted bg-primary-light px-3 py-1 rounded-full"><Globe size={14} /> ตลอดทั้งปี</span>
             </div>
 
-            {partner?.rating > 0 && (
-              <div className="flex items-center gap-2 mb-4 bg-amber-50 rounded-xl px-4 py-2.5">
-                <Star size={18} className="text-amber-500 fill-amber-500" />
-                <span className="text-lg font-bold text-amber-700">{partner.rating.toFixed(1)}</span>
-                <span className="text-sm text-amber-600">({partner.total_reviews} รีวิว)</span>
-              </div>
-            )}
+            <div className="flex items-center gap-2 mb-4 bg-amber-50 rounded-xl px-4 py-2.5">
+              <Star size={18} className="text-amber-500 fill-amber-500" />
+              {partner?.rating > 0 ? (
+                <>
+                  <span className="text-lg font-bold text-amber-700">{partner.rating.toFixed(1)}</span>
+                  <span className="text-sm text-amber-600">({partner.total_reviews} รีวิว)</span>
+                </>
+              ) : (
+                <span className="text-sm text-amber-600">ยังไม่มีรีวิว</span>
+              )}
+            </div>
 
             <div className="prose prose-sm max-w-none">
               <p className="text-tmuted leading-relaxed whitespace-pre-wrap">{post.content}</p>
             </div>
 
             <div className="flex items-center gap-4 pt-4 mt-4 border-t border-primary-dark/10">
-              <button onClick={() => setLiked(!liked)} className={`flex items-center gap-1.5 text-sm transition ${liked ? 'text-danger' : 'text-tmuted'}`}>
-                <Heart size={20} fill={liked ? 'currentColor' : 'none'} />
+              <button onClick={() => { if (navigator.share) { navigator.share({ title: post.title, url: window.location.href }); } else { navigator.clipboard.writeText(window.location.href); } }} className="flex items-center gap-1.5 text-sm text-tmuted hover:text-secondary transition">
+                <Share2 size={20} /> แชร์
               </button>
-              <button className="text-tmuted"><MessageCircle size={20} /></button>
-              <button className="text-tmuted"><Share2 size={20} /></button>
             </div>
           </div>
 
@@ -197,9 +198,9 @@ export default function PostDetailPage() {
             </button>
           )}
 
-          {relatedPosts.length > 0 && (
-            <div className="mt-6">
-              <h2 className="font-bold text-lg text-tmain mb-4">โพสต์อื่นที่เกี่ยวข้อง</h2>
+          <div className="mt-6">
+            <h2 className="font-bold text-lg text-tmain mb-4">โพสต์อื่นที่เกี่ยวข้อง</h2>
+            {relatedPosts.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {relatedPosts.map((rp: any) => {
                   const rpImage = rp.media_urls?.[0];
@@ -220,20 +221,22 @@ export default function PostDetailPage() {
                         <p className="text-xs text-tmuted mt-0.5">{rpPartner?.business_name}</p>
                         <div className="flex items-center justify-between mt-2">
                           {rp.price_min && <span className="text-sm font-bold text-secondary">฿{rp.price_min.toLocaleString()}</span>}
-                          {rpPartner?.rating > 0 && (
-                            <span className="flex items-center gap-0.5 text-xs text-amber-600">
-                              <Star size={10} className="fill-amber-500 text-amber-500" />
-                              {rpPartner.rating.toFixed(1)}
-                            </span>
-                          )}
+                          <span className="flex items-center gap-0.5 text-xs text-amber-600">
+                            <Star size={10} className="fill-amber-500 text-amber-500" />
+                            {rpPartner?.rating > 0 ? rpPartner.rating.toFixed(1) : '-'}
+                          </span>
                         </div>
                       </div>
                     </Link>
                   );
                 })}
               </div>
-            </div>
-          )}
+            ) : (
+              <div className="bg-white rounded-xl border border-primary-dark/20 p-6 text-center">
+                <p className="text-tmuted text-sm">ยังไม่มีโพสต์ที่เกี่ยวข้องในขณะนี้</p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
