@@ -136,10 +136,10 @@ export default function Navbar() {
   return (
     <nav className="sticky top-0 z-50 bg-primary shadow-md shadow-primary-dark/20">
       <div className="max-w-7xl mx-auto px-4">
-        <div className="flex items-center justify-between h-16">
+        <div className="flex items-center justify-between h-20">
           <div className="flex items-center gap-8">
             <Link href="/feed" className="flex items-center">
-              <img src="/logo.png" alt="ChillGo" className="h-10 w-auto" />
+              <img src="/logo.png" alt="ChillGo" className="h-14 w-auto" />
             </Link>
 
             <div className="hidden md:flex items-center gap-1">
