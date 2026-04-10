@@ -65,7 +65,7 @@ export default function FlightsPage() {
           </div>
         </div>
       </div>
-      <div className="max-w-6xl mx-auto px-4 py-8">
+      <div className="max-w-6xl mx-auto px-4 py-8 animate-blur-in">
         <h2 className="font-display text-xl font-bold text-tmain mb-2">{searchText.trim() ? `ผลการค้นหา "${searchText}"` : 'เส้นทางบินยอดนิยมจากกรุงเทพ'}</h2>
         <p className="text-sm text-tmuted mb-6">เลือกจุดหมายแล้วเปรียบเทียบราคาตั๋วเครื่องบิน</p>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

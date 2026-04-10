@@ -284,7 +284,7 @@ export default function TrackingPage() {
   if (loading) {
     return (
       <AppLayout>
-        <div className="max-w-3xl mx-auto px-4 py-6">
+        <div className="max-w-3xl mx-auto px-4 py-6 animate-blur-in">
           <div className="bg-white rounded-2xl p-6 animate-pulse space-y-4">
             <div className="w-2/3 h-6 bg-primary/20 rounded" />
             <div className="w-full h-64 bg-primary/20 rounded-xl" />

@@ -80,7 +80,7 @@ export default function RevenueReportPage() {
 
   return (
     <AppLayout>
-      <div className="max-w-6xl mx-auto px-4 py-8">
+      <div className="max-w-6xl mx-auto px-4 py-8 animate-blur-in">
         <h1 className="text-2xl font-bold text-tmain mb-6">รายงาน</h1>
 
         <div className="flex gap-2 mb-6">

@@ -101,7 +101,7 @@ export default function BookingPage() {
 
   return (
     <AppLayout>
-      <div className="max-w-2xl mx-auto px-4 lg:px-0 py-6 lg:py-8">
+      <div className="max-w-2xl mx-auto px-4 lg:px-0 py-6 animate-blur-in lg:py-8">
         <h1 className="text-2xl font-bold text-tmain mb-4 hidden lg:block">การจองของฉัน</h1>
 
         <div className="flex gap-2 mb-4">
@@ -144,7 +144,7 @@ export default function BookingPage() {
               const status = statusConfig[booking.status] || statusConfig.pending;
               const StatusIcon = status.icon;
               return (
-                <div key={booking.id} className="bg-white rounded-2xl p-4 border border-primary-dark/20 shadow-sm">
+                <div key={booking.id} className="bg-white rounded-2xl p-4 border border-primary-dark/20 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
                   <Link href={`/booking/${booking.id}`} className="block">
                   <div className="flex items-start justify-between mb-3">
                     <div>

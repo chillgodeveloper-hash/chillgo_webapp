@@ -66,7 +66,7 @@ export default function HotelsPage() {
           </div>
         </div>
       </div>
-      <div className="max-w-6xl mx-auto px-4 py-8">
+      <div className="max-w-6xl mx-auto px-4 py-8 animate-blur-in">
         <h2 className="font-display text-xl font-bold text-tmain mb-2">{searchText.trim() ? `ผลการค้นหา "${searchText}"` : 'ที่พักยอดนิยมทั่วไทย'}</h2>
         <p className="text-sm text-tmuted mb-6">เลือกเมืองแล้วเปรียบเทียบราคาที่พัก</p>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

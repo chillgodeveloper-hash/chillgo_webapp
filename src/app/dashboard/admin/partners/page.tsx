@@ -41,7 +41,7 @@ export default function AdminPartnersPage() {
 
   return (
     <AppLayout>
-      <div className="max-w-4xl mx-auto px-4 lg:px-0 py-6 lg:py-8">
+      <div className="max-w-4xl mx-auto px-4 lg:px-0 py-6 animate-blur-in lg:py-8">
         <h1 className="text-2xl font-bold text-tmain mb-6">จัดการพาร์ทเนอร์</h1>
 
         <div className="relative mb-4">

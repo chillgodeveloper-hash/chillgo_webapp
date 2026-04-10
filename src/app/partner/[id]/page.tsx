@@ -84,7 +84,7 @@ export default function PartnerProfilePage() {
 
   return (
     <AppLayout>
-      <div className="max-w-3xl mx-auto px-4 py-6 lg:py-8">
+      <div className="max-w-3xl mx-auto px-4 py-6 animate-blur-in lg:py-8">
         <div className="bg-white rounded-2xl border border-primary-dark/20 overflow-hidden">
           <div className="bg-gradient-to-r from-primary via-primary-dark to-secondary p-6">
             <div className="flex items-center gap-4">

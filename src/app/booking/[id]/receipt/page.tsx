@@ -112,7 +112,7 @@ export default function ReceiptPage() {
 
   return (
     <AppLayout>
-      <div className="max-w-lg mx-auto px-4 py-8">
+      <div className="max-w-lg mx-auto px-4 py-8 animate-blur-in">
         <button onClick={() => router.back()} className="flex items-center gap-1 text-tmuted mb-4 hover:bg-primary/20 px-3 py-1.5 rounded-lg transition">
           <ArrowLeft size={18} /> กลับ
         </button>

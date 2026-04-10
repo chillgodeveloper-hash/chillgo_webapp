@@ -55,7 +55,7 @@ export default function BookingDetailPage() {
   if (loading) {
     return (
       <AppLayout>
-        <div className="max-w-3xl mx-auto px-4 py-6 lg:py-8">
+        <div className="max-w-3xl mx-auto px-4 py-6 animate-blur-in lg:py-8">
           <div className="bg-white rounded-2xl p-6 animate-pulse space-y-4">
             <div className="w-2/3 h-6 bg-primary/20 rounded" />
             <div className="w-1/2 h-4 bg-primary/20 rounded" />

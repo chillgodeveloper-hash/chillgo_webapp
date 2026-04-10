@@ -120,7 +120,7 @@ export default function FeedPage() {
         <>
           <SearchHero onSearch={handleSearch} />
 
-          <div className="max-w-7xl mx-auto px-4 py-12">
+          <div className="max-w-7xl mx-auto px-4 py-12 animate-blur-in">
             <h2 className="font-display text-2xl font-bold text-tmain mb-6 text-center">บริการยอดนิยม</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div

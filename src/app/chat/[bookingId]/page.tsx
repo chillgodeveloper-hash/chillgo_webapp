@@ -77,7 +77,7 @@ export default function ChatPage() {
 
   return (
     <AppLayout>
-      <div className="max-w-2xl mx-auto flex flex-col h-[calc(100vh-8rem)] lg:h-[calc(100vh-6rem)]">
+      <div className="max-w-2xl mx-auto flex flex-col h-[calc(100vh-8rem)] animate-blur-in lg:h-[calc(100vh-6rem)]">
         <div className="bg-white rounded-t-2xl border border-primary-dark/20 p-4 flex items-center gap-3">
           <Link href="/booking" className="text-tmuted hover:text-tmuted lg:hidden">
             <ArrowLeft size={20} />

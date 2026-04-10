@@ -42,7 +42,7 @@ export default function LoginPage() {
         </div>
       </nav>
 
-      <div className="flex-1 flex items-center justify-center px-4 py-12">
+      <div className="flex-1 flex items-center justify-center px-4 py-12 animate-blur-in">
         <div className="w-full max-w-md">
           <div className="bg-white rounded-3xl shadow-xl border border-primary-dark/20 p-8">
             <div className="text-center mb-6">
