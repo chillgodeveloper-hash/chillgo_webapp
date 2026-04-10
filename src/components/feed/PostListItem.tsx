@@ -18,17 +18,17 @@ export default function PostListItem({ post, onBook }: PostListItemProps) {
   const categoryLabel = post.category === 'guide' ? '🗺️ ไกด์' : post?.category === 'driver' ? '🚗 คนขับรถ' : '🌐 ล่าม';
 
   return (
-    <div className="bg-white rounded-2xl border border-primary-dark/20 overflow-hidden hover:border-primary transition-colors animate-slide-up flex flex-col md:flex-row">
-      <div className="relative w-full md:w-64 h-48 md:h-auto flex-shrink-0">
+    <div className="bg-white rounded-2xl border border-primary-dark/20 overflow-hidden hover:border-primary hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 flex flex-col md:flex-row">
+      <Link href={`/post/${post.id}`} className="relative w-full md:w-64 h-48 md:h-auto flex-shrink-0 block">
         {image ? (
           <Image src={image} alt={post.title} fill className="object-cover" />
         ) : (
           <div className="w-full h-full bg-primary/10 flex items-center justify-center text-4xl">
-            {post.category === 'guide' ? '🗺️' : '🚗'}
+            {post.category === 'guide' ? '🗺️' : post.category === 'driver' ? '🚗' : '🌐'}
           </div>
         )}
         <button
-          onClick={(e) => { e.stopPropagation(); setLiked(!liked); }}
+          onClick={(e) => { e.preventDefault(); e.stopPropagation(); setLiked(!liked); }}
           className={`absolute top-3 right-3 w-8 h-8 rounded-full bg-white/80 flex items-center justify-center transition ${
             liked ? 'text-danger' : 'text-tmuted'
           }`}
@@ -38,14 +38,14 @@ export default function PostListItem({ post, onBook }: PostListItemProps) {
         <span className="absolute top-3 left-3 bg-white/90 text-tmain text-xs font-medium px-2.5 py-1 rounded-full">
           {categoryLabel}
         </span>
-      </div>
+      </Link>
 
       <div className="flex-1 p-4 md:p-5 flex flex-col">
         <div className="flex items-start justify-between mb-2">
           <div>
-            <h3 className="font-bold text-tmain text-lg leading-tight">{post.title}</h3>
+            <Link href={`/post/${post.id}`} className="font-bold text-tmain text-lg leading-tight hover:text-secondary transition">{post.title}</Link>
             <p className="text-sm text-tmuted mt-0.5">
-              <Link href={`/partner/${partner?.user_id}`} className="hover:underline">{partner?.business_name}</Link>
+              <Link href={`/partner/${partner?.user_id}`} className="hover:text-secondary transition">{partner?.business_name}</Link>
             </p>
           </div>
           {partner?.is_verified && (
