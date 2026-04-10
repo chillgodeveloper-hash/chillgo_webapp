@@ -460,8 +460,23 @@ function SwitchRoleModal({ onClose }: { onClose: () => void }) {
         setUser({ ...user, role: 'partner' });
         setPartnerProfile(existingPP);
         onClose();
-        window.location.href = '/feed';
+        if (existingPP.portfolio_images && existingPP.portfolio_images.length > 0) {
+          window.location.href = '/feed';
+        } else {
+          window.location.href = '/dashboard/partner/setup';
+        }
       } else {
+        const { data: oldUnfinished } = await supabase
+          .from('partner_profiles')
+          .select('id, portfolio_images')
+          .eq('user_id', user.id)
+          .filter('portfolio_images', 'eq', '{}');
+        if (oldUnfinished) {
+          for (const old of oldUnfinished) {
+            await supabase.from('partner_profiles').delete().eq('id', old.id);
+          }
+        }
+
         await supabase.from('partner_profiles').insert({
           user_id: user.id, category: selectedCategory, business_name: user.full_name,
           description: '', portfolio_images: [], is_verified: false,
@@ -539,10 +554,28 @@ function SwitchPartnerModal({ onClose }: { onClose: () => void }) {
       .maybeSingle();
 
     if (existingPP) {
-      setPartnerProfile(existingPP);
-      onClose();
-      window.location.href = '/feed';
+      if (existingPP.portfolio_images && existingPP.portfolio_images.length > 0) {
+        setPartnerProfile(existingPP);
+        onClose();
+        window.location.href = '/feed';
+      } else {
+        setPartnerProfile(existingPP);
+        onClose();
+        window.location.href = '/dashboard/partner/setup';
+      }
     } else {
+      const { data: oldUnfinished } = await supabase
+        .from('partner_profiles')
+        .select('id, portfolio_images')
+        .eq('user_id', user.id)
+        .filter('portfolio_images', 'eq', '{}');
+
+      if (oldUnfinished) {
+        for (const old of oldUnfinished) {
+          await supabase.from('partner_profiles').delete().eq('id', old.id);
+        }
+      }
+
       await supabase.from('partner_profiles').insert({
         user_id: user.id, category: selectedCategory, business_name: user.full_name,
         description: '', portfolio_images: [], is_verified: false,
@@ -564,15 +597,34 @@ function SwitchPartnerModal({ onClose }: { onClose: () => void }) {
   return (
     <ModalWrapper title="เปลี่ยนประเภทพาร์ทเนอร์" onClose={onClose}>
       <div className="space-y-4">
-        <p className="text-sm text-tmuted text-center">ประเภทปัจจุบัน: <span className="font-semibold text-tmain">{currentCategory === 'guide' ? 'ไกด์' : currentCategory === 'driver' ? 'คนขับรถ' : 'ล่าม'}</span></p>
-        <p className="text-sm font-medium text-tmain">เลือกประเภทที่ต้องการเปลี่ยน</p>
+        <p className="text-sm font-medium text-tmain">เลือกประเภทที่ต้องการ</p>
         <div className="grid grid-cols-3 gap-3">
-          {categories.filter(c => c.key !== currentCategory).map(cat => (
-            <button key={cat.key} onClick={() => setSelectedCategory(cat.key)} className={`p-4 rounded-xl border-2 text-center transition-all ${selectedCategory === cat.key ? 'border-primary bg-primary/20' : 'border-primary-dark/30 hover:bg-primary/10'}`}>
-              <span className="text-2xl block mb-1">{cat.icon}</span>
-              <p className="font-semibold text-xs text-tmain">{cat.label}</p>
-            </button>
-          ))}
+          {[
+            { key: 'guide' as const, icon: '🗺️', label: 'ไกด์' },
+            { key: 'driver' as const, icon: '🚗', label: 'คนขับรถ' },
+            { key: 'translator' as const, icon: '🌐', label: 'ล่าม/นักแปล' },
+          ].map(cat => {
+            const isCurrent = cat.key === currentCategory;
+            const isSelected = cat.key === selectedCategory;
+            return (
+              <button
+                key={cat.key}
+                onClick={() => !isCurrent && setSelectedCategory(cat.key)}
+                disabled={isCurrent}
+                className={`p-4 rounded-xl border-2 text-center transition-all relative ${
+                  isCurrent
+                    ? 'border-primary-dark/20 bg-primary-dark/10 opacity-60 cursor-not-allowed'
+                    : isSelected
+                    ? 'border-primary bg-primary/20'
+                    : 'border-primary-dark/30 hover:bg-primary/10'
+                }`}
+              >
+                <span className="text-2xl block mb-1">{cat.icon}</span>
+                <p className="font-semibold text-xs text-tmain">{cat.label}</p>
+                {isCurrent && <span className="text-[10px] text-tmuted block mt-1">ปัจจุบัน</span>}
+              </button>
+            );
+          })}
         </div>
         <p className="text-xs text-tmuted text-center">ถ้ายังไม่เคยลงทะเบียนประเภทนี้ จะไปหน้าลงทะเบียนให้อัตโนมัติ</p>
         <button onClick={handleSwitch} disabled={loading || !selectedCategory} className="w-full bg-primary hover:bg-primary-dark text-tmain font-semibold py-3 rounded-xl transition flex items-center justify-center gap-2 disabled:opacity-40">
