@@ -116,11 +116,23 @@ export default function PartnerSetupPage() {
         const { data: profile } = await supabase.from('profiles').select('*').eq('id', session.user.id).single();
         if (profile) { setUser(profile); currentUser = profile; }
       }
+
       let pp = partnerProfile;
-      if (!pp && currentUser) {
-        const { data } = await supabase.from('partner_profiles').select('*').eq('user_id', currentUser.id).single();
-        if (data) { setPartnerProfile(data); pp = data; }
+
+      if (currentUser) {
+        const { data: allPPs } = await supabase
+          .from('partner_profiles')
+          .select('*')
+          .eq('user_id', currentUser.id)
+          .order('created_at', { ascending: false });
+
+        if (allPPs && allPPs.length > 0) {
+          const unfinished = allPPs.find((p: any) => !p.portfolio_images || p.portfolio_images.length === 0);
+          pp = unfinished || allPPs[0];
+          setPartnerProfile(pp);
+        }
       }
+
       setLocalPartnerProfile(pp);
       if (pp) setForm(prev => ({ ...prev, business_name: pp.business_name || '' }));
       setPageLoading(false);

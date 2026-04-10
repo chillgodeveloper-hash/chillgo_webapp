@@ -38,19 +38,21 @@ export function useAuth(requireRole?: string) {
         }
 
         if (profile.role === 'partner') {
-          const { data: partnerProfile } = await supabase
+          const { data: allPPs } = await supabase
             .from('partner_profiles')
             .select('*')
             .eq('user_id', profile.id)
-            .order('created_at', { ascending: false })
-            .limit(1)
-            .maybeSingle();
-          setPartnerProfile(partnerProfile);
+            .order('created_at', { ascending: false });
 
-          if (partnerProfile && partnerProfile.portfolio_images?.length === 0) {
-            setLoading(false);
-            router.push('/dashboard/partner/setup');
-            return;
+          if (allPPs && allPPs.length > 0) {
+            const unfinished = allPPs.find((p: any) => !p.portfolio_images || p.portfolio_images.length === 0);
+            if (unfinished) {
+              setPartnerProfile(unfinished);
+              setLoading(false);
+              router.push('/dashboard/partner/setup');
+              return;
+            }
+            setPartnerProfile(allPPs[0]);
           }
         }
 
