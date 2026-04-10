@@ -64,14 +64,30 @@ export default function SearchFilter({ filters, onChange, onReset }: SearchFilte
       </div>
 
       <div>
-        <label className="text-sm font-medium text-tmain mb-2 block">คะแนนขั้นต่ำ</label>
-        <div className="flex gap-1">
-          {[0, 1, 2, 3, 4, 5].map((s) => (
-            <button key={s} onClick={() => update('rating', s === filters.rating ? 0 : s)} className={`flex-1 h-10 rounded-lg text-xs font-medium transition flex items-center justify-center gap-0.5 ${filters.rating === s && s > 0 ? 'bg-secondary text-tmain' : 'bg-primary/20 text-tmain hover:bg-primary/30'}`}>
-              {s === 0 ? 'ทั้งหมด' : <><Star size={12} className="text-amber-500 fill-amber-500" /> {s}+</>}
-            </button>
-          ))}
+        <label className="text-sm font-medium text-tmain mb-2 block">คะแนนขั้นต่ำ: {filters.rating > 0 ? `${filters.rating} ดาวขึ้นไป` : 'ทั้งหมด'}</label>
+        <div className="flex items-center gap-3">
+          <span className="text-xs text-tmuted">0</span>
+          <div className="flex-1 relative">
+            <input
+              type="range"
+              min={0}
+              max={5}
+              step={0.5}
+              value={filters.rating}
+              onChange={(e) => update('rating', parseFloat(e.target.value))}
+              className="w-full h-2 bg-primary/30 rounded-lg appearance-none cursor-pointer accent-secondary [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:bg-secondary [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:cursor-pointer"
+            />
+          </div>
+          <span className="text-xs text-tmuted">5</span>
         </div>
+        {filters.rating > 0 && (
+          <div className="flex items-center gap-1 mt-1.5">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Star key={i} size={14} className={i < Math.floor(filters.rating) ? 'text-amber-500 fill-amber-500' : i < filters.rating ? 'text-amber-500 fill-amber-200' : 'text-primary-dark/30'} />
+            ))}
+            <span className="text-xs text-amber-600 ml-1 font-medium">{filters.rating}+</span>
+          </div>
+        )}
       </div>
 
       <div>

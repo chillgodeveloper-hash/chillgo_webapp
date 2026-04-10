@@ -28,36 +28,7 @@ export default function SearchHero({ onSearch, compact = false }: SearchHeroProp
   if (compact) {
     return (
       <div className="bg-white rounded-2xl border border-primary-dark/20 p-4 shadow-sm">
-        <div className="flex flex-wrap gap-3 items-center justify-between">
-          <div className="flex bg-primary/20 rounded-xl p-1 gap-1">
-            <button
-              onClick={() => setCategory('guide')}
-              className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
-                category === 'guide' ? 'bg-secondary text-tmain shadow-sm' : 'text-tmain hover:bg-primary/30'
-              }`}
-            >
-              <Map size={14} className="inline mr-1.5" />ไกด์
-            </button>
-            <button
-              onClick={() => setCategory('driver')}
-              className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
-                category === 'driver' ? 'bg-secondary text-tmain shadow-sm' : 'text-tmain hover:bg-primary/30'
-              }`}
-            >
-              <Car size={14} className="inline mr-1.5" />คนขับรถ
-            </button>
-            <button
-              onClick={() => setCategory('translator')}
-              className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
-                category === 'translator' ? 'bg-secondary text-tmain shadow-sm' : 'text-tmain hover:bg-primary/30'
-              }`}
-            >
-              🌐 ล่าม
-            </button>
-          </div>
-        </div>
-
-        <div className="relative mt-3">
+        <div className="relative">
           <MapPin size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-tmuted z-10" />
           <input
             type="text"
