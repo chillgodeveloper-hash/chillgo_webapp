@@ -135,7 +135,7 @@ export default function PartnerSetupPage() {
           } else {
             const unfinished = allPPs.find((p: any) => !p.portfolio_images || p.portfolio_images.length === 0);
             pp = unfinished || allPPs[0];
-            localStorage.setItem('active_partner_id', pp.id);
+            if (pp) localStorage.setItem('active_partner_id', pp.id);
           }
           setPartnerProfile(pp);
         }
