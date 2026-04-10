@@ -42,10 +42,17 @@ export default function ReviewModal({ bookingId, partnerId, partnerName, postTit
 
     if (reviews && reviews.length > 0) {
       const avgRating = reviews.reduce((sum: number, r: any) => sum + r.rating, 0) / reviews.length;
-      await supabase
-        .from('partner_profiles')
-        .update({ rating: Math.round(avgRating * 10) / 10, total_reviews: reviews.length })
-        .eq('user_id', partnerId);
+
+      const { data: booking } = await supabase.from('bookings').select('post_id').eq('id', bookingId).single();
+      if (booking?.post_id) {
+        const { data: post } = await supabase.from('posts').select('partner_id').eq('id', booking.post_id).single();
+        if (post?.partner_id) {
+          await supabase
+            .from('partner_profiles')
+            .update({ rating: Math.round(avgRating * 10) / 10, total_reviews: reviews.length })
+            .eq('id', post.partner_id);
+        }
+      }
     }
 
     await supabase.from('notifications').insert({
