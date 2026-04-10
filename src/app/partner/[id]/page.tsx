@@ -17,11 +17,14 @@ export default function PartnerProfilePage() {
 
   useEffect(() => {
     const fetch = async () => {
-      const { data: pp } = await supabase
+      const { data: allPPs } = await supabase
         .from('partner_profiles')
         .select('*, profile:profiles(*)')
         .eq('user_id', id)
-        .single();
+        .order('created_at', { ascending: false });
+
+      const finishedPP = allPPs?.find((p: any) => p.portfolio_images && p.portfolio_images.length > 0);
+      const pp = finishedPP || allPPs?.[0] || null;
       setPartner(pp);
 
       const { data: wh } = await supabase
