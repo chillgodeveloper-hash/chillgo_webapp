@@ -77,10 +77,15 @@ export default function PartnerSetupPage() {
     business_name: '', description: '',
     full_name_th: '', full_name_en: '', nickname: '', age: '', id_number: '', date_of_birth: '',
     nationality: 'ไทย', phone: '', line_id: '', wechat_id: '', contact_email: '', address: '', province: '', postcode: '',
-    languages: {} as Record<string, string>, other_language: '', other_language_level: '',
+    marital_status: '',
+    languages: {} as Record<string, string>, other_languages: [] as any[],
     skills: [] as string[], service_styles: [] as string[], special_routes: '',
     bank_name: '', bank_branch: '', account_name: '', account_number: '', account_type: '', promptpay: '',
-    guide_license_no: '', guide_license_type: '', marital_status: '',
+    guide_license_no: '', guide_license_type: '',
+    education: [] as any[],
+    certifications: [] as string[],
+    cert_detail: '',
+    work_experience: [] as any[],
     driving_license_type: '', driving_license_no: '', driving_license_expiry: '',
     vehicle_brand: '', vehicle_color: '', vehicle_plate: '', vehicle_plate_province: '', vehicle_year: '', vehicle_seats: '',
     vehicle_plate_type: '', vehicle_insurance_compulsory: '', vehicle_insurance_compulsory_expiry: '', vehicle_insurance_voluntary: '',
@@ -99,7 +104,7 @@ export default function PartnerSetupPage() {
   const router = useRouter();
 
   const category = localPartnerProfile?.category || 'guide';
-  const totalSteps = category === 'guide' ? 5 : category === 'driver' ? 5 : 5;
+  const totalSteps = category === 'guide' ? 8 : category === 'driver' ? 5 : 5;
 
   useEffect(() => {
     const init = async () => {
@@ -202,6 +207,9 @@ export default function PartnerSetupPage() {
         updateData.guide_license_no = form.guide_license_no;
         updateData.guide_license_type = form.guide_license_type;
         updateData.marital_status = form.marital_status;
+        updateData.education = form.education;
+        updateData.certifications = form.certifications;
+        updateData.work_experience = form.work_experience;
       }
       if (category === 'driver') {
         updateData.driving_license_type = form.driving_license_type;
@@ -308,6 +316,12 @@ export default function PartnerSetupPage() {
                     <FormInput label="ประเภทใบอนุญาต" name="guide_license_type" value={form["guide_license_type"] || ''} onChange={update} />
                   </div>
                 )}
+                {category === 'guide' && (
+                  <div className="grid grid-cols-2 gap-3">
+                    <FormInput label="สัญชาติ / Nationality" name="nationality" value={form["nationality"] || ''} onChange={update} />
+                    <FormInput label="สถานภาพ / Status" name="marital_status" value={form["marital_status"] || ''} onChange={update} />
+                  </div>
+                )}
                 {category === 'translator' && (
                   <>
                     <div className="grid grid-cols-2 gap-3">
@@ -326,6 +340,12 @@ export default function PartnerSetupPage() {
                   <FormInput label="Email" name="contact_email" type="email" value={form["contact_email"] || ''} onChange={update} />
                 </div>
                 <FormInput label={category === 'translator' ? 'ที่อยู่ปัจจุบัน / Current Address' : 'ที่อยู่ปัจจุบัน'} name="address" rows={3} value={form["address"] || ''} onChange={update} />
+                {category === 'guide' && (
+                  <div className="grid grid-cols-2 gap-3">
+                    <FormInput label="จังหวัด / Province" name="province" value={form["province"] || ''} onChange={update} />
+                    <FormInput label="รหัสไปรษณีย์ / Postcode" name="postcode" value={form["postcode"] || ''} onChange={update} />
+                  </div>
+                )}
               </div>
             </>
           )}
@@ -474,17 +494,24 @@ export default function PartnerSetupPage() {
                     </div>
                   </div>
                 ))}
-                <div className="grid grid-cols-2 gap-3">
-                  <FormInput label="ภาษาอื่นๆ (ระบุ)" name="other_language" placeholder="เช่น ภาษาญี่ปุ่น" value={form["other_language"] || ''} onChange={update} />
-                  <div>
-                    <label className="text-sm font-medium text-tmain mb-1 block">ระดับ</label>
+                <hr className="border-primary-dark/10" />
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-semibold text-tmain">ภาษาอื่น ๆ / Other Languages</p>
+                  <button type="button" onClick={() => update('other_languages', [...form.other_languages, { name: '', level: '' }])} className="text-xs bg-primary/20 hover:bg-primary/30 text-tmain px-3 py-1.5 rounded-lg transition font-medium">+ เพิ่มภาษา</button>
+                </div>
+                {form.other_languages.map((ol: any, i: number) => (
+                  <div key={i} className="flex gap-2 items-end">
+                    <div className="flex-1">
+                      <input placeholder="ชื่อภาษา เช่น ภาษาญี่ปุ่น" value={ol.name} onChange={e => { const arr = [...form.other_languages]; arr[i] = { ...arr[i], name: e.target.value }; update('other_languages', arr); }} className="w-full px-3 py-2 rounded-lg border border-primary-dark/30 text-xs outline-none focus:border-primary" />
+                    </div>
                     <div className="flex gap-1">
                       {LANG_LEVELS.map(level => (
-                        <button key={level} type="button" onClick={() => update('other_language_level', level)} className={`flex-1 py-2 rounded-lg border text-[10px] transition ${form.other_language_level === level ? 'border-primary bg-primary/20 font-medium' : 'border-primary-dark/20'}`}>{level}</button>
+                        <button key={level} type="button" onClick={() => { const arr = [...form.other_languages]; arr[i] = { ...arr[i], level }; update('other_languages', arr); }} className={`px-2 py-2 rounded-lg border text-[10px] transition ${ol.level === level ? 'border-primary bg-primary/20 font-medium' : 'border-primary-dark/20'}`}>{level}</button>
                       ))}
                     </div>
+                    <button type="button" onClick={() => update('other_languages', form.other_languages.filter((_: any, idx: number) => idx !== i))} className="text-xs text-red-500 hover:text-red-700 py-2">ลบ</button>
                   </div>
-                </div>
+                ))}
               </div>
             </>
           )}
@@ -524,26 +551,85 @@ export default function PartnerSetupPage() {
                   <p className="text-sm font-semibold text-tmain mb-2">ทักษะพิเศษเพิ่มเติม / Extra Skills</p>
                   <CheckboxGrid items={TRANSLATOR_SKILLS} selected={form["skills"] as string[]} onToggle={(item) => toggleArray("skills", item)} />
                 </div>
-                <hr className="border-primary-dark/10" />
-                <p className="text-sm font-semibold text-tmain">ข้อมูลการทำงาน / Work Info</p>
-                <div className="grid grid-cols-2 gap-3">
-                  <FormInput label="จำนวนคำเฉลี่ยต่อวัน / Daily Capacity" name="daily_capacity" placeholder="เช่น 3000 คำ" value={form["daily_capacity"] || ''} onChange={update} />
-                  <FormInput label="ราคาเริ่มต้น / Rate (per word/page)" name="rate_per_word" placeholder="เช่น 1.5 บาท/คำ" value={form["rate_per_word"] || ''} onChange={update} />
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <FormInput label="เวลาทำงานที่ถนัด / Working Hours" name="working_hours" placeholder="เช่น 9:00-18:00" value={form["working_hours"] || ''} onChange={update} />
-                  <div>
-                    <label className="text-sm font-medium text-tmain mb-1 block">รับงานด่วน? / Rush Job</label>
-                    <button type="button" onClick={() => update('rush_job_available', !form.rush_job_available)} className={`w-full px-4 py-3 rounded-xl border text-sm transition ${form.rush_job_available ? 'border-primary bg-primary/20 font-medium' : 'border-primary-dark/30'}`}>
-                      {form.rush_job_available ? '✓ รับงานด่วน' : 'ไม่รับงานด่วน'}
-                    </button>
-                  </div>
-                </div>
               </div>
             </>
           )}
 
-          {((step === 4 && (category === 'guide' || category === 'driver')) || (step === 4 && category === 'translator')) && (
+          {step === 4 && category === 'guide' && (
+            <>
+              <h2 className="font-bold text-lg text-tmain mb-4">ประวัติการศึกษาและใบอนุญาต</h2>
+              <div className="space-y-4">
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-sm font-semibold text-tmain">ระดับการศึกษา</p>
+                    <button type="button" onClick={() => update('education', [...form.education, { level: '', institution: '', major: '', year: '' }])} className="text-xs bg-primary/20 hover:bg-primary/30 text-tmain px-3 py-1.5 rounded-lg transition font-medium">+ เพิ่ม</button>
+                  </div>
+                  {form.education.length === 0 && <p className="text-xs text-tmuted bg-primary-light rounded-xl p-3 text-center">กด + เพิ่ม เพื่อเพิ่มข้อมูลการศึกษา</p>}
+                  {form.education.map((edu: any, i: number) => (
+                    <div key={i} className="bg-primary-light rounded-xl p-3 mb-2 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-medium text-tmuted">ลำดับที่ {i + 1}</span>
+                        <button type="button" onClick={() => update('education', form.education.filter((_: any, idx: number) => idx !== i))} className="text-xs text-red-500">ลบ</button>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <select value={edu.level} onChange={e => { const arr = [...form.education]; arr[i] = { ...arr[i], level: e.target.value }; update('education', arr); }} className="px-3 py-2 rounded-lg border border-primary-dark/30 text-xs outline-none bg-white">
+                          <option value="">ระดับการศึกษา</option>
+                          <option value="มัธยม / Secondary">มัธยม / Secondary</option>
+                          <option value="อนุปริญญา / Diploma">อนุปริญญา / Diploma</option>
+                          <option value="ปริญญาตรี / Bachelor">ปริญญาตรี / Bachelor</option>
+                          <option value="สูงกว่าปริญญาตรี / Graduate">สูงกว่าปริญญาตรี / Graduate</option>
+                        </select>
+                        <input placeholder="ชื่อสถาบัน / Institution" value={edu.institution} onChange={e => { const arr = [...form.education]; arr[i] = { ...arr[i], institution: e.target.value }; update('education', arr); }} className="px-3 py-2 rounded-lg border border-primary-dark/30 text-xs outline-none" />
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <input placeholder="สาขาวิชา / Major" value={edu.major} onChange={e => { const arr = [...form.education]; arr[i] = { ...arr[i], major: e.target.value }; update('education', arr); }} className="px-3 py-2 rounded-lg border border-primary-dark/30 text-xs outline-none" />
+                        <input placeholder="ปีที่จบ / Year" value={edu.year} onChange={e => { const arr = [...form.education]; arr[i] = { ...arr[i], year: e.target.value }; update('education', arr); }} className="px-3 py-2 rounded-lg border border-primary-dark/30 text-xs outline-none" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <hr className="border-primary-dark/10" />
+                <p className="text-sm font-semibold text-tmain">ใบอนุญาตและใบรับรอง (Licenses & Certifications)</p>
+                <div className="grid grid-cols-2 gap-2">
+                  {['ใบอนุญาตมัคคุเทศก์ (Thai Guide)', 'CPR / First Aid Certificate', 'Chinese Proficiency (HSK / อื่นๆ)', 'English (IELTS / TOEIC / อื่นๆ)'].map(cert => (
+                    <button key={cert} type="button" onClick={() => toggleArray('certifications', cert)} className={`p-2 rounded-xl border text-xs text-left transition ${(form.certifications as string[]).includes(cert) ? 'border-primary bg-primary/20 font-medium' : 'border-primary-dark/20 hover:bg-primary/10'}`}>{cert}</button>
+                  ))}
+                </div>
+                <FormInput label="ระบุชื่อใบรับรองและระดับ / Certificate name & level" name="cert_detail" rows={2} value={form["cert_detail"] || ''} onChange={update} />
+              </div>
+            </>
+          )}
+
+          {step === 5 && category === 'guide' && (
+            <>
+              <h2 className="font-bold text-lg text-tmain mb-4">ประสบการณ์ทำงาน / Work Experience</h2>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-sm font-semibold text-tmain">ประวัติการทำงาน</p>
+                  <button type="button" onClick={() => update('work_experience', [...form.work_experience, { company: '', position: '', period: '', reason_left: '' }])} className="text-xs bg-primary/20 hover:bg-primary/30 text-tmain px-3 py-1.5 rounded-lg transition font-medium">+ เพิ่ม</button>
+                </div>
+                {form.work_experience.length === 0 && <p className="text-xs text-tmuted bg-primary-light rounded-xl p-3 text-center">กด + เพิ่ม เพื่อเพิ่มประสบการณ์ทำงาน</p>}
+                {form.work_experience.map((we: any, i: number) => (
+                  <div key={i} className="bg-primary-light rounded-xl p-3 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-medium text-tmuted">ลำดับที่ {i + 1}</span>
+                      <button type="button" onClick={() => update('work_experience', form.work_experience.filter((_: any, idx: number) => idx !== i))} className="text-xs text-red-500">ลบ</button>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <input placeholder="บริษัท / Company" value={we.company} onChange={e => { const arr = [...form.work_experience]; arr[i] = { ...arr[i], company: e.target.value }; update('work_experience', arr); }} className="px-3 py-2 rounded-lg border border-primary-dark/30 text-xs outline-none" />
+                      <input placeholder="ตำแหน่ง / Position" value={we.position} onChange={e => { const arr = [...form.work_experience]; arr[i] = { ...arr[i], position: e.target.value }; update('work_experience', arr); }} className="px-3 py-2 rounded-lg border border-primary-dark/30 text-xs outline-none" />
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <input placeholder="ระยะเวลา / Period" value={we.period} onChange={e => { const arr = [...form.work_experience]; arr[i] = { ...arr[i], period: e.target.value }; update('work_experience', arr); }} className="px-3 py-2 rounded-lg border border-primary-dark/30 text-xs outline-none" />
+                      <input placeholder="สาเหตุที่ออก / Reason Left" value={we.reason_left} onChange={e => { const arr = [...form.work_experience]; arr[i] = { ...arr[i], reason_left: e.target.value }; update('work_experience', arr); }} className="px-3 py-2 rounded-lg border border-primary-dark/30 text-xs outline-none" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+
+          {((step === 6 && category === 'guide') || (step === 4 && (category === 'driver' || category === 'translator'))) && (
             <>
               <h2 className="font-bold text-lg text-tmain mb-4">{category === 'translator' ? 'ข้อมูลบัญชีธนาคาร / Bank Account Information' : 'ข้อมูลบัญชีธนาคาร'}</h2>
               <p className="text-xs text-amber-600 bg-amber-50 rounded-xl p-3 mb-4">{category === 'translator' ? '⚠ ชื่อบัญชีต้องตรงกับชื่อผู้สมัครเท่านั้น / Account name must match applicant\'s name' : '⚠ ชื่อบัญชีต้องตรงกับชื่อผู้สมัครเท่านั้น'}</p>
@@ -580,7 +666,81 @@ export default function PartnerSetupPage() {
             </>
           )}
 
-          {step === totalSteps && (
+          {step === 7 && category === 'guide' && (
+            <>
+              <h2 className="font-bold text-lg text-tmain mb-4">อัปโหลดเอกสารและผลงาน</h2>
+              <div className="space-y-4">
+                <div>
+                  <p className="text-sm font-medium text-tmain mb-1">คำอธิบาย / แนะนำตัว</p>
+                  <textarea value={form.description} onChange={e => update('description', e.target.value)} rows={3} placeholder="เล่าเกี่ยวกับบริการของคุณ..." className="w-full px-4 py-3 rounded-xl border border-primary-dark/30 focus:border-primary outline-none text-sm resize-none" />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="bg-primary-light rounded-xl p-3">
+                    <p className="text-xs font-semibold text-tmain mb-2">เอกสาร (Required Documents)</p>
+                    <div className="space-y-1.5 text-xs text-tmuted">
+                      <p>✓ สำเนาบัตรประชาชน</p>
+                      <p>✓ สำเนาใบอนุญาตมัคคุเทศก์</p>
+                      <p>✓ สำเนาหน้าสมุดบัญชีธนาคาร</p>
+                      <p>✓ ทะเบียนบ้าน (ถ้ามี)</p>
+                      <p>✓ ใบรับรองอื่น ๆ ที่เกี่ยวข้อง</p>
+                    </div>
+                  </div>
+                  <div className="bg-primary-light rounded-xl p-3">
+                    <p className="text-xs font-semibold text-tmain mb-2">สื่อและมีเดีย (Media)</p>
+                    <div className="space-y-1.5 text-xs text-tmuted">
+                      <p>✓ รูปถ่ายหน้าตรงชัดเจน (1:1)</p>
+                      <p>✓ รูปถ่ายไลฟ์สไตล์ขณะทำงาน (3-5 รูป)</p>
+                      <p>✓ วิดีโอแนะนำตัว (Intro Video) 1-2 นาที</p>
+                      <p>✓ วิดีโอโชว์ทักษะการเอ็นเตอร์เทน</p>
+                      <p>✓ Portfolio / ผลงานนำเที่ยวที่ผ่านมา</p>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-tmain mb-2">อัปโหลดรูปภาพ / เอกสาร (อย่างน้อย 1 ไฟล์)</p>
+                  <div className="grid grid-cols-4 gap-2">
+                    {portfolioFiles.map((f, i) => (
+                      <div key={i} className="relative aspect-square rounded-xl overflow-hidden bg-primary/20">
+                        <img src={f.preview} alt="" className="w-full h-full object-cover" />
+                        <button onClick={() => setPortfolioFiles(prev => prev.filter((_, idx) => idx !== i))} className="absolute top-1 right-1 w-5 h-5 bg-black/50 rounded-full flex items-center justify-center text-primary-light"><X size={12} /></button>
+                      </div>
+                    ))}
+                    {portfolioFiles.length < 10 && (
+                      <button onClick={() => portfolioRef.current?.click()} className="aspect-square rounded-xl border-2 border-dashed border-primary-dark/40 flex flex-col items-center justify-center text-tmuted hover:border-primary hover:bg-primary/20 transition">
+                        <ImagePlus size={20} /><span className="text-[10px] mt-1">เพิ่มไฟล์</span>
+                      </button>
+                    )}
+                  </div>
+                  <input ref={portfolioRef} type="file" accept="image/*" multiple onChange={handlePortfolioSelect} className="hidden" />
+                </div>
+              </div>
+            </>
+          )}
+
+          {step === 8 && category === 'guide' && (
+            <>
+              <h2 className="font-bold text-lg text-tmain mb-4">ข้อกำหนดและเงื่อนไข</h2>
+              <div className="space-y-4">
+                <div className="bg-primary-light rounded-xl p-4 max-h-64 overflow-y-auto text-xs text-tmuted leading-relaxed space-y-3">
+                  <p className="font-semibold text-tmain">บริษัท ชิลโก ทราเวล จำกัด (Chill Go Travel Co., Ltd.) ขอชี้แจงสถานะและรูปแบบการดำเนินงานเพื่อความเข้าใจที่ตรงกันระหว่างบริษัทและพาร์ทเนอร์ผู้ร่วมงานทุกท่าน โดยมีรายละเอียดและเงื่อนไขดังต่อไปนี้</p>
+                  <p><span className="font-semibold text-tmain">1. สถานะทางกฎหมายของบริษัท (Legal Status)</span><br/>บริษัท ชิลโก ทราเวล จำกัด เป็นเพียงผู้ให้บริการ "แพลตฟอร์มอิเล็กทรอนิกส์" (Platform Provider) ซึ่งทำหน้าที่เป็นตัวกลางในการเชื่อมโยงและอำนวยความสะดวกให้พาร์ทเนอร์ (เช่น ไกด์นำเที่ยว) และลูกค้าได้มาพบกันเท่านั้น บริษัทบริหารจัดการระบบการรับชำระเงิน การจัดการด้านความปลอดภัย และเทคโนโลยีเพื่อความสะดวกในการปฏิบัติงาน</p>
+                  <p><span className="font-semibold text-tmain">2. ความสัมพันธ์ระหว่างคู่สัญญา (Legal Relationship)</span><br/>บริษัท ชิลโก ทราเวล จำกัด มิใช่ผู้ว่าจ้างหรือนายจ้าง และพาร์ทเนอร์มิใช่ลูกจ้างหรือพนักงานของบริษัท คู่สัญญาทั้งสองฝ่ายไม่มีนิติสัมพันธ์ในลักษณะการจ้างแรงงาน พาร์ทเนอร์จึงไม่มีสิทธิในสวัสดิการพนักงาน หรือการสมทบกองทุนประกันสังคมในฐานะลูกจ้าง (มาตรา 33) พาร์ทเนอร์เป็นผู้ดำเนินธุรกิจอิสระ (Freelancer / Independent Contractor)</p>
+                  <p><span className="font-semibold text-tmain">3. อิสระในการกำหนดราคา (Pricing Freedom)</span><br/>พาร์ทเนอร์เป็นผู้มีอำนาจอิสระในการกำหนดราคาค่าบริการด้วยตนเอง โดยบริษัทจะทำหน้าที่เพียงสนับสนุนระบบการทำธุรกรรมให้เป็นไปอย่างโปร่งใสเท่านั้น</p>
+                  <p><span className="font-semibold text-tmain">4. ความรับผิดชอบทางกฎหมายและการปฏิบัติงาน (Legal & Operational Responsibility)</span><br/>พาร์ทเนอร์มีหน้าที่ตรวจสอบและปฏิบัติตามกฎหมายและระเบียบข้อบังคับของราชการที่เกี่ยวข้องอย่างเคร่งครัด บริษัทขอสงวนสิทธิ์ที่จะไม่รับผิดชอบต่อความเสียหายหรือค่าปรับใดๆ ทั้งสิ้น</p>
+                  <p><span className="font-semibold text-tmain">5. การหักค่าธรรมเนียมและการชำระเงิน (Fees & Payment)</span><br/>– ค่าบริการแพลตฟอร์ม: 15% ของรายได้<br/>– ภาษี: หักภาษี ณ ที่จ่าย ตามที่กฎหมายกำหนด<br/>– รอบการโอนเงิน: ภายใน 3 วันทำการหลังจากงานเสร็จสิ้น (ไม่นับวันหยุดราชการไทยและจีน)</p>
+                  <p><span className="font-semibold text-tmain">6. กรณีความขัดแย้งระหว่างพาร์ทเนอร์และลูกค้า (Dispute Resolution)</span><br/>บริษัทจะไม่มีส่วนรับผิดชอบต่อความขัดแย้งส่วนบุคคลระหว่างพาร์ทเนอร์และลูกค้าในทุกกรณี เว้นแต่พาร์ทเนอร์ถูกประทุษร้ายและสามารถพิสูจน์ข้อเท็จจริงตามขั้นตอนทางกฎหมายได้ บริษัทจะพิจารณาจ่ายค่าเสียหายตามที่กฎหมายกำหนดเท่านั้น</p>
+                </div>
+                <label className="flex items-start gap-3 bg-white border border-primary-dark/20 rounded-xl p-4 cursor-pointer">
+                  <input type="checkbox" checked={form.terms_accepted} onChange={e => update('terms_accepted', e.target.checked)} className="mt-1 w-4 h-4 accent-primary" />
+                  <span className="text-xs text-tmuted leading-relaxed">
+                    ข้าพเจ้าขอรับรองว่าข้อมูลทั้งหมดที่กรอกในใบสมัครนี้ถูกต้องและเป็นความจริงทุกประการ ข้าพเจ้าได้อ่านและทำความเข้าใจข้อกำหนดและเงื่อนไขการให้บริการบนแพลตฟอร์มครบถ้วนทุกข้อแล้ว และยอมรับเงื่อนไขทั้งหมดโดยไม่มีข้อโต้แย้ง
+                  </span>
+                </label>
+              </div>
+            </>
+          )}
+
+          {step === totalSteps && category !== 'guide' && (
             <>
               <h2 className="font-bold text-lg text-tmain mb-4">อัปโหลดผลงานและยืนยัน</h2>
               <div className="space-y-4">
