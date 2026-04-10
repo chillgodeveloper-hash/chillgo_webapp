@@ -72,7 +72,7 @@ export default function PostListItem({ post, onBook }: PostListItemProps) {
           )}
           <span className="flex items-center gap-1 text-amber-600 font-medium">
               <Star size={14} className="text-amber-500 fill-amber-500" />
-              {partner?.rating > 0 ? `${partner.rating.toFixed(1)} (${partner.total_reviews} รีวิว)` : 'ยังไม่มีรีวิว'}
+              {(partner?.rating ?? 0) > 0 ? `${(partner?.rating ?? 0).toFixed(1)} (${partner?.total_reviews ?? 0} รีวิว)` : 'ยังไม่มีรีวิว'}
             </span>
           {(post as any).available_start && (post as any).available_end ? (
             <span className="flex items-center gap-1">
