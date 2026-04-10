@@ -263,11 +263,13 @@ export default function PartnerSetupPage() {
   const handleLogout = async () => { await supabase.auth.signOut(); router.push('/auth/login'); };
   const handleSwitchToCustomer = async () => {
     if (!user) return;
-    await supabase.from('partner_profiles').delete().eq('user_id', user.id);
+    if (localPartnerProfile && (!localPartnerProfile.portfolio_images || localPartnerProfile.portfolio_images.length === 0)) {
+      await supabase.from('partner_profiles').delete().eq('id', localPartnerProfile.id);
+    }
     await supabase.from('profiles').update({ role: 'customer' }).eq('id', user.id);
     setUser({ ...user, role: 'customer' });
     setPartnerProfile(null);
-    router.push('/feed');
+    window.location.href = '/feed';
   };
 
   if (pageLoading) return <div className="min-h-screen bg-primary-light flex items-center justify-center"><Loader2 size={40} className="text-secondary animate-spin" /></div>;
