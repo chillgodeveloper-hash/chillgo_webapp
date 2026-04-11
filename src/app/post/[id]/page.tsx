@@ -18,6 +18,7 @@ export default function PostDetailPage() {
   const [loading, setLoading] = useState(true);
   const [currentImage, setCurrentImage] = useState(0);
   const [showBooking, setShowBooking] = useState(false);
+  const [copied, setCopied] = useState(false);
   const { user } = useAuthStore();
   const supabase = createClient();
 
@@ -157,8 +158,8 @@ export default function PostDetailPage() {
             </div>
 
             <div className="flex items-center gap-4 pt-4 mt-4 border-t border-primary-dark/10">
-              <button onClick={() => { if (navigator.share) { navigator.share({ title: post.title, url: window.location.href }); } else { navigator.clipboard.writeText(window.location.href); } }} className="flex items-center gap-1.5 text-sm text-tmuted hover:text-secondary transition">
-                <Share2 size={20} /> แชร์
+              <button onClick={() => { navigator.clipboard.writeText(window.location.href); setCopied(true); setTimeout(() => setCopied(false), 2000); }} className="flex items-center gap-1.5 text-sm text-tmuted hover:text-secondary transition">
+                <Share2 size={18} /> {copied ? '✓ คัดลอกลิงก์แล้ว' : 'คัดลอกลิงก์'}
               </button>
             </div>
           </div>

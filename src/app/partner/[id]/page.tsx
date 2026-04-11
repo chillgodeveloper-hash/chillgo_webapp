@@ -185,16 +185,6 @@ export default function PartnerProfilePage() {
               </div>
             )}
 
-            {partner.category === 'driver' && (
-              <div className="space-y-1">
-                <h3 className="font-semibold text-tmain text-sm mt-3 mb-1">ข้อมูลรถ</h3>
-                {partner.vehicle_brand && <p className="text-sm text-tmuted">🚗 {partner.vehicle_brand} {partner.vehicle_color && `สี${partner.vehicle_color}`}</p>}
-                {partner.vehicle_plate && <p className="text-sm text-tmuted">🔢 ทะเบียน: {partner.vehicle_plate} {partner.vehicle_plate_province}</p>}
-                {partner.vehicle_seats && <p className="text-sm text-tmuted">💺 {partner.vehicle_seats} ที่นั่ง</p>}
-                {partner.vehicle_plate_type && <p className="text-sm text-tmuted">🏷️ {partner.vehicle_plate_type}</p>}
-              </div>
-            )}
-
             {partner.category === 'translator' && partner.translation_specializations && partner.translation_specializations.length > 0 && (
               <div>
                 <h3 className="font-semibold text-tmain text-sm mt-3 mb-1">หมวดงานที่เชี่ยวชาญ</h3>
