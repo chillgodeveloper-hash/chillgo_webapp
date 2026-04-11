@@ -1,12 +1,13 @@
 'use client';
 
+import { Suspense } from 'react';
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase-client';
 import { Loader2 } from 'lucide-react';
 import Link from 'next/link';
 
-export default function LineCallbackPage() {
+function LineCallbackContent() {
   const searchParams = useSearchParams();
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
@@ -52,7 +53,6 @@ export default function LineCallbackPage() {
             access_token: data.session.access_token,
             refresh_token: data.session.refresh_token,
           });
-
           window.location.href = '/';
         } else {
           setError('ไม่สามารถสร้าง session ได้');
@@ -87,5 +87,20 @@ export default function LineCallbackPage() {
         <Link href="/auth/login" className="inline-block bg-primary hover:bg-primary-dark text-tmain font-semibold px-6 py-3 rounded-xl transition">กลับหน้าเข้าสู่ระบบ</Link>
       </div>
     </div>
+  );
+}
+
+export default function LineCallbackPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-primary-light flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 size={40} className="text-success animate-spin mx-auto mb-3" />
+          <p className="text-tmain font-medium">กำลังโหลด...</p>
+        </div>
+      </div>
+    }>
+      <LineCallbackContent />
+    </Suspense>
   );
 }
