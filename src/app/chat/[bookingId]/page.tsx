@@ -50,7 +50,9 @@ export default function ChatPage() {
             .select('*, sender:profiles(*)')
             .eq('id', payload.new.id)
             .single();
-          if (data) setMessages((prev) => [...prev, data]);
+          if (data) {
+            setMessages((prev) => prev.some((m) => m.id === data.id) ? prev : [...prev, data]);
+          }
         }
       )
       .subscribe();
@@ -73,16 +75,24 @@ export default function ChatPage() {
     }
 
     setSending(true);
-    const { error } = await supabase.from('chat_messages').insert({
-      booking_id: bookingId,
-      sender_id: user.id,
-      message: newMessage.trim(),
-    });
+    const { data: inserted, error } = await supabase
+      .from('chat_messages')
+      .insert({
+        booking_id: bookingId,
+        sender_id: user.id,
+        message: newMessage.trim(),
+      })
+      .select('*, sender:profiles(*)')
+      .single();
 
     if (error) {
       setViolation('ส่งข้อความไม่สำเร็จ: ' + error.message);
       setSending(false);
       return;
+    }
+
+    if (inserted) {
+      setMessages((prev) => prev.some((m) => m.id === inserted.id) ? prev : [...prev, inserted]);
     }
 
     setNewMessage('');
