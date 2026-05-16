@@ -34,9 +34,21 @@ export default function BookingModal({ post, onClose }: BookingModalProps) {
     }
     setLoading(true);
 
+    let partnerId = post.partner_profile?.user_id;
+    if (!partnerId && post.partner_id) {
+      const { data: pp } = await supabase.from('partner_profiles').select('user_id').eq('id', post.partner_id).single();
+      partnerId = pp?.user_id;
+    }
+
+    if (!partnerId) {
+      alert('ไม่พบข้อมูลพาร์ทเนอร์');
+      setLoading(false);
+      return;
+    }
+
     const bookingData = {
       customer_id: user.id,
-      partner_id: post.partner_profile?.user_id,
+      partner_id: partnerId,
       post_id: post.id,
       booking_date: date,
       booking_end_date: endDate || null,

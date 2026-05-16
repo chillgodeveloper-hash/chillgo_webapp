@@ -42,7 +42,7 @@ export const FILE_LIMITS = {
   },
   video: {
     maxSize: 50 * 1024 * 1024,
-    types: ['video/mp4', 'video/webm'],
+    types: ['video/mp4', 'video/webm', 'video/quicktime'],
     label: '50MB',
   },
   avatar: {

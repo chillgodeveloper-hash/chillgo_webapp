@@ -82,10 +82,12 @@ export default function BookingDetailPage() {
   const post = booking.post;
   const image = post?.media_urls?.[0];
 
+  const backUrl = user?.role === 'admin' ? '/dashboard/admin/bookings' : '/booking';
+
   return (
     <AppLayout>
       <div className="max-w-3xl mx-auto px-4 py-6 lg:py-8">
-        <Link href="/booking" className="flex items-center gap-1 text-tmuted mb-4 hover:bg-primary/20 px-3 py-1.5 rounded-lg transition w-fit">
+        <Link href={backUrl} className="flex items-center gap-1 text-tmuted mb-4 hover:bg-primary/20 px-3 py-1.5 rounded-lg transition w-fit">
           <ArrowLeft size={18} /> กลับรายการจอง
         </Link>
 

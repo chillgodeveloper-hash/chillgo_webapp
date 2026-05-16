@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { createClient } from '@/lib/supabase-client';
 import { useAuthStore } from '@/hooks/useAuthStore';
 import { checkContentViolation, validateFile } from '@/lib/moderation';
-import { ImagePlus, X, Send, AlertTriangle, MapPin } from 'lucide-react';
+import { ImagePlus, X, Send, AlertTriangle, MapPin, Search, Link2 } from 'lucide-react';
 
 interface Props {
   onSuccess?: () => void;
@@ -20,6 +20,8 @@ export default function CreatePostForm({ onSuccess, editPost, onCancelEdit, isMo
   const [price, setPrice] = useState(editPost?.price_min?.toString() || '');
   const [locationName, setLocationName] = useState(existingLocation.split(' — ')[0] || '');
   const [mapLocation, setMapLocation] = useState(existingLocation.split(' — ')[1] || '');
+  const [googleMapsLink, setGoogleMapsLink] = useState(editPost?.google_maps_link || '');
+  const [searchQuery, setSearchQuery] = useState('');
   const [showMap, setShowMap] = useState(false);
   const [files, setFiles] = useState<{ file: File; type: 'image' | 'video'; preview: string }[]>([]);
   const [loading, setLoading] = useState(false);
@@ -27,6 +29,8 @@ export default function CreatePostForm({ onSuccess, editPost, onCancelEdit, isMo
   const [violation, setViolation] = useState('');
   const fileRef = useRef<HTMLInputElement>(null);
   const mapRef = useRef<HTMLDivElement>(null);
+  const mapInstanceRef = useRef<any>(null);
+  const markerRef = useRef<any>(null);
   const { user, partnerProfile } = useAuthStore();
   const supabase = createClient();
 
@@ -47,27 +51,56 @@ export default function CreatePostForm({ onSuccess, editPost, onCancelEdit, isMo
     setFiles((prev) => { URL.revokeObjectURL(prev[i].preview); return prev.filter((_, idx) => idx !== i); });
   };
 
+  const initMap = () => {
+    const L = (window as any).L;
+    if (!L || !mapRef.current || mapInstanceRef.current) return;
+    const map = L.map(mapRef.current).setView([13.7563, 100.5018], 6);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OSM' }).addTo(map);
+    mapInstanceRef.current = map;
+
+    map.on('click', (e: any) => {
+      if (markerRef.current) map.removeLayer(markerRef.current);
+      markerRef.current = L.marker([e.latlng.lat, e.latlng.lng]).addTo(map);
+      setMapLocation(`${e.latlng.lat.toFixed(4)}, ${e.latlng.lng.toFixed(4)}`);
+    });
+  };
+
+  const handleSearch = async () => {
+    if (!searchQuery.trim()) return;
+    try {
+      const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(searchQuery)}&format=json&limit=1&accept-language=th`);
+      const data = await res.json();
+      if (data.length > 0) {
+        const { lat, lon, display_name } = data[0];
+        const L = (window as any).L;
+        const map = mapInstanceRef.current;
+        if (map && L) {
+          map.setView([parseFloat(lat), parseFloat(lon)], 14);
+          if (markerRef.current) map.removeLayer(markerRef.current);
+          markerRef.current = L.marker([parseFloat(lat), parseFloat(lon)]).addTo(map);
+          setMapLocation(`${parseFloat(lat).toFixed(4)}, ${parseFloat(lon).toFixed(4)}`);
+          if (!locationName) setLocationName(display_name.split(',')[0]);
+        }
+      } else {
+        setError('ไม่พบสถานที่ที่ค้นหา');
+      }
+    } catch {
+      setError('ค้นหาสถานที่ไม่สำเร็จ');
+    }
+  };
+
   useEffect(() => {
     if (!showMap || !mapRef.current) return;
-    const script = document.createElement('script');
-    script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
-    script.onload = () => {
-      const L = (window as any).L;
-      if (!L || !mapRef.current) return;
-      const map = L.map(mapRef.current).setView([13.7563, 100.5018], 6);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OSM' }).addTo(map);
-      let marker: any = null;
-      map.on('click', (e: any) => {
-        if (marker) map.removeLayer(marker);
-        marker = L.marker([e.latlng.lat, e.latlng.lng]).addTo(map);
-        setMapLocation(`${e.latlng.lat.toFixed(4)}, ${e.latlng.lng.toFixed(4)}`);
-      });
-    };
-    document.head.appendChild(script);
+    if ((window as any).L) { initMap(); return; }
     const link = document.createElement('link');
     link.rel = 'stylesheet';
     link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
     document.head.appendChild(link);
+    const script = document.createElement('script');
+    script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+    script.onload = initMap;
+    document.head.appendChild(script);
+    return () => { mapInstanceRef.current = null; markerRef.current = null; };
   }, [showMap]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -99,6 +132,7 @@ export default function CreatePostForm({ onSuccess, editPost, onCancelEdit, isMo
         price_min: price ? parseFloat(price) : null,
         price_max: price ? parseFloat(price) : null,
         location: finalLocation || null, status: 'active',
+        google_maps_link: googleMapsLink || null,
       };
 
       if (editPost) {
@@ -107,7 +141,7 @@ export default function CreatePostForm({ onSuccess, editPost, onCancelEdit, isMo
         await supabase.from('posts').insert({ ...postData, partner_id: partnerProfile.id });
       }
 
-      setTitle(''); setContent(''); setPrice(''); setLocationName(''); setMapLocation(''); setFiles([]);
+      setTitle(''); setContent(''); setPrice(''); setLocationName(''); setMapLocation(''); setGoogleMapsLink(''); setFiles([]);
       onSuccess?.();
       if (isModal) onCancelEdit?.();
     } catch (err: any) {
@@ -142,10 +176,20 @@ export default function CreatePostForm({ onSuccess, editPost, onCancelEdit, isMo
         </div>
       </div>
 
+      <div className="mb-3">
+        <label className="text-xs text-tmuted mb-1 block">ลิงก์ Google Maps (ไม่บังคับ)</label>
+        <div className="flex gap-2">
+          <div className="flex-1 relative">
+            <Link2 size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-tmuted" />
+            <input type="url" value={googleMapsLink} onChange={(e) => setGoogleMapsLink(e.target.value)} placeholder="https://maps.google.com/..." className="w-full min-w-0 h-12 pl-9 pr-3 rounded-xl border border-primary-dark/30 focus:border-primary outline-none text-sm text-tmain" />
+          </div>
+        </div>
+      </div>
+
       <div className="mb-4">
         <label className="text-xs text-tmuted mb-1 block">ตำแหน่งบนแผนที่</label>
         <div className="flex gap-2">
-          <input type="text" value={mapLocation} readOnly placeholder="กดเลือกจากแผนที่" className="flex-1 min-w-0 h-12 px-3 rounded-xl border border-primary-dark/30 text-sm text-tmain bg-primary-light/50" />
+          <input type="text" value={mapLocation} readOnly placeholder="กดเลือกจากแผนที่ หรือค้นหาสถานที่" className="flex-1 min-w-0 h-12 px-3 rounded-xl border border-primary-dark/30 text-sm text-tmain bg-primary-light/50" />
           <button type="button" onClick={() => setShowMap(true)} className="h-12 px-4 bg-primary/20 hover:bg-primary/30 rounded-xl text-sm text-tmain font-medium transition flex items-center gap-1.5">
             <MapPin size={16} /> เลือก
           </button>
@@ -156,7 +200,7 @@ export default function CreatePostForm({ onSuccess, editPost, onCancelEdit, isMo
         <div className="flex gap-2 overflow-x-auto pb-3 mb-4">
           {editPost?.media_urls?.map((url: string, i: number) => (
             <div key={`e-${i}`} className="relative flex-shrink-0 w-24 h-24 rounded-xl overflow-hidden bg-primary/10">
-              <img src={url} alt="" className="w-full h-full object-cover" />
+              {editPost.media_types?.[i] === 'video' ? <video src={url} className="w-full h-full object-cover" /> : <img src={url} alt="" className="w-full h-full object-cover" />}
             </div>
           ))}
           {files.map((f, i) => (
@@ -170,13 +214,13 @@ export default function CreatePostForm({ onSuccess, editPost, onCancelEdit, isMo
 
       <div className="flex items-center justify-between pt-3 border-t border-primary-dark/15">
         <div>
-          <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp,video/mp4,video/webm" multiple onChange={handleFileSelect} className="hidden" />
+          <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,video/quicktime" multiple onChange={handleFileSelect} className="hidden" />
           <button type="button" onClick={() => fileRef.current?.click()} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-tmuted hover:bg-primary/20 transition">
             <ImagePlus size={18} /> รูป/คลิป
           </button>
         </div>
         <button type="submit" disabled={loading || !!violation || !title || !content} className="bg-primary hover:bg-primary-dark text-tmain font-semibold px-6 py-2 rounded-xl text-sm transition flex items-center gap-2 disabled:opacity-40">
-          {loading ? <div className="w-4 h-4 border-2 border-tmain/30 border-t-tmain rounded-full animate-spin" /> : <><Send size={16} /> {editPost ? 'บันทึกการเปลี่ยนแปลง' : 'โพสต์'}</>}
+          {loading ? <div className="w-4 h-4 border-2 border-tmain/30 border-t-tmain rounded-full animate-spin" /> : <><Send size={16} /> {editPost ? 'บันทึก' : 'โพสต์'}</>}
         </button>
       </div>
 
@@ -184,13 +228,21 @@ export default function CreatePostForm({ onSuccess, editPost, onCancelEdit, isMo
         <div className="fixed inset-0 z-[60] flex items-center justify-center">
           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowMap(false)} />
           <div className="relative bg-white w-full max-w-2xl mx-4 rounded-2xl overflow-hidden">
-            <div className="p-4 border-b border-primary-dark/15 flex items-center justify-between">
-              <h3 className="font-bold text-tmain">เลือกตำแหน่งสถานที่</h3>
-              <button type="button" onClick={() => setShowMap(false)} className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-tmain"><X size={18} /></button>
+            <div className="p-4 border-b border-primary-dark/15">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="font-bold text-tmain">เลือกตำแหน่งสถานที่</h3>
+                <button type="button" onClick={() => setShowMap(false)} className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-tmain"><X size={18} /></button>
+              </div>
+              <div className="flex gap-2">
+                <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleSearch())} placeholder="ค้นหาสถานที่ เช่น วัดพระแก้ว, เชียงใหม่" className="flex-1 h-10 px-3 rounded-lg border border-primary-dark/30 text-sm outline-none focus:border-primary" />
+                <button type="button" onClick={handleSearch} className="h-10 px-4 bg-secondary hover:bg-secondary/90 text-tmain rounded-lg text-sm font-medium transition flex items-center gap-1.5">
+                  <Search size={16} /> ค้นหา
+                </button>
+              </div>
             </div>
             <div ref={mapRef} className="w-full h-[400px]" />
             <div className="p-4 flex items-center justify-between">
-              <p className="text-sm text-tmuted">{mapLocation || 'กดบนแผนที่เพื่อเลือกตำแหน่ง'}</p>
+              <p className="text-sm text-tmuted">{mapLocation || 'ค้นหาหรือกดบนแผนที่เพื่อเลือกตำแหน่ง'}</p>
               <button type="button" onClick={() => setShowMap(false)} className="bg-primary hover:bg-primary-dark text-tmain font-semibold px-6 py-2 rounded-xl text-sm transition">ยืนยัน</button>
             </div>
           </div>
