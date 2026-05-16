@@ -4,8 +4,9 @@ import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase-client';
 import { useAuthStore } from '@/hooks/useAuthStore';
+import { checkContentViolation } from '@/lib/moderation';
 import AppLayout from '@/components/layout/AppLayout';
-import { Send, ImagePlus, ArrowLeft } from 'lucide-react';
+import { Send, ImagePlus, ArrowLeft, AlertTriangle } from 'lucide-react';
 import { ChatMessage } from '@/types';
 import Link from 'next/link';
 
@@ -14,6 +15,7 @@ export default function ChatPage() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [sending, setSending] = useState(false);
+  const [violation, setViolation] = useState('');
   const bottomRef = useRef<HTMLDivElement>(null);
   const { user } = useAuthStore();
   const supabase = createClient();
@@ -63,15 +65,28 @@ export default function ChatPage() {
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newMessage.trim() || !user || !bookingId) return;
-    setSending(true);
 
-    await supabase.from('chat_messages').insert({
+    const check = checkContentViolation(newMessage);
+    if (check.isViolation) {
+      setViolation(check.reason || '');
+      return;
+    }
+
+    setSending(true);
+    const { error } = await supabase.from('chat_messages').insert({
       booking_id: bookingId,
       sender_id: user.id,
       message: newMessage.trim(),
     });
 
+    if (error) {
+      setViolation('ส่งข้อความไม่สำเร็จ: ' + error.message);
+      setSending(false);
+      return;
+    }
+
     setNewMessage('');
+    setViolation('');
     setSending(false);
   };
 
@@ -124,25 +139,37 @@ export default function ChatPage() {
           <div ref={bottomRef} />
         </div>
 
-        <form onSubmit={handleSend} className="bg-white border-t border-primary-dark/15 p-3 rounded-b-2xl flex items-center gap-2">
-          <button type="button" className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-tmuted hover:bg-primary-dark/30 transition flex-shrink-0">
-            <ImagePlus size={18} />
-          </button>
-          <input
-            type="text"
-            value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
-            placeholder="พิมพ์ข้อความ..."
-            className="flex-1 px-4 py-2.5 rounded-full bg-primary/20 outline-none text-sm focus:bg-primary-light focus:ring-2 focus:ring-primary/20 transition"
-          />
-          <button
-            type="submit"
-            disabled={!newMessage.trim() || sending}
-            className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-dark-DEFAULT hover:bg-primary-dark transition disabled:opacity-40 flex-shrink-0"
-          >
-            <Send size={18} />
-          </button>
-        </form>
+        <div className="flex flex-col">
+          {violation && (
+            <div className="bg-danger/10 border-t border-danger/20 px-3 py-2 flex items-start gap-2">
+              <AlertTriangle size={14} className="text-danger mt-0.5 flex-shrink-0" />
+              <p className="text-xs text-tmain">{violation}</p>
+            </div>
+          )}
+          <form onSubmit={handleSend} className="bg-white border-t border-primary-dark/15 p-3 rounded-b-2xl flex items-center gap-2">
+            <button type="button" className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-tmuted hover:bg-primary-dark/30 transition flex-shrink-0">
+              <ImagePlus size={18} />
+            </button>
+            <input
+              type="text"
+              value={newMessage}
+              onChange={(e) => {
+                setNewMessage(e.target.value);
+                const c = checkContentViolation(e.target.value);
+                setViolation(c.isViolation ? (c.reason || '') : '');
+              }}
+              placeholder="พิมพ์ข้อความ..."
+              className="flex-1 px-4 py-2.5 rounded-full bg-primary/20 outline-none text-sm focus:bg-primary-light focus:ring-2 focus:ring-primary/20 transition"
+            />
+            <button
+              type="submit"
+              disabled={!newMessage.trim() || sending || !!violation}
+              className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-dark-DEFAULT hover:bg-primary-dark transition disabled:opacity-40 flex-shrink-0"
+            >
+              <Send size={18} />
+            </button>
+          </form>
+        </div>
       </div>
     </AppLayout>
   );

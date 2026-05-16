@@ -63,7 +63,7 @@ export default function FeedPage() {
       query = query.gte('price_min', parseFloat(filters.priceMin));
     }
     if (filters.priceMax) {
-      query = query.lte('price_min', parseFloat(filters.priceMax));
+      query = query.lte('price_max', parseFloat(filters.priceMax));
     }
 
     if (sortBy === 'price_low') {

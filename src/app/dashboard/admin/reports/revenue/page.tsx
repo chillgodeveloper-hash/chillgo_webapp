@@ -23,7 +23,7 @@ export default function RevenueReportPage() {
   const supabase = createClient();
 
   useEffect(() => {
-    const fetch = async () => {
+    const load = async () => {
       const { data: bookings } = await supabase
         .from('bookings')
         .select('total_price, created_at, status')
@@ -73,7 +73,7 @@ export default function RevenueReportPage() {
 
       setLoading(false);
     };
-    fetch();
+    load();
   }, []);
 
   const maxRevenue = Math.max(...monthlyData.map((d) => d.revenue), 1);

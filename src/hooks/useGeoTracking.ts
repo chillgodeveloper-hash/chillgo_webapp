@@ -37,9 +37,11 @@ export function useGeoTracking({ bookingId, userId, enabled, intervalMs = 10000 
   const wakeLockRef = useRef<any>(null);
   const supabase = createClient();
 
+  const ready = !!(bookingId && userId);
+
   const requestWakeLock = useCallback(async () => {
     try {
-      if ('wakeLock' in navigator) {
+      if ('wakeLock' in navigator && !wakeLockRef.current) {
         wakeLockRef.current = await (navigator as any).wakeLock.request('screen');
         setState(prev => ({ ...prev, wakeLockActive: true }));
 
@@ -61,17 +63,17 @@ export function useGeoTracking({ bookingId, userId, enabled, intervalMs = 10000 
   }, []);
 
   useEffect(() => {
-    if (!enabled) return;
+    if (!enabled || !ready) return;
 
     const handleVisibilityChange = async () => {
-      if (document.visibilityState === 'visible' && enabled && !wakeLockRef.current) {
+      if (document.visibilityState === 'visible' && !wakeLockRef.current) {
         await requestWakeLock();
       }
     };
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
     return () => { document.removeEventListener('visibilitychange', handleVisibilityChange); };
-  }, [enabled, requestWakeLock]);
+  }, [enabled, ready, requestWakeLock]);
 
   const sendLocation = useCallback(async () => {
     const coords = latestCoordsRef.current;
@@ -90,41 +92,6 @@ export function useGeoTracking({ bookingId, userId, enabled, intervalMs = 10000 
     }
   }, [bookingId, userId]);
 
-  const startTracking = useCallback(async () => {
-    if (!navigator.geolocation) {
-      setState(prev => ({ ...prev, error: 'เบราว์เซอร์ไม่รองรับ GPS' }));
-      return;
-    }
-
-    await requestWakeLock();
-
-    watchIdRef.current = navigator.geolocation.watchPosition(
-      (pos) => {
-        const { latitude, longitude, accuracy } = pos.coords;
-        latestCoordsRef.current = { lat: latitude, lng: longitude, accuracy: accuracy || 0 };
-        setState(prev => ({
-          ...prev,
-          tracking: true,
-          lat: latitude,
-          lng: longitude,
-          accuracy: accuracy || 0,
-          error: null,
-        }));
-      },
-      (err) => {
-        let msg = 'ไม่สามารถดึงตำแหน่งได้';
-        if (err.code === 1) msg = 'กรุณาอนุญาตการเข้าถึงตำแหน่ง';
-        if (err.code === 2) msg = 'ไม่พบสัญญาณ GPS';
-        if (err.code === 3) msg = 'หมดเวลาดึงตำแหน่ง';
-        setState(prev => ({ ...prev, error: msg, tracking: false }));
-      },
-      { enableHighAccuracy: true, timeout: 15000, maximumAge: 5000 }
-    );
-
-    sendLocation();
-    intervalRef.current = setInterval(sendLocation, intervalMs);
-  }, [sendLocation, intervalMs, requestWakeLock]);
-
   const stopTracking = useCallback(async () => {
     if (watchIdRef.current !== null) {
       navigator.geolocation.clearWatch(watchIdRef.current);
@@ -139,13 +106,57 @@ export function useGeoTracking({ bookingId, userId, enabled, intervalMs = 10000 
   }, [releaseWakeLock]);
 
   useEffect(() => {
-    if (enabled) {
-      startTracking();
-    } else {
+    if (!enabled || !ready) {
+      // ensure any prior tracking is cleaned up
       stopTracking();
+      return;
     }
-    return () => { stopTracking(); };
-  }, [enabled, startTracking, stopTracking]);
+
+    let cancelled = false;
+
+    const start = async () => {
+      if (!navigator.geolocation) {
+        setState(prev => ({ ...prev, error: 'เบราว์เซอร์ไม่รองรับ GPS' }));
+        return;
+      }
+
+      await requestWakeLock();
+      if (cancelled) return;
+
+      watchIdRef.current = navigator.geolocation.watchPosition(
+        (pos) => {
+          const { latitude, longitude, accuracy } = pos.coords;
+          latestCoordsRef.current = { lat: latitude, lng: longitude, accuracy: accuracy || 0 };
+          setState(prev => ({
+            ...prev,
+            tracking: true,
+            lat: latitude,
+            lng: longitude,
+            accuracy: accuracy || 0,
+            error: null,
+          }));
+        },
+        (err) => {
+          let msg = 'ไม่สามารถดึงตำแหน่งได้';
+          if (err.code === 1) msg = 'กรุณาอนุญาตการเข้าถึงตำแหน่ง';
+          if (err.code === 2) msg = 'ไม่พบสัญญาณ GPS';
+          if (err.code === 3) msg = 'หมดเวลาดึงตำแหน่ง';
+          setState(prev => ({ ...prev, error: msg, tracking: false }));
+        },
+        { enableHighAccuracy: true, timeout: 15000, maximumAge: 5000 }
+      );
+
+      sendLocation();
+      intervalRef.current = setInterval(sendLocation, intervalMs);
+    };
+
+    start();
+
+    return () => {
+      cancelled = true;
+      stopTracking();
+    };
+  }, [enabled, ready, sendLocation, intervalMs, requestWakeLock, stopTracking]);
 
   return { ...state, stopTracking };
 }

@@ -111,16 +111,18 @@ export default function NotificationsPage() {
           <div className="space-y-2">
             {notifications.map((notif) => {
               const Icon = typeIcons[notif.type] || Bell;
-              return (
+              const handleClick = () => { if (!notif.is_read) markAsRead(notif.id); };
+              const cardClasses = `block rounded-xl p-4 border transition-colors ${
+                notif.is_read
+                  ? 'bg-white border-primary-dark/10'
+                  : 'bg-primary-light border-primary-dark/20'
+              } hover:border-primary`;
+              return notif.link ? (
                 <Link
                   key={notif.id}
-                  href={notif.link || '#'}
-                  onClick={() => !notif.is_read && markAsRead(notif.id)}
-                  className={`block rounded-xl p-4 border transition-colors ${
-                    notif.is_read
-                      ? 'bg-white border-primary-dark/10'
-                      : 'bg-primary-light border-primary-dark/20'
-                  } hover:border-primary`}
+                  href={notif.link}
+                  onClick={handleClick}
+                  className={cardClasses}
                 >
                   <div className="flex gap-3">
                     <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
@@ -145,6 +147,35 @@ export default function NotificationsPage() {
                     </div>
                   </div>
                 </Link>
+              ) : (
+                <button
+                  key={notif.id}
+                  onClick={handleClick}
+                  className={`${cardClasses} text-left w-full`}
+                >
+                  <div className="flex gap-3">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
+                      notif.type === 'payment' ? 'bg-success/20' :
+                      notif.type === 'booking' ? 'bg-primary/30' :
+                      notif.type === 'chat' ? 'bg-info/20' :
+                      'bg-primary/20'
+                    }`}>
+                      <Icon size={18} className="text-tmain" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between">
+                        <p className="text-sm font-semibold text-tmain">{notif.title}</p>
+                        {!notif.is_read && (
+                          <span className="w-2.5 h-2.5 rounded-full bg-secondary flex-shrink-0 mt-1" />
+                        )}
+                      </div>
+                      <p className="text-sm text-tmuted mt-0.5">{notif.message}</p>
+                      <p className="text-xs text-tmuted mt-1">
+                        {new Date(notif.created_at).toLocaleDateString('th-TH')} {new Date(notif.created_at).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })}
+                      </p>
+                    </div>
+                  </div>
+                </button>
               );
             })}
           </div>

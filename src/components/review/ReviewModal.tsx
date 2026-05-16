@@ -27,7 +27,7 @@ export default function ReviewModal({ bookingId, partnerId, partnerName, postTit
     if (!user || rating === 0) return;
     setLoading(true);
 
-    await supabase.from('reviews').insert({
+    const { error } = await supabase.from('reviews').insert({
       booking_id: bookingId,
       customer_id: user.id,
       partner_id: partnerId,
@@ -35,25 +35,14 @@ export default function ReviewModal({ bookingId, partnerId, partnerName, postTit
       comment: comment.trim() || null,
     });
 
-    const { data: reviews } = await supabase
-      .from('reviews')
-      .select('rating')
-      .eq('partner_id', partnerId);
-
-    if (reviews && reviews.length > 0) {
-      const avgRating = reviews.reduce((sum: number, r: any) => sum + r.rating, 0) / reviews.length;
-
-      const { data: booking } = await supabase.from('bookings').select('post_id').eq('id', bookingId).single();
-      if (booking?.post_id) {
-        const { data: post } = await supabase.from('posts').select('partner_id').eq('id', booking.post_id).single();
-        if (post?.partner_id) {
-          await supabase
-            .from('partner_profiles')
-            .update({ rating: Math.round(avgRating * 10) / 10, total_reviews: reviews.length })
-            .eq('id', post.partner_id);
-        }
-      }
+    if (error) {
+      alert('ส่งรีวิวไม่สำเร็จ: ' + error.message);
+      setLoading(false);
+      return;
     }
+
+    // partner_profiles.rating + total_reviews are recomputed by the
+    // reviews_refresh_rating trigger (see migration_security_fixes.sql).
 
     await supabase.from('notifications').insert({
       user_id: partnerId,

@@ -1,7 +1,12 @@
 'use client';
 
-import { redirect } from 'next/navigation';
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function PendingBookingsPage() {
-  redirect('/dashboard/admin/bookings?filter=pending');
+  const router = useRouter();
+  useEffect(() => {
+    router.replace('/dashboard/admin/bookings?filter=pending');
+  }, [router]);
+  return null;
 }

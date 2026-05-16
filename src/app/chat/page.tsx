@@ -17,31 +17,13 @@ export default function ChatListPage() {
     if (!user) return;
 
     const fetchChats = async () => {
-      let bookingIds: string[] = [];
-
-      if (user.role === 'admin') {
-        const { data: msgData } = await supabase
-          .from('chat_messages')
-          .select('booking_id')
-          .eq('sender_id', user.id);
-        bookingIds = Array.from(new Set((msgData || []).map((m: any) => m.booking_id)));
-
-        if (bookingIds.length === 0) {
-          setChats([]);
-          setLoading(false);
-          return;
-        }
-      }
-
       let query = supabase
         .from('bookings')
         .select(`id, status, customer_id, partner_id, updated_at, post:posts!bookings_post_id_fkey(title)`)
         .in('status', ['confirmed', 'paid', 'in_progress'])
         .order('updated_at', { ascending: false });
 
-      if (user.role === 'admin') {
-        query = query.in('id', bookingIds);
-      } else {
+      if (user.role !== 'admin') {
         query = query.or(`customer_id.eq.${user.id},partner_id.eq.${user.id}`);
       }
 

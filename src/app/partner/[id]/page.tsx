@@ -16,7 +16,7 @@ export default function PartnerProfilePage() {
   const supabase = createClient();
 
   useEffect(() => {
-    const fetch = async () => {
+    const load = async () => {
       const { data: allPPs } = await supabase
         .from('partner_profiles')
         .select('*, profile:profiles(*)')
@@ -53,7 +53,7 @@ export default function PartnerProfilePage() {
 
       setLoading(false);
     };
-    fetch();
+    load();
   }, [id]);
 
   if (loading) {

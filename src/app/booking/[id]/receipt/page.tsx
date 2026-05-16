@@ -15,16 +15,18 @@ export default function ReceiptPage() {
   const supabase = createClient();
 
   useEffect(() => {
-    const fetch = async () => {
+    const loadReceipt = async () => {
       const { data } = await supabase
         .from('receipts')
         .select('*')
         .eq('booking_id', id)
-        .single();
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
       setReceipt(data);
       setLoading(false);
     };
-    fetch();
+    loadReceipt();
   }, [id]);
 
   const handleDownloadPDF = () => {

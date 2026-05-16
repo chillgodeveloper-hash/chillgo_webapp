@@ -4,7 +4,8 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase-client';
 import { useAuthStore } from '@/hooks/useAuthStore';
-import { X, Calendar, Users, FileText, Send } from 'lucide-react';
+import { checkContentViolation } from '@/lib/moderation';
+import { X, Calendar, Users, FileText, Send, AlertTriangle } from 'lucide-react';
 import { Post } from '@/types';
 import FlatpickrInput from '@/components/ui/FlatpickrInput';
 
@@ -18,6 +19,7 @@ export default function BookingModal({ post, onClose }: BookingModalProps) {
   const [endDate, setEndDate] = useState('');
   const [guests, setGuests] = useState(1);
   const [note, setNote] = useState('');
+  const [violation, setViolation] = useState('');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const { user } = useAuthStore();
@@ -32,6 +34,15 @@ export default function BookingModal({ post, onClose }: BookingModalProps) {
       router.push('/auth/login');
       return;
     }
+
+    if (note) {
+      const check = checkContentViolation(note);
+      if (check.isViolation) {
+        setViolation(check.reason || '');
+        return;
+      }
+    }
+
     setLoading(true);
 
     let partnerId = post.partner_profile?.user_id;
@@ -46,6 +57,8 @@ export default function BookingModal({ post, onClose }: BookingModalProps) {
       return;
     }
 
+    const totalPrice = (post.price_min || 0) * (guests || 1);
+
     const bookingData = {
       customer_id: user.id,
       partner_id: partnerId,
@@ -55,7 +68,7 @@ export default function BookingModal({ post, onClose }: BookingModalProps) {
       guests,
       note: note || null,
       status: 'pending',
-      total_price: post.price_min || 0,
+      total_price: totalPrice,
     };
 
     const { data, error } = await supabase.from('bookings').insert(bookingData).select().single();
@@ -77,7 +90,7 @@ export default function BookingModal({ post, onClose }: BookingModalProps) {
           link: '/booking',
         },
         {
-          user_id: post.partner_profile?.user_id,
+          user_id: partnerId,
           title: 'มีคำขอจองใหม่',
           message: `${user.full_name} ต้องการจอง "${post.title}"`,
           type: 'booking',
@@ -102,7 +115,10 @@ export default function BookingModal({ post, onClose }: BookingModalProps) {
         });
       }
 
-      await supabase.from('notifications').insert(notifications);
+      const filteredNotifs = notifications.filter(n => !!n.user_id);
+      if (filteredNotifs.length > 0) {
+        await supabase.from('notifications').insert(filteredNotifs);
+      }
 
       setSuccess(true);
       setTimeout(() => {
@@ -189,16 +205,26 @@ export default function BookingModal({ post, onClose }: BookingModalProps) {
               </label>
               <textarea
                 value={note}
-                onChange={(e) => setNote(e.target.value)}
+                onChange={(e) => {
+                  setNote(e.target.value);
+                  const c = checkContentViolation(e.target.value);
+                  setViolation(c.isViolation ? (c.reason || '') : '');
+                }}
                 placeholder="รายละเอียดเพิ่มเติม เช่น ความต้องการพิเศษ"
                 rows={3}
                 className="w-full px-4 py-3 rounded-xl border border-primary-dark/30 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none resize-none"
               />
+              {violation && (
+                <div className="bg-danger/10 border border-danger/20 rounded-xl p-2.5 mt-2 flex items-start gap-2">
+                  <AlertTriangle size={14} className="text-danger mt-0.5 flex-shrink-0" />
+                  <p className="text-xs text-tmain">{violation}</p>
+                </div>
+              )}
             </div>
 
             <button
               type="submit"
-              disabled={loading || !date}
+              disabled={loading || !date || !!violation}
               className="w-full bg-primary hover:bg-primary-dark text-dark-DEFAULT font-bold py-3.5 rounded-2xl transition flex items-center justify-center gap-2 shadow-lg shadow-primary/30 disabled:opacity-40"
             >
               {loading ? (

@@ -11,7 +11,7 @@ export default function PartnersReportPage() {
   const supabase = createClient();
 
   useEffect(() => {
-    const fetch = async () => {
+    const load = async () => {
       const { data } = await supabase
         .from('partner_profiles')
         .select('*, profile:profiles(*)')
@@ -42,7 +42,7 @@ export default function PartnersReportPage() {
 
       setLoading(false);
     };
-    fetch();
+    load();
   }, []);
 
   const guideCount = partners.filter((p) => p.category === 'guide').length;

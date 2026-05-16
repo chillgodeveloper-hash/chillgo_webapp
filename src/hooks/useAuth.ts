@@ -1,13 +1,14 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { createClient } from '@/lib/supabase-client';
 import { useAuthStore } from './useAuthStore';
 
 export function useAuth(requireRole?: string) {
   const router = useRouter();
-  const { user, setUser, setPartnerProfile, setLoading, isLoading } = useAuthStore();
+  const pathname = usePathname();
+  const { user, setUser, setPartnerProfile, setLoading, isLoading, reset } = useAuthStore();
   const supabase = createClient();
 
   useEffect(() => {
@@ -33,7 +34,7 @@ export function useAuth(requireRole?: string) {
 
         if (!profile.role) {
           setLoading(false);
-          router.push('/auth/role-select');
+          if (pathname !== '/auth/role-select') router.push('/auth/role-select');
           return;
         }
 
@@ -52,7 +53,7 @@ export function useAuth(requireRole?: string) {
               setPartnerProfile(activePP);
               if (!activePP.portfolio_images || activePP.portfolio_images.length === 0) {
                 setLoading(false);
-                router.push('/dashboard/partner/setup');
+                if (pathname !== '/dashboard/partner/setup') router.push('/dashboard/partner/setup');
                 return;
               }
             } else {
@@ -61,7 +62,7 @@ export function useAuth(requireRole?: string) {
                 if (typeof window !== 'undefined') localStorage.setItem('active_partner_id', unfinished.id);
                 setPartnerProfile(unfinished);
                 setLoading(false);
-                router.push('/dashboard/partner/setup');
+                if (pathname !== '/dashboard/partner/setup') router.push('/dashboard/partner/setup');
                 return;
               }
               if (typeof window !== 'undefined') localStorage.setItem('active_partner_id', allPPs[0].id);
@@ -71,7 +72,7 @@ export function useAuth(requireRole?: string) {
         }
 
         if (requireRole && profile.role !== requireRole && requireRole !== 'any') {
-          router.push('/feed');
+          if (pathname !== '/feed') router.push('/feed');
         }
       }
 
@@ -81,17 +82,17 @@ export function useAuth(requireRole?: string) {
     getUser();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      async (event) => {
         if (event === 'SIGNED_OUT') {
-          setUser(null);
-          setPartnerProfile(null);
+          reset();
           router.push('/auth/login');
         }
       }
     );
 
     return () => subscription.unsubscribe();
-  }, []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [requireRole]);
 
   return { user, isLoading };
 }

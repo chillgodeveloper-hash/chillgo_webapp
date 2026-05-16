@@ -49,12 +49,9 @@ export default function BookingPage() {
     const { data, error } = await query;
 
     if (error) {
-      console.error('Bookings fetch error:', error);
       setLoading(false);
       return;
     }
-
-    console.log('Bookings fetched:', data?.length, 'for user:', user.id, 'role:', user.role);
 
     const userIds = Array.from(new Set((data || []).flatMap((b: any) => [b.customer_id, b.partner_id])));
     const profileMap: Record<string, any> = {};
@@ -186,10 +183,19 @@ export default function BookingPage() {
                       <div className="flex gap-2 mt-2">
                         <button
                           onClick={async () => {
-                            await supabase
+                            // Swap to alternative post; status stays 'alternative_offered' until admin re-confirms
+                            const { error } = await supabase
                               .from('bookings')
-                              .update({ post_id: booking.alternative_post_id, status: 'confirmed' })
+                              .update({ post_id: booking.alternative_post_id })
                               .eq('id', booking.id);
+                            if (error) { alert('ไม่สามารถยอมรับได้: ' + error.message); return; }
+                            await supabase.from('notifications').insert({
+                              user_id: booking.partner_id,
+                              title: 'ลูกค้ายอมรับตัวเลือกใหม่',
+                              message: `ลูกค้ายอมรับตัวเลือก "${booking.alternative_post?.title}" รอ Admin ยืนยัน`,
+                              type: 'booking',
+                              link: '/dashboard/admin/bookings',
+                            });
                             window.location.reload();
                           }}
                           className="bg-success/20 text-tmain px-4 py-1.5 rounded-lg text-xs font-medium"
@@ -198,10 +204,11 @@ export default function BookingPage() {
                         </button>
                         <button
                           onClick={async () => {
-                            await supabase
+                            const { error } = await supabase
                               .from('bookings')
                               .update({ status: 'cancelled' })
                               .eq('id', booking.id);
+                            if (error) { alert('ไม่สามารถยกเลิกได้: ' + error.message); return; }
                             window.location.reload();
                           }}
                           className="bg-primary-dark/30 text-tmuted px-4 py-1.5 rounded-lg text-xs font-medium"

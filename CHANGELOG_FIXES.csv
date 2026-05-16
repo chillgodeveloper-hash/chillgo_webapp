@@ -1,0 +1,48 @@
+﻿ID,Severity,Category,Issue,Fix,Files Changed
+1,Critical,Payment,client ส่ง amount มาเองได้ใน /api/payments จ่าย 1 บาทแทน 10000 ได้,เลิกรับ amount จาก client; อ่าน booking.total_price จาก DB เท่านั้น,src/app/api/payments/route.ts | src/app/booking/[id]/pay/page.tsx
+2,Critical,Payment,Customer mark booking 'paid' ฝั่ง client หลัง Stripe confirm,ลบ client-side update; ปล่อยให้ webhook ทำ + เพิ่ม trigger ที่ DB ห้าม customer transition,src/app/booking/[id]/pay/page.tsx | supabase/migration_security_fixes.sql
+3,Critical,Auth/LINE,id_token ไม่ verify signature → account takeover ปลอม email ของ victim ได้,เพิ่ม HMAC-SHA256 verify (verifyLineIdToken) + ตรวจ iss/aud/exp + เลิกรับ unverified email ที่ชนกับ user เดิม,src/lib/line-jwt.ts (ใหม่) | src/app/api/auth/line/route.ts
+4,Critical,Auth/LINE,OAuth ไม่มี CSRF state validation,เพิ่ม endpoint /api/auth/line/start ตั้ง state cookie + verify ใน callback,src/app/api/auth/line/start/route.ts (ใหม่) | src/app/auth/login/page.tsx | src/app/auth/register/page.tsx | src/app/auth/line/callback/page.tsx
+5,Critical,Auth,ทุกหน้า /dashboard/admin/* ไม่เช็ค role,เพิ่ม AdminGuard + layout.tsx ใต้ /dashboard/admin/,src/app/dashboard/admin/layout.tsx (ใหม่) | src/components/layout/AdminGuard.tsx (ใหม่) | src/lib/auth-guard.ts (ใหม่)
+6,Critical,Moderation,Chat ไม่ผ่าน checkContentViolation,เพิ่ม moderation check ตอนพิมพ์และตอนส่ง,src/app/chat/[bookingId]/page.tsx
+7,Critical,Upload,Path traversal ผ่าน folder + spoof file.type,เพิ่ม allowlist folders + validate mime + sanitize extension,src/app/api/upload/route.ts
+8,Critical,Webhook,Stripe webhook ไม่ idempotent retry ส่ง notification ซ้ำ,เพิ่ม stripe_events table + dedupe by event.id + rollback ถ้า handler error,supabase/migration_security_fixes.sql | src/app/api/webhooks/stripe/route.ts
+9,Critical,RLS,notifications ไม่มี INSERT policy → client insert พังเงียบ,เพิ่ม policy 'Authenticated users can create notifications',supabase/migration_security_fixes.sql
+10,Critical,DB,realtime publication add notifications ซ้ำใน migration_reviews.sql,เพิ่มใน migration ใหม่ใช้ pg_publication_tables check ก่อน add,supabase/migration_security_fixes.sql
+11,Critical,DB,partner_category enum ค้าง 'car_rental' UI แสดงเป็น 'ล่าม',drop+recreate enum ลบ car_rental + map rows เดิมเป็น 'driver',supabase/migration_security_fixes.sql
+12,High,Booking,Customer accept alternative_offered ข้าม admin re-approval + swap post_id ได้,UI แค่ update post_id ให้ status ค้างที่ alternative_offered + แจ้ง admin/partner + trigger ห้าม transition ที่ DB,src/app/booking/page.tsx | supabase/migration_security_fixes.sql
+13,High,Booking,Partner mark completed จาก client โดยไม่มี verification,เพิ่ม DB trigger enforce_booking_status_transition จำกัด transition รายบทบาท,supabase/migration_security_fixes.sql
+14,High,Payment,Customer cancel paid booking โดยไม่มี refund flow,DB trigger ห้าม customer transition จาก paid/completed; เพิ่ม case 'charge.refunded' ใน webhook,supabase/migration_security_fixes.sql | src/app/api/webhooks/stripe/route.ts
+15,High,Feed,priceMax filter ใช้ .lte('price_min'...) ผิดคอลัมน์,เปลี่ยนเป็น .lte('price_max'...),src/app/feed/page.tsx
+16,High,Feed,src/app/page.tsx ซ้ำกับ feed/page.tsx (ทั้ง bug ก็ duplicate),ลบไฟล์ duplicate ทำเป็น server redirect ไป /feed,src/app/page.tsx
+17,High,API,Travel API ไม่ encodeURIComponent query params injection ได้,ใช้ URL/URLSearchParams + validate AIRPORT_CODE_RE + DATE_RE,src/app/api/travel/route.ts
+18,High,Auth/LINE,listUsers อ่านแค่ page 1 พังเมื่อมี user > 1000,paginate ลูป page 1-20 + perPage 1000,src/app/api/auth/line/route.ts
+19,High,Booking,BookingModal partnerId divergence + notification null filter,รวม partnerId; filter null user_id ก่อน insert; ใช้ price_min * guests,src/components/booking/BookingModal.tsx
+20,High,Auth,Customer cancel paid booking โดยตรง,DB trigger จำกัด transition,supabase/migration_security_fixes.sql
+21,Medium,Hook,useGeoTracking wake lock leak + async cleanup ไม่ await + start ก่อนเช็ค IDs,เพิ่ม ready check (bookingId+userId) + cancelled flag + idempotent wake lock,src/hooks/useGeoTracking.ts
+22,Medium,Hook,useGeoTracking request wake lock ก่อนเช็ค IDs,Gate ทุก effect ด้วย ready check,src/hooks/useGeoTracking.ts
+23,Medium,Webhook,Receipt race ระหว่าง webhook กับ /api/receipts (23505 throw ใน webhook),webhook ignore 23505; /api/receipts เปลี่ยนเป็น lookup-only ไม่ insert,src/app/api/webhooks/stripe/route.ts | src/app/api/receipts/route.ts
+24,Medium,DB,ReviewModal เขียน partner_profiles.rating ฝั่ง client last-write-wins,เพิ่ม DB trigger reviews_refresh_rating recompute อัตโนมัติ + ลบ client code,supabase/migration_security_fixes.sql | src/components/review/ReviewModal.tsx
+25,Medium,UI,Navbar openNotifDropdown fetch ทั้งตอนเปิดและปิด (stale state),ใช้ const willOpen = !notifOpen แล้วเช็คจาก willOpen,src/components/layout/Navbar.tsx
+26,Medium,UI,Navbar realtime + manual fetch dedup ไม่มี ได้ duplicate,เพิ่ม id-based dedup ก่อน prepend,src/components/layout/Navbar.tsx
+27,Medium,Routing,/dashboard/admin/bookings/pending ใช้ redirect() ใน client component → throw,เปลี่ยนเป็น useEffect + router.replace,src/app/dashboard/admin/bookings/pending/page.tsx
+28,Medium,Routing,target /dashboard/admin/bookings ไม่อ่าน filter จาก URL,รับ filter จาก useSearchParams เป็น initialFilter,src/app/dashboard/admin/bookings/page.tsx
+29,Medium,UI,PostCard crash ถ้า media_urls = null,เพิ่ม fallback || [] บน mediaUrls / mediaTypes,src/components/feed/PostCard.tsx
+30,Medium,UI,Admin chat list คัด bookings โดย sender_id = admin.id เห็นแชทไม่ครบ,เปลี่ยนเป็นโชว์ทุก booking ที่ active สำหรับ admin,src/app/chat/page.tsx
+31,Medium,UI,Settings page ปุ่ม บันทึก ไม่มี onClick,เขียน state + handleSave + localStorage,src/app/dashboard/admin/settings/page.tsx
+32,Medium,Booking,total_price ใช้ price_min ไม่คูณ guests,total_price = price_min * guests,src/components/booking/BookingModal.tsx
+33,Medium,Payment,Pay page poll receipt แบบ stop-gap (webhook เป็น authority),เปลี่ยน flow ใหม่ poll DB ทุก 1.5s สูงสุด 8 ครั้ง,src/app/booking/[id]/pay/page.tsx
+34,Medium,Booking,Receipt page .single() throw ถ้ามี duplicate,ใช้ order + limit 1 + maybeSingle,src/app/booking/[id]/receipt/page.tsx
+35,Low,Hook,useAuth deps array ว่าง + infinite redirect loop,เพิ่ม pathname guard + deps [requireRole],src/hooks/useAuth.ts
+36,Low,Hook,useAuthStore.reset() defined แต่ไม่ใช้,เรียก reset() ใน SIGNED_OUT handler ของ useAuth,src/hooks/useAuth.ts
+37,Low,Auth,Login redirect '/' แล้วโดน middleware redirect ต่อ race กับ cookie write,เปลี่ยนเป็น router.replace('/feed') ตรง ๆ,src/app/auth/login/page.tsx
+38,Low,Auth,createServiceRoleClient ใช้ require() ใน ESM,เปลี่ยนเป็น import createClient จาก @supabase/supabase-js,src/lib/supabase-server.ts
+39,Low,Auth,auth/verify ไม่ exchangeCodeForSession → email verify พังบน PKCE,เพิ่ม exchangeCodeForSession + hash token fallback,src/app/auth/verify/page.tsx
+40,Low,UI,Footer มี Line: @chillgo ที่ขัดกับ moderation,เอาออก แทนด้วย ติดต่อผ่านระบบแชทในแอป,src/components/layout/Footer.tsx
+41,Low,UI,Notifications page link={notif.link || '#'} → click ได้ URL '#',ใช้ <button> ถ้าไม่มี link / <Link> ถ้ามี,src/app/notifications/page.tsx
+42,Low,UI,console.log/console.error ใน booking page,ลบทิ้ง,src/app/booking/page.tsx
+43,Low,UI,local function ชื่อ fetch shadow global,เปลี่ยนเป็น load,src/app/dashboard/admin/customers/page.tsx | src/app/dashboard/admin/reports/revenue/page.tsx | src/app/dashboard/admin/reports/partners/page.tsx | src/app/partner/[id]/page.tsx
+44,Low,Webhook,Webhook handle แค่ succeeded + failed,เพิ่ม case 'charge.refunded',src/app/api/webhooks/stripe/route.ts
+45,Low,DB,reviews ไม่มี UPDATE/DELETE policy,เพิ่ม policies (customer แก้/ลบรีวิวตัวเองได้),supabase/migration_security_fixes.sql
+46,Low,DB,bookings.post_id swap โดย customer ได้,trigger enforce_booking_post_id อนุญาตเฉพาะ admin หรือ swap เป็น alternative_post_id,supabase/migration_security_fixes.sql
+47,Low,DB,bookings.total_price แก้โดย customer ได้,trigger enforce_booking_total_price อนุญาตเฉพาะ admin/service role,supabase/migration_security_fixes.sql

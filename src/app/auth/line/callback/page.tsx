@@ -15,6 +15,7 @@ function LineCallbackContent() {
 
   useEffect(() => {
     const code = searchParams.get('code');
+    const state = searchParams.get('state');
     const errorParam = searchParams.get('error');
 
     if (errorParam) {
@@ -23,7 +24,7 @@ function LineCallbackContent() {
       return;
     }
 
-    if (!code) {
+    if (!code || !state) {
       setError('ไม่พบรหัสยืนยัน');
       setLoading(false);
       return;
@@ -37,7 +38,7 @@ function LineCallbackContent() {
         const res = await fetch('/api/auth/line', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ code, redirectUri }),
+          body: JSON.stringify({ code, redirectUri, state }),
         });
 
         const data = await res.json();

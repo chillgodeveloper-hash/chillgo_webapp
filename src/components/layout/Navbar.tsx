@@ -50,7 +50,11 @@ export default function Navbar() {
       .channel('navbar-notif')
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${user.id}` }, (payload) => {
         setUnreadCount((prev) => prev + 1);
-        setNotifications((prev) => [payload.new as any, ...prev].slice(0, 20));
+        setNotifications((prev) => {
+          const newItem = payload.new as any;
+          if (prev.some((n) => n.id === newItem.id)) return prev;
+          return [newItem, ...prev].slice(0, 20);
+        });
       })
       .subscribe();
 
@@ -58,8 +62,9 @@ export default function Navbar() {
   }, [user]);
 
   const openNotifDropdown = async () => {
-    setNotifOpen(!notifOpen);
-    if (!notifOpen && user) {
+    const willOpen = !notifOpen;
+    setNotifOpen(willOpen);
+    if (willOpen && user) {
       setNotifLoading(true);
       const { data } = await supabase
         .from('notifications')

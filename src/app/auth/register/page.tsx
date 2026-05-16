@@ -25,12 +25,15 @@ export default function RegisterPage() {
     });
   };
 
-  const handleLineSignup = () => {
-    const channelId = process.env.NEXT_PUBLIC_LINE_CHANNEL_ID;
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || window.location.origin;
-    const redirectUri = encodeURIComponent(`${baseUrl}/auth/line/callback`);
-    const state = Math.random().toString(36).substring(2);
-    window.location.href = `https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=${channelId}&redirect_uri=${redirectUri}&state=${state}&scope=profile%20openid%20email`;
+  const handleLineSignup = async () => {
+    try {
+      const res = await fetch('/api/auth/line/start');
+      const data = await res.json();
+      if (!res.ok || !data.authUrl) { setError(data.error || 'ไม่สามารถเริ่ม LINE login ได้'); return; }
+      window.location.href = data.authUrl;
+    } catch (e: any) {
+      setError(e.message || 'ไม่สามารถเริ่ม LINE login ได้');
+    }
   };
 
   const handleRegister = async (e: React.FormEvent) => {

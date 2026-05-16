@@ -28,8 +28,8 @@ export default function Footer() {
           <div>
             <h4 className="font-semibold text-tmain mb-3 text-sm">ติดต่อ</h4>
             <div className="space-y-2">
-              <span className="block text-sm text-tmuted px-2 py-1">support@chillgo.com</span>
-              <span className="block text-sm text-tmuted px-2 py-1">Line: @chillgo</span>
+              <a href="mailto:support@chillgo.com" className="block text-sm text-tmuted hover:bg-primary/20 px-2 py-1 rounded transition">support@chillgo.com</a>
+              <span className="block text-xs text-tmuted px-2 py-1">ติดต่อผ่านระบบแชทในแอปเท่านั้น</span>
             </div>
           </div>
         </div>

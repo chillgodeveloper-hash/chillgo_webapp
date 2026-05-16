@@ -12,7 +12,7 @@ export default function AdminCustomersPage() {
   const supabase = createClient();
 
   useEffect(() => {
-    const fetch = async () => {
+    const load = async () => {
       const { data } = await supabase
         .from('profiles')
         .select('*')
@@ -21,7 +21,7 @@ export default function AdminCustomersPage() {
       setCustomers(data || []);
       setLoading(false);
     };
-    fetch();
+    load();
   }, []);
 
   const filtered = customers.filter((c) =>

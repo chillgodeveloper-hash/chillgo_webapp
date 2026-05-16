@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase-client';
 import { Eye, EyeOff, LogIn } from 'lucide-react';
 import Link from 'next/link';
@@ -13,6 +14,7 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const supabase = createClient();
+  const router = useRouter();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,7 +27,7 @@ export default function LoginPage() {
       setLoading(false);
       return;
     }
-    window.location.href = '/';
+    router.replace('/feed');
   };
 
   const handleGoogleLogin = async () => {
@@ -35,13 +37,15 @@ export default function LoginPage() {
     });
   };
 
-  const handleLineLogin = () => {
-    const channelId = process.env.NEXT_PUBLIC_LINE_CHANNEL_ID;
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || window.location.origin;
-    const redirectUri = encodeURIComponent(`${baseUrl}/auth/line/callback`);
-    const state = Math.random().toString(36).substring(2);
-    const url = `https://access.line.me/oauth2/v2.1/authorize?response_type=code&client_id=${channelId}&redirect_uri=${redirectUri}&state=${state}&scope=profile%20openid%20email`;
-    window.location.href = url;
+  const handleLineLogin = async () => {
+    try {
+      const res = await fetch('/api/auth/line/start');
+      const data = await res.json();
+      if (!res.ok || !data.authUrl) { setError(data.error || 'ไม่สามารถเริ่ม LINE login ได้'); return; }
+      window.location.href = data.authUrl;
+    } catch (e: any) {
+      setError(e.message || 'ไม่สามารถเริ่ม LINE login ได้');
+    }
   };
 
   return (

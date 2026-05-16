@@ -66,7 +66,7 @@ export default function PaymentPage() {
       const res = await fetch('/api/payments', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ bookingId: booking.id, amount: booking.total_price }),
+        body: JSON.stringify({ bookingId: booking.id }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
@@ -198,26 +198,17 @@ export default function PaymentPage() {
       }
 
       if (result?.paymentIntent?.status === 'succeeded') {
-        await supabase
-          .from('bookings')
-          .update({ status: 'paid', stripe_payment_intent_id: result.paymentIntent.id })
-          .eq('id', booking.id);
-
+        // Webhook is the authority for marking booking 'paid' and creating the receipt.
+        // Poll for the webhook-created receipt so the UI updates quickly.
         setPaid(true);
-
-        try {
-          const receiptRes = await fetch('/api/receipts', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              bookingId: booking.id,
-              paymentIntentId: result.paymentIntent.id,
-              paymentMethod: activeTab,
-            }),
-          });
-          const receiptJson = await receiptRes.json();
-          if (receiptJson.receipt) setReceipt(receiptJson.receipt);
-        } catch {}
+        const pollReceipt = async () => {
+          for (let i = 0; i < 8; i++) {
+            const { data } = await supabase.from('receipts').select('*').eq('booking_id', booking.id).maybeSingle();
+            if (data) { setReceipt(data); return; }
+            await new Promise(r => setTimeout(r, 1500));
+          }
+        };
+        pollReceipt();
       } else if (result?.paymentIntent?.status === 'requires_action') {
         setPaying(false);
         return;
@@ -232,23 +223,14 @@ export default function PaymentPage() {
     const params = new URLSearchParams(window.location.search);
     if (params.get('status') === 'complete') {
       setPaid(true);
-      const createReceipt = async () => {
-        try {
-          const piId = params.get('payment_intent') || '';
-          const res = await fetch('/api/receipts', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              bookingId: id,
-              paymentIntentId: piId,
-              paymentMethod: 'promptpay',
-            }),
-          });
-          const json = await res.json();
-          if (json.receipt) setReceipt(json.receipt);
-        } catch {}
+      const pollReceipt = async () => {
+        for (let i = 0; i < 8; i++) {
+          const { data } = await supabase.from('receipts').select('*').eq('booking_id', id).maybeSingle();
+          if (data) { setReceipt(data); return; }
+          await new Promise(r => setTimeout(r, 1500));
+        }
       };
-      createReceipt();
+      pollReceipt();
     }
   }, []);
 

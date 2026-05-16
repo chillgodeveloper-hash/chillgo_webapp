@@ -12,11 +12,30 @@ export default function VerifyPage() {
 
   useEffect(() => {
     const handleVerify = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        setStatus('success');
-        setTimeout(() => router.push('/feed'), 2000);
-      } else {
+      try {
+        const url = new URL(window.location.href);
+        const code = url.searchParams.get('code');
+        if (code) {
+          const { error } = await supabase.auth.exchangeCodeForSession(code);
+          if (!error) { setStatus('success'); setTimeout(() => router.push('/feed'), 1500); return; }
+        }
+
+        const hash = window.location.hash.substring(1);
+        if (hash) {
+          const params = new URLSearchParams(hash);
+          const access_token = params.get('access_token');
+          const refresh_token = params.get('refresh_token');
+          if (access_token && refresh_token) {
+            const { error } = await supabase.auth.setSession({ access_token, refresh_token });
+            if (!error) { setStatus('success'); setTimeout(() => router.push('/feed'), 1500); return; }
+          }
+        }
+
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) { setStatus('success'); setTimeout(() => router.push('/feed'), 1500); return; }
+
+        setStatus('error');
+      } catch {
         setStatus('error');
       }
     };

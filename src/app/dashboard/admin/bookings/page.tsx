@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase-client';
 import AppLayout from '@/components/layout/AppLayout';
 import { CheckCircle, XCircle, Edit, MessageCircle, X, Save, Navigation } from 'lucide-react';
@@ -9,9 +10,11 @@ import Link from 'next/link';
 import FlatpickrInput from '@/components/ui/FlatpickrInput';
 
 export default function AdminBookingsPage() {
+  const searchParams = useSearchParams();
+  const initialFilter = searchParams.get('filter') || 'all';
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState('all');
+  const [filter, setFilter] = useState(initialFilter);
   const [editBooking, setEditBooking] = useState<any>(null);
   const [partners, setPartners] = useState<any[]>([]);
   const [editForm, setEditForm] = useState({ booking_date: '', guests: 1, total_price: 0, partner_id: '', admin_note: '' });

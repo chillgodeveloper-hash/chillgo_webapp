@@ -4,10 +4,10 @@ import { createServerSupabase } from '@/lib/supabase-server';
 
 export async function POST(request: NextRequest) {
   try {
-    const { bookingId, amount } = await request.json();
+    const { bookingId } = await request.json();
 
-    if (!bookingId || !amount) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+    if (!bookingId) {
+      return NextResponse.json({ error: 'Missing bookingId' }, { status: 400 });
     }
 
     const supabase = createServerSupabase();
@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
 
     const { data: booking } = await supabase
       .from('bookings')
-      .select('*')
+      .select('id, total_price, status, customer_id, stripe_payment_intent_id')
       .eq('id', bookingId)
       .eq('customer_id', session.user.id)
       .eq('status', 'confirmed')
@@ -27,6 +27,10 @@ export async function POST(request: NextRequest) {
 
     if (!booking) {
       return NextResponse.json({ error: 'Booking not found or not confirmed' }, { status: 404 });
+    }
+
+    if (!booking.total_price || booking.total_price <= 0) {
+      return NextResponse.json({ error: 'Invalid booking amount' }, { status: 400 });
     }
 
     const { data: profile } = await supabase
@@ -40,7 +44,11 @@ export async function POST(request: NextRequest) {
     if (booking.stripe_payment_intent_id) {
       try {
         const existingPI = await stripe.paymentIntents.retrieve(booking.stripe_payment_intent_id);
-        if (existingPI.status === 'requires_payment_method' || existingPI.status === 'requires_confirmation') {
+        const expectedAmount = Math.round(booking.total_price * 100);
+        if (
+          (existingPI.status === 'requires_payment_method' || existingPI.status === 'requires_confirmation')
+          && existingPI.amount === expectedAmount
+        ) {
           return NextResponse.json({
             clientSecret: existingPI.client_secret,
             paymentIntentId: existingPI.id,
@@ -49,7 +57,7 @@ export async function POST(request: NextRequest) {
       } catch {}
     }
 
-    const paymentIntent = await createPaymentIntent(amount, bookingId, customerEmail);
+    const paymentIntent = await createPaymentIntent(booking.total_price, bookingId, customerEmail);
 
     await supabase
       .from('bookings')

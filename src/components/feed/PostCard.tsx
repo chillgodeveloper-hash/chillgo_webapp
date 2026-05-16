@@ -16,8 +16,10 @@ export default function PostCard({ post, onBook }: PostCardProps) {
   const [liked, setLiked] = useState(false);
 
   const partner = post.partner_profile;
-  const images = post.media_urls.filter((_, i) => post.media_types[i] === 'image');
-  const videos = post.media_urls.filter((_, i) => post.media_types[i] === 'video');
+  const mediaUrls = post.media_urls || [];
+  const mediaTypes = post.media_types || [];
+  const images = mediaUrls.filter((_, i) => mediaTypes[i] === 'image');
+  const videos = mediaUrls.filter((_, i) => mediaTypes[i] === 'video');
 
   const categoryLabel = post.category === 'guide' ? '🗺️ ไกด์' : post?.category === 'driver' ? '🚗 คนขับรถ' : '🌐 ล่าม';
   const categoryColor = post.category === 'guide' ? 'bg-secondary/10 text-secondary' : 'bg-info/10 text-info';
