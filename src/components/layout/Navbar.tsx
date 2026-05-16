@@ -47,7 +47,7 @@ export default function Navbar() {
     fetchUnread();
 
     const channel = supabase
-      .channel('navbar-notif')
+      .channel(`navbar-notif-${user.id}-${Math.random().toString(36).slice(2, 8)}`)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${user.id}` }, (payload) => {
         setUnreadCount((prev) => prev + 1);
         setNotifications((prev) => {
@@ -58,7 +58,13 @@ export default function Navbar() {
       })
       .subscribe();
 
-    return () => { supabase.removeChannel(channel); };
+    return () => {
+      // Defer removal to next tick so the WebSocket has a chance to finish
+      // its join handshake before we tear it down — silences the noisy dev
+      // "WebSocket is closed before the connection is established" warning
+      // that React Strict Mode triggers in development.
+      setTimeout(() => { supabase.removeChannel(channel); }, 0);
+    };
   }, [user]);
 
   const openNotifDropdown = async () => {
