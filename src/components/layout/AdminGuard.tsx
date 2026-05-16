@@ -1,14 +1,47 @@
 'use client';
 
-import { ReactNode } from 'react';
-import { useAuth } from '@/hooks/useAuth';
+import { ReactNode, useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { createClient } from '@/lib/supabase-client';
 import { Loader2, ShieldAlert } from 'lucide-react';
 import Link from 'next/link';
 
-export default function AdminGuard({ children }: { children: ReactNode }) {
-  const { user, isLoading } = useAuth('admin');
+type CheckState = 'checking' | 'admin' | 'denied' | 'unauth';
 
-  if (isLoading) {
+export default function AdminGuard({ children }: { children: ReactNode }) {
+  const [state, setState] = useState<CheckState>('checking');
+  const router = useRouter();
+
+  useEffect(() => {
+    const supabase = createClient();
+    let cancelled = false;
+
+    const verify = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (cancelled) return;
+      if (!session) {
+        setState('unauth');
+        router.push('/auth/login');
+        return;
+      }
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', session.user.id)
+        .single();
+      if (cancelled) return;
+      if (profile?.role === 'admin') {
+        setState('admin');
+      } else {
+        setState('denied');
+      }
+    };
+
+    verify();
+    return () => { cancelled = true; };
+  }, [router]);
+
+  if (state === 'checking' || state === 'unauth') {
     return (
       <div className="min-h-screen flex items-center justify-center bg-primary-light">
         <div className="text-center">
@@ -19,7 +52,7 @@ export default function AdminGuard({ children }: { children: ReactNode }) {
     );
   }
 
-  if (!user || user.role !== 'admin') {
+  if (state === 'denied') {
     return (
       <div className="min-h-screen flex items-center justify-center bg-primary-light p-6">
         <div className="bg-white rounded-3xl shadow-xl p-8 max-w-md w-full text-center">
