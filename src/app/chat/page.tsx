@@ -60,7 +60,7 @@ export default function ChatListPage() {
         }
       }
 
-      const roomList = [...roomMap.values()];
+      const roomList = Array.from(roomMap.values());
 
       // 3. Resolve booking + counterpart info.
       const bookingIds = Array.from(new Set(roomList.map((r) => r.bookingId)));
