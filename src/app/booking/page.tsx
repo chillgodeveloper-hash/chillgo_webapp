@@ -78,18 +78,19 @@ export default function BookingPage() {
   };
 
   useEffect(() => {
-    if (user) {
-      fetchBookings();
-    }
+    if (!user) return;
+    fetchBookings();
 
     const channel = supabase
-      .channel('user-bookings')
+      .channel(`user-bookings-${user.id}-${Math.random().toString(36).slice(2, 8)}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'bookings' }, () => {
-        if (user) fetchBookings();
+        fetchBookings();
       })
       .subscribe();
 
-    return () => { supabase.removeChannel(channel); };
+    return () => {
+      setTimeout(() => { supabase.removeChannel(channel); }, 0);
+    };
   }, [user]);
 
   const activeBookings = bookings.filter((b) => !['completed', 'cancelled'].includes(b.status));
