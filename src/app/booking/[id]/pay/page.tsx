@@ -198,17 +198,22 @@ export default function PaymentPage() {
       }
 
       if (result?.paymentIntent?.status === 'succeeded') {
-        // Webhook is the authority for marking booking 'paid' and creating the receipt.
-        // Poll for the webhook-created receipt so the UI updates quickly.
         setPaid(true);
-        const pollReceipt = async () => {
-          for (let i = 0; i < 8; i++) {
-            const { data } = await supabase.from('receipts').select('*').eq('booking_id', booking.id).maybeSingle();
-            if (data) { setReceipt(data); return; }
-            await new Promise(r => setTimeout(r, 1500));
-          }
-        };
-        pollReceipt();
+        // Server-side verify: idempotently flips booking → paid and creates
+        // the receipt. Works even if the webhook is misconfigured (wrong URL,
+        // missing secret, etc.) instead of leaving the UI stuck on "creating
+        // receipt" forever.
+        try {
+          const res = await fetch('/api/payments/verify', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ bookingId: booking.id }),
+          });
+          const data = await res.json();
+          if (data?.receipt) setReceipt(data.receipt);
+        } catch (e) {
+          console.error('[pay] verify failed', e);
+        }
       } else if (result?.paymentIntent?.status === 'requires_action') {
         setPaying(false);
         return;
@@ -223,14 +228,22 @@ export default function PaymentPage() {
     const params = new URLSearchParams(window.location.search);
     if (params.get('status') === 'complete') {
       setPaid(true);
-      const pollReceipt = async () => {
-        for (let i = 0; i < 8; i++) {
-          const { data } = await supabase.from('receipts').select('*').eq('booking_id', id).maybeSingle();
-          if (data) { setReceipt(data); return; }
-          await new Promise(r => setTimeout(r, 1500));
+      // Same server-side verify as the inline path — covers PromptPay /
+      // redirect flows where the client doesn't immediately know success
+      // until Stripe bounces the user back here.
+      (async () => {
+        try {
+          const res = await fetch('/api/payments/verify', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ bookingId: id }),
+          });
+          const data = await res.json();
+          if (data?.receipt) setReceipt(data.receipt);
+        } catch (e) {
+          console.error('[pay] verify failed', e);
         }
-      };
-      pollReceipt();
+      })();
     }
   }, []);
 

@@ -47,13 +47,16 @@ export async function POST(request: NextRequest) {
         const bookingId = paymentIntent.metadata.bookingId;
         if (!bookingId) break;
 
-        // Single UPDATE...RETURNING gets the booking row and flips status in one round-trip.
+        // .neq('status','paid') gates the update so a second runner (e.g. the
+        // sync verify endpoint already flipped it) returns no rows here, and
+        // we skip the notifications/receipt path below to avoid duplicates.
         const { data: booking } = await supabase
           .from('bookings')
           .update({ status: 'paid', stripe_payment_intent_id: paymentIntent.id })
           .eq('id', bookingId)
+          .neq('status', 'paid')
           .select('*, post:posts!bookings_post_id_fkey(title)')
-          .single();
+          .maybeSingle();
 
         if (!booking) break;
 
