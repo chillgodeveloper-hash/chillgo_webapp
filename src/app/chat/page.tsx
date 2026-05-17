@@ -17,10 +17,13 @@ export default function ChatListPage() {
     if (!user) return;
 
     const fetchChats = async () => {
+      // A chat exists iff there's at least one chat_messages row for the
+      // booking — status (pending/approved/confirmed/...) is irrelevant.
+      // The previous status filter hid admin↔customer chats on pre-confirm
+      // bookings from the customer's list view.
       let query = supabase
         .from('bookings')
         .select(`id, status, customer_id, partner_id, updated_at, post:posts!bookings_post_id_fkey(title)`)
-        .in('status', ['confirmed', 'paid', 'in_progress'])
         .order('updated_at', { ascending: false });
 
       if (user.role !== 'admin') {
@@ -52,12 +55,14 @@ export default function ChatListPage() {
         });
       }
 
-      const enriched = (data || []).map((b: any) => ({
-        ...b,
-        customer: profileMap[b.customer_id] || null,
-        partner: profileMap[b.partner_id] || null,
-        lastMessage: lastMsgMap[b.id] || null,
-      }));
+      const enriched = (data || [])
+        .map((b: any) => ({
+          ...b,
+          customer: profileMap[b.customer_id] || null,
+          partner: profileMap[b.partner_id] || null,
+          lastMessage: lastMsgMap[b.id] || null,
+        }))
+        .filter((b: any) => b.lastMessage);
 
       enriched.sort((a: any, b: any) => {
         const aTime = a.lastMessage?.created_at || a.updated_at;

@@ -21,23 +21,17 @@ export default function ChatPage() {
   const supabase = createClient();
 
   useEffect(() => {
-    console.log('[chat] effect fired. bookingId=', bookingId, 'user=', user?.id, 'role=', user?.role);
-    if (!bookingId || !user) {
-      console.warn('[chat] effect early-return — missing bookingId or user');
-      return;
-    }
+    if (!bookingId || !user) return;
 
     let channel: ReturnType<typeof supabase.channel> | null = null;
     let cancelled = false;
 
     const setup = async () => {
-      console.log('[chat] setup start, user=', user?.id, 'booking=', bookingId);
       // @supabase/ssr reads the session from cookies but does NOT push the
       // JWT into the realtime client — so the WS channel joins as anon and
       // RLS on chat_messages (bookings.customer_id = auth.uid()) drops every
       // event. Explicitly forward the token before subscribing.
       const { data: { session } } = await supabase.auth.getSession();
-      console.log('[chat] session?', !!session, 'token?', !!session?.access_token);
       if (cancelled) return;
       if (session?.access_token) {
         supabase.realtime.setAuth(session.access_token);
@@ -50,13 +44,10 @@ export default function ChatPage() {
         .order('created_at', { ascending: true });
       if (cancelled) return;
       if (error) console.error('[chat] fetch error:', error);
-      console.log('[chat] fetched messages count=', data?.length || 0);
       setMessages(data || []);
 
-      const channelName = `chat:${bookingId}:${user.id}:${Math.random().toString(36).slice(2, 8)}`;
-      console.log('[chat] subscribing to', channelName);
       channel = supabase
-        .channel(channelName)
+        .channel(`chat:${bookingId}:${user.id}:${Math.random().toString(36).slice(2, 8)}`)
         .on(
           'postgres_changes',
           {
@@ -66,7 +57,6 @@ export default function ChatPage() {
             filter: `booking_id=eq.${bookingId}`,
           },
           async (payload) => {
-            console.log('[chat] received INSERT', payload.new);
             const { data } = await supabase
               .from('chat_messages')
               .select('*, sender:profiles(*)')
@@ -77,9 +67,7 @@ export default function ChatPage() {
             }
           }
         )
-        .subscribe((status, err) => {
-          console.log('[chat] subscribe status:', status, err || '');
-        });
+        .subscribe();
     };
 
     setup();
