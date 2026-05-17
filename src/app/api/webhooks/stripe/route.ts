@@ -118,7 +118,7 @@ export async function POST(request: NextRequest) {
             title: 'ได้รับการชำระเงิน',
             message: `${customer?.full_name || 'ลูกค้า'} ชำระเงินสำหรับ "${serviceName}" แล้ว`,
             type: 'payment',
-            link: `/chat/${bookingId}`,
+            link: `/chat/${bookingId}/${booking.customer_id}`,
           },
         ]);
         break;

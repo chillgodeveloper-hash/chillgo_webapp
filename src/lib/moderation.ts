@@ -37,7 +37,7 @@ export function checkContentViolation(text: string): {
 export const FILE_LIMITS = {
   image: {
     maxSize: 5 * 1024 * 1024,
-    types: ['image/jpeg', 'image/png', 'image/webp'],
+    types: ['image/jpeg', 'image/png', 'image/webp', 'image/gif'],
     label: '5MB',
   },
   video: {

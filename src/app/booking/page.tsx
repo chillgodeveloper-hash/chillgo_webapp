@@ -236,7 +236,7 @@ export default function BookingPage() {
                     )}
                     {['confirmed', 'paid', 'in_progress'].includes(booking.status) && (
                       <Link
-                        href={`/chat/${booking.id}`}
+                        href={`/chat/${booking.id}/${user?.id === booking.customer_id ? booking.partner_id : booking.customer_id}`}
                         className="flex-1 bg-info/10 text-tmain font-medium py-2 rounded-xl text-sm text-center flex items-center justify-center gap-1.5 hover:bg-info/20 transition"
                       >
                         <MessageCircle size={16} /> แชท

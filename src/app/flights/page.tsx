@@ -34,8 +34,17 @@ export default function FlightsPage() {
   const [returnDate, setReturnDate] = useState('');
   const [passengers, setPassengers] = useState(1);
   const todayStr = new Date().toISOString().split('T')[0];
+  // Aviasales encodes dates as DDMM (4 digits) in the URL slug — not YYYYMMDD.
+  // Without the right format aviasales falls back to "no date" and shows
+  // no flights for the route.
+  const toDDMM = (yyyymmdd: string) => {
+    const [, mm, dd] = yyyymmdd.split('-');
+    return `${dd}${mm}`;
+  };
   const buildLink = (from: string, to: string) => {
-    let url = `https://www.aviasales.com/search/${from}${departDate ? departDate.replace(/-/g, '') : ''}${to}${returnDate ? returnDate.replace(/-/g, '') : ''}${passengers}`;
+    const depart = toDDMM(departDate || todayStr);
+    const ret = returnDate ? toDDMM(returnDate) : '';
+    let url = `https://www.aviasales.com/search/${from}${depart}${to}${ret}${passengers}`;
     if (MARKER) url += `?marker=${MARKER}`;
     return url;
   };

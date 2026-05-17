@@ -27,6 +27,7 @@ export default function CreatePostForm({ onSuccess, editPost, onCancelEdit, isMo
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [violation, setViolation] = useState('');
+  const [fileError, setFileError] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
@@ -37,11 +38,18 @@ export default function CreatePostForm({ onSuccess, editPost, onCancelEdit, isMo
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selected = Array.from(e.target.files || []);
     const newFiles: typeof files = [];
+    const rejected: string[] = [];
     for (const file of selected) {
       const isVideo = file.type.startsWith('video/');
       const v = validateFile(file, isVideo ? 'video' : 'image');
-      if (!v.valid) { setError(v.error || ''); continue; }
+      if (!v.valid) {
+        rejected.push(`${file.name}: ${v.error}`);
+        continue;
+      }
       newFiles.push({ file, type: isVideo ? 'video' : 'image', preview: URL.createObjectURL(file) });
+    }
+    if (rejected.length > 0) {
+      setFileError(rejected.join('\n'));
     }
     setFiles((prev) => [...prev, ...newFiles].slice(0, 10));
     if (fileRef.current) fileRef.current.value = '';
@@ -223,6 +231,34 @@ export default function CreatePostForm({ onSuccess, editPost, onCancelEdit, isMo
           {loading ? <div className="w-4 h-4 border-2 border-tmain/30 border-t-tmain rounded-full animate-spin" /> : <><Send size={16} /> {editPost ? 'บันทึก' : 'โพสต์'}</>}
         </button>
       </div>
+
+      {fileError && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setFileError(null)} />
+          <div className="relative bg-white w-full max-w-md mx-4 rounded-2xl overflow-hidden shadow-xl animate-blur-in">
+            <div className="p-5">
+              <div className="flex items-start gap-3 mb-3">
+                <div className="w-10 h-10 rounded-full bg-danger/15 flex items-center justify-center flex-shrink-0">
+                  <AlertTriangle size={20} className="text-danger" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-bold text-tmain mb-1">ไฟล์ไม่ถูกต้อง</h3>
+                  <p className="text-sm text-tmuted">รูปไม่เกิน 5MB · คลิปไม่เกิน 50MB</p>
+                </div>
+                <button type="button" onClick={() => setFileError(null)} className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-tmain hover:bg-primary/30 transition flex-shrink-0">
+                  <X size={16} />
+                </button>
+              </div>
+              <div className="bg-danger/5 border border-danger/20 rounded-xl px-3 py-2.5 text-sm text-tmain whitespace-pre-line break-words max-h-40 overflow-y-auto">
+                {fileError}
+              </div>
+              <button type="button" onClick={() => setFileError(null)} className="w-full mt-4 bg-primary hover:bg-primary-dark text-tmain font-semibold py-2.5 rounded-xl text-sm transition">
+                เข้าใจแล้ว
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {showMap && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center">

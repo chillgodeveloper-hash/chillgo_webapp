@@ -143,7 +143,8 @@ export default function AdminBookingsPage() {
                     {booking.status === 'pending' && (
                       <button onClick={() => openEdit(booking)} className="flex items-center gap-1 bg-secondary/20 text-tmain px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-secondary/30 transition"><Edit size={14} /> แก้ไข</button>
                     )}
-                    <Link href={`/chat/${booking.id}`} className="flex items-center gap-1 bg-info/20 text-tmain px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-info/30 transition"><MessageCircle size={14} /> แชท</Link>
+                    <Link href={`/chat/${booking.id}/${booking.customer_id}`} className="flex items-center gap-1 bg-info/20 text-tmain px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-info/30 transition"><MessageCircle size={14} /> ลูกค้า</Link>
+                    <Link href={`/chat/${booking.id}/${booking.partner_id}`} className="flex items-center gap-1 bg-info/20 text-tmain px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-info/30 transition"><MessageCircle size={14} /> พาร์ทเนอร์</Link>
                     {booking.status === 'in_progress' && (
                       <Link href={`/booking/${booking.id}/tracking`} className="flex items-center gap-1 bg-success/20 text-tmain px-3 py-1.5 rounded-lg text-xs font-medium hover:bg-success/30 transition"><Navigation size={14} /> GPS</Link>
                     )}

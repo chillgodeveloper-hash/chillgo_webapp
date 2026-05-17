@@ -315,7 +315,7 @@ export default function PaymentPage() {
                   </button>
                   <div className="flex gap-2">
                     <button
-                      onClick={() => router.push(`/chat/${booking?.id}`)}
+                      onClick={() => router.push(`/chat/${booking?.id}/${booking?.partner_id}`)}
                       className="flex-1 bg-info/10 text-tmain font-medium py-2.5 rounded-xl transition hover:bg-info/20 text-sm"
                     >
                       เริ่มแชท
@@ -348,7 +348,7 @@ export default function PaymentPage() {
                   ลองโหลดใหม่
                 </button>
                 <div className="flex gap-2 mt-6">
-                  <button onClick={() => router.push(`/chat/${booking?.id}`)} className="flex-1 bg-primary hover:bg-primary-dark text-tmain font-semibold py-3 rounded-xl transition">
+                  <button onClick={() => router.push(`/chat/${booking?.id}/${booking?.partner_id}`)} className="flex-1 bg-primary hover:bg-primary-dark text-tmain font-semibold py-3 rounded-xl transition">
                     เริ่มแชท
                   </button>
                   <button onClick={() => router.push('/booking')} className="flex-1 bg-white border border-primary-dark/30 text-tmain font-semibold py-3 rounded-xl transition hover:bg-primary/20">

@@ -7,8 +7,20 @@ import AppLayout from '@/components/layout/AppLayout';
 import Link from 'next/link';
 import { MessageCircle } from 'lucide-react';
 
+interface Room {
+  bookingId: string;
+  counterpartId: string;
+  bookingStatus: string;
+  postTitle: string | null;
+  counterpartName: string;
+  counterpartRole: string | null;
+  lastMessage: string;
+  lastTime: string;
+  lastSenderIsMe: boolean;
+}
+
 export default function ChatListPage() {
-  const [chats, setChats] = useState<any[]>([]);
+  const [rooms, setRooms] = useState<Room[]>([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuthStore();
   const supabase = createClient();
@@ -16,65 +28,83 @@ export default function ChatListPage() {
   useEffect(() => {
     if (!user) return;
 
-    const fetchChats = async () => {
-      // A chat exists iff there's at least one chat_messages row for the
-      // booking — status (pending/approved/confirmed/...) is irrelevant.
-      // The previous status filter hid admin↔customer chats on pre-confirm
-      // bookings from the customer's list view.
-      let query = supabase
-        .from('bookings')
-        .select(`id, status, customer_id, partner_id, updated_at, post:posts!bookings_post_id_fkey(title)`)
-        .order('updated_at', { ascending: false });
+    const fetchRooms = async () => {
+      // 1. All messages the current user is part of (sender or receiver).
+      //    RLS already filters to messages they can see; admins see all.
+      const { data: msgs } = await supabase
+        .from('chat_messages')
+        .select('booking_id, sender_id, receiver_id, message, created_at')
+        .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
+        .order('created_at', { ascending: false });
 
-      if (user.role !== 'admin') {
-        query = query.or(`customer_id.eq.${user.id},partner_id.eq.${user.id}`);
+      // 2. Group by (booking, counterpart) — take the first (most-recent) msg per room.
+      const roomMap = new Map<string, {
+        bookingId: string;
+        counterpartId: string;
+        lastMessage: string;
+        lastTime: string;
+        lastSenderIsMe: boolean;
+      }>();
+      for (const m of msgs || []) {
+        const cp = m.sender_id === user.id ? m.receiver_id : m.sender_id;
+        if (!cp) continue;
+        const key = `${m.booking_id}:${cp}`;
+        if (!roomMap.has(key)) {
+          roomMap.set(key, {
+            bookingId: m.booking_id,
+            counterpartId: cp,
+            lastMessage: m.message,
+            lastTime: m.created_at,
+            lastSenderIsMe: m.sender_id === user.id,
+          });
+        }
       }
 
-      const { data } = await query;
+      const roomList = [...roomMap.values()];
 
-      const userIds = Array.from(new Set((data || []).flatMap((b: any) => [b.customer_id, b.partner_id])));
-      const profileMap: Record<string, any> = {};
-      if (userIds.length > 0) {
-        const { data: profilesData } = await supabase.from('profiles').select('*').in('id', userIds);
-        profilesData?.forEach((p: any) => { profileMap[p.id] = p; });
-      }
+      // 3. Resolve booking + counterpart info.
+      const bookingIds = Array.from(new Set(roomList.map((r) => r.bookingId)));
+      const counterpartIds = Array.from(new Set(roomList.map((r) => r.counterpartId)));
 
-      const bookingIdsAll = (data || []).map((b: any) => b.id);
-      const lastMsgMap: Record<string, any> = {};
-      if (bookingIdsAll.length > 0) {
-        const { data: lastMsgs } = await supabase
-          .from('chat_messages')
-          .select('booking_id, message, created_at, sender_id')
-          .in('booking_id', bookingIdsAll)
-          .order('created_at', { ascending: false });
+      const [{ data: bookings }, { data: profiles }] = await Promise.all([
+        bookingIds.length
+          ? supabase
+              .from('bookings')
+              .select(`id, status, post:posts!bookings_post_id_fkey(title)`)
+              .in('id', bookingIds)
+          : Promise.resolve({ data: [] as any[] }),
+        counterpartIds.length
+          ? supabase.from('profiles').select('id, full_name, role').in('id', counterpartIds)
+          : Promise.resolve({ data: [] as any[] }),
+      ]);
 
-        (lastMsgs || []).forEach((m: any) => {
-          if (!lastMsgMap[m.booking_id]) {
-            lastMsgMap[m.booking_id] = m;
-          }
-        });
-      }
+      const bookingMap = new Map((bookings || []).map((b: any) => [b.id, b]));
+      const profileMap = new Map((profiles || []).map((p: any) => [p.id, p]));
 
-      const enriched = (data || [])
-        .map((b: any) => ({
-          ...b,
-          customer: profileMap[b.customer_id] || null,
-          partner: profileMap[b.partner_id] || null,
-          lastMessage: lastMsgMap[b.id] || null,
-        }))
-        .filter((b: any) => b.lastMessage);
+      const enriched: Room[] = roomList
+        .map((r) => {
+          const b = bookingMap.get(r.bookingId) as any;
+          const p = profileMap.get(r.counterpartId) as any;
+          if (!b || !p) return null;
+          return {
+            bookingId: r.bookingId,
+            counterpartId: r.counterpartId,
+            bookingStatus: b.status,
+            postTitle: b.post?.title || null,
+            counterpartName: p.full_name || (p.role === 'admin' ? 'แอดมิน' : 'ผู้ใช้'),
+            counterpartRole: p.role,
+            lastMessage: r.lastMessage,
+            lastTime: r.lastTime,
+            lastSenderIsMe: r.lastSenderIsMe,
+          };
+        })
+        .filter((x): x is Room => x !== null);
 
-      enriched.sort((a: any, b: any) => {
-        const aTime = a.lastMessage?.created_at || a.updated_at;
-        const bTime = b.lastMessage?.created_at || b.updated_at;
-        return new Date(bTime).getTime() - new Date(aTime).getTime();
-      });
-
-      setChats(enriched);
+      setRooms(enriched);
       setLoading(false);
     };
 
-    fetchChats();
+    fetchRooms();
   }, [user]);
 
   const getTimeAgo = (dateStr: string) => {
@@ -86,6 +116,13 @@ export default function ChatListPage() {
     if (diff < 86400) return `${Math.floor(diff / 3600)} ชม.ที่แล้ว`;
     if (diff < 604800) return `${Math.floor(diff / 86400)} วันที่แล้ว`;
     return date.toLocaleDateString('th-TH');
+  };
+
+  const roleLabel = (role: string | null) => {
+    if (role === 'admin') return 'แอดมิน';
+    if (role === 'partner') return 'พาร์ทเนอร์';
+    if (role === 'customer') return 'ลูกค้า';
+    return '';
   };
 
   return (
@@ -109,60 +146,38 @@ export default function ChatListPage() {
               </div>
             ))}
           </div>
-        ) : chats.length === 0 ? (
+        ) : rooms.length === 0 ? (
           <div className="text-center py-16">
             <p className="text-5xl mb-4">💬</p>
-            <p className="text-tmuted">
-              {user?.role === 'admin' ? 'ยังไม่เคยส่งข้อความในแชทใด' : 'ยังไม่มีข้อความ'}
-            </p>
-            <p className="text-tmuted text-sm mt-1">
-              {user?.role === 'admin'
-                ? 'เริ่มแชทได้จากหน้ารายการจอง'
-                : 'เริ่มแชทหลังจากยืนยันการจอง'}
-            </p>
+            <p className="text-tmuted">ยังไม่มีข้อความ</p>
+            <p className="text-tmuted text-sm mt-1">เริ่มแชทจากหน้ารายการจอง</p>
           </div>
         ) : (
           <div className="space-y-2">
-            {chats.map((chat) => {
-              let displayName = '';
-              if (user?.role === 'admin') {
-                const cName = chat.customer?.full_name || 'ลูกค้า';
-                const pName = chat.partner?.full_name || 'พาร์ทเนอร์';
-                displayName = `${cName} ↔ ${pName}`;
-              } else if (user?.role === 'customer') {
-                displayName = chat.partner?.full_name || 'พาร์ทเนอร์';
-              } else {
-                displayName = chat.customer?.full_name || 'ลูกค้า';
-              }
-
-              const lastMsg = chat.lastMessage;
-              let lastMsgPreview = chat.post?.title || '';
-              if (lastMsg) {
-                const senderName = lastMsg.sender_id === user?.id ? 'คุณ' : (
-                  lastMsg.sender_id === chat.customer_id
-                    ? (chat.customer?.full_name?.split(' ')[0] || '')
-                    : (chat.partner?.full_name?.split(' ')[0] || '')
-                );
-                lastMsgPreview = `${senderName}: ${lastMsg.message}`;
-              }
-
-              const timeStr = lastMsg ? getTimeAgo(lastMsg.created_at) : '';
-
+            {rooms.map((room) => {
+              const preview = `${room.lastSenderIsMe ? 'คุณ' : (room.counterpartName.split(' ')[0] || '')}: ${room.lastMessage}`;
+              const role = roleLabel(room.counterpartRole);
               return (
                 <Link
-                  key={chat.id}
-                  href={`/chat/${chat.id}`}
+                  key={`${room.bookingId}:${room.counterpartId}`}
+                  href={`/chat/${room.bookingId}/${room.counterpartId}`}
                   className="flex items-center gap-3 bg-white rounded-2xl p-4 border border-primary-dark/20 hover:border-primary/30 hover:shadow-sm transition"
                 >
                   <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center text-primary-text font-bold flex-shrink-0">
-                    {user?.role === 'admin' ? '👥' : (displayName?.charAt(0) || '?')}
+                    {room.counterpartName.charAt(0) || '?'}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2">
-                      <p className="font-semibold text-tmain truncate">{displayName}</p>
-                      {timeStr && <p className="text-[11px] text-tmuted flex-shrink-0">{timeStr}</p>}
+                      <p className="font-semibold text-tmain truncate">
+                        {room.counterpartName}
+                        {role && <span className="ml-1 text-[10px] font-normal text-tmuted">· {role}</span>}
+                      </p>
+                      <p className="text-[11px] text-tmuted flex-shrink-0">{getTimeAgo(room.lastTime)}</p>
                     </div>
-                    <p className="text-sm text-tmuted truncate">{lastMsgPreview}</p>
+                    {room.postTitle && (
+                      <p className="text-[11px] text-tmuted truncate">การจอง: {room.postTitle}</p>
+                    )}
+                    <p className="text-sm text-tmuted truncate">{preview}</p>
                   </div>
                   <MessageCircle size={18} className="text-tmuted flex-shrink-0" />
                 </Link>
