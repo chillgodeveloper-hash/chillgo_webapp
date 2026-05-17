@@ -21,7 +21,11 @@ export default function ChatPage() {
   const supabase = createClient();
 
   useEffect(() => {
-    if (!bookingId) return;
+    // Gate on `user` so the supabase-js auth session has populated the
+    // realtime client with a JWT — without it the WS connects as anon,
+    // RLS on chat_messages (customer_id = auth.uid()) blocks every event,
+    // and the channel silently delivers nothing.
+    if (!bookingId || !user) return;
 
     const fetchMessages = async () => {
       const { data, error } = await supabase
@@ -36,7 +40,7 @@ export default function ChatPage() {
     fetchMessages();
 
     const channel = supabase
-      .channel(`chat:${bookingId}`)
+      .channel(`chat:${bookingId}:${user.id}:${Math.random().toString(36).slice(2, 8)}`)
       .on(
         'postgres_changes',
         {
@@ -58,8 +62,13 @@ export default function ChatPage() {
       )
       .subscribe();
 
-    return () => { supabase.removeChannel(channel); };
-  }, [bookingId]);
+    return () => {
+      // Defer removal so the WS finishes its join handshake before teardown —
+      // silences the dev "WebSocket is closed before the connection is
+      // established" warning that React Strict Mode triggers.
+      setTimeout(() => { supabase.removeChannel(channel); }, 0);
+    };
+  }, [bookingId, user]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
