@@ -21,7 +21,11 @@ export default function ChatPage() {
   const supabase = createClient();
 
   useEffect(() => {
-    if (!bookingId || !user) return;
+    console.log('[chat] effect fired. bookingId=', bookingId, 'user=', user?.id, 'role=', user?.role);
+    if (!bookingId || !user) {
+      console.warn('[chat] effect early-return — missing bookingId or user');
+      return;
+    }
 
     let channel: ReturnType<typeof supabase.channel> | null = null;
     let cancelled = false;
