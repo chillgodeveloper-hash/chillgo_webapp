@@ -4,11 +4,14 @@ import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase-client';
 import { useAuthStore } from '@/hooks/useAuthStore';
-import { checkContentViolation } from '@/lib/moderation';
+import { checkContentViolation, validateFile } from '@/lib/moderation';
 import AppLayout from '@/components/layout/AppLayout';
-import { Send, ImagePlus, ArrowLeft, AlertTriangle } from 'lucide-react';
+import { Send, ImagePlus, ArrowLeft, AlertTriangle, X } from 'lucide-react';
 import { ChatMessage, Profile } from '@/types';
 import Link from 'next/link';
+
+const VIDEO_RE = /\.(mp4|webm|mov|quicktime)(\?|$)/i;
+const isVideoUrl = (url: string) => VIDEO_RE.test(url);
 
 export default function ChatRoomPage() {
   const params = useParams();
@@ -19,8 +22,11 @@ export default function ChatRoomPage() {
   const [counterpart, setCounterpart] = useState<Profile | null>(null);
   const [newMessage, setNewMessage] = useState('');
   const [sending, setSending] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [violation, setViolation] = useState('');
+  const [fileError, setFileError] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
   const { user } = useAuthStore();
   const supabase = createClient();
 
@@ -136,6 +142,49 @@ export default function ChatRoomPage() {
     setSending(false);
   };
 
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (fileRef.current) fileRef.current.value = '';
+    if (!file || !user || !bookingId || !counterpartId) return;
+
+    const isVideo = file.type.startsWith('video/');
+    const validation = validateFile(file, isVideo ? 'video' : 'image');
+    if (!validation.valid) {
+      setFileError(validation.error || 'ไฟล์ไม่ถูกต้อง');
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const ext = file.name.split('.').pop() || (isVideo ? 'mp4' : 'jpg');
+      const path = `chat/${user.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+      const { error: upErr } = await supabase.storage.from('media').upload(path, file);
+      if (upErr) throw upErr;
+      const { data: { publicUrl } } = supabase.storage.from('media').getPublicUrl(path);
+
+      const { data: inserted, error: insErr } = await supabase
+        .from('chat_messages')
+        .insert({
+          booking_id: bookingId,
+          sender_id: user.id,
+          receiver_id: counterpartId,
+          message: isVideo ? '🎬' : '🖼️',
+          media_url: publicUrl,
+        })
+        .select('*, sender:profiles!sender_id(*)')
+        .single();
+      if (insErr) throw insErr;
+
+      if (inserted) {
+        setMessages((prev) => prev.some((m) => m.id === inserted.id) ? prev : [...prev, inserted]);
+      }
+    } catch (err: any) {
+      setFileError('อัปโหลดไม่สำเร็จ: ' + (err?.message || 'ไม่ทราบสาเหตุ'));
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const counterpartLabel = counterpart?.full_name
     || (counterpart?.role === 'admin' ? 'แอดมิน' : 'ผู้ใช้');
   const counterpartInitial = counterpartLabel.charAt(0) || '?';
@@ -177,7 +226,19 @@ export default function ChatRoomPage() {
                       ? 'ml-auto bg-primary text-dark-DEFAULT rounded-br-md'
                       : 'bg-white text-tmain border border-primary-dark/20 rounded-bl-md'
                   }`}>
-                    {msg.message}
+                    {msg.media_url && (
+                      <div className={msg.message && msg.message !== '🎬' && msg.message !== '🖼️' ? 'mb-2' : ''}>
+                        {isVideoUrl(msg.media_url) ? (
+                          <video src={msg.media_url} controls className="rounded-xl max-w-[280px] max-h-80" />
+                        ) : (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <a href={msg.media_url} target="_blank" rel="noopener noreferrer">
+                            <img src={msg.media_url} alt="" className="rounded-xl max-w-[280px] max-h-80 object-cover" />
+                          </a>
+                        )}
+                      </div>
+                    )}
+                    {msg.message && msg.message !== '🎬' && msg.message !== '🖼️' && msg.message}
                   </div>
                   <p className={`text-[10px] text-tmuted mt-1 ${isMe ? 'text-right mr-1' : 'ml-1'}`}>
                     {new Date(msg.created_at).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })}
@@ -197,8 +258,24 @@ export default function ChatRoomPage() {
             </div>
           )}
           <form onSubmit={handleSend} className="bg-white border-t border-primary-dark/15 p-3 rounded-b-2xl flex items-center gap-2">
-            <button type="button" className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-tmuted hover:bg-primary-dark/30 transition flex-shrink-0">
-              <ImagePlus size={18} />
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,video/quicktime"
+              onChange={handleFileSelect}
+              className="hidden"
+            />
+            <button
+              type="button"
+              onClick={() => fileRef.current?.click()}
+              disabled={uploading}
+              className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-tmuted hover:bg-primary-dark/30 transition flex-shrink-0 disabled:opacity-40"
+            >
+              {uploading ? (
+                <div className="w-4 h-4 border-2 border-tmuted/30 border-t-tmuted rounded-full animate-spin" />
+              ) : (
+                <ImagePlus size={18} />
+              )}
             </button>
             <input
               type="text"
@@ -221,6 +298,34 @@ export default function ChatRoomPage() {
           </form>
         </div>
       </div>
+
+      {fileError && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setFileError(null)} />
+          <div className="relative bg-white w-full max-w-md mx-4 rounded-2xl overflow-hidden shadow-xl animate-blur-in">
+            <div className="p-5">
+              <div className="flex items-start gap-3 mb-3">
+                <div className="w-10 h-10 rounded-full bg-danger/15 flex items-center justify-center flex-shrink-0">
+                  <AlertTriangle size={20} className="text-danger" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-bold text-tmain mb-1">ส่งไฟล์ไม่ได้</h3>
+                  <p className="text-sm text-tmuted">รูปไม่เกิน 5MB · คลิปไม่เกิน 50MB</p>
+                </div>
+                <button type="button" onClick={() => setFileError(null)} className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-tmain hover:bg-primary/30 transition flex-shrink-0">
+                  <X size={16} />
+                </button>
+              </div>
+              <div className="bg-danger/5 border border-danger/20 rounded-xl px-3 py-2.5 text-sm text-tmain break-words">
+                {fileError}
+              </div>
+              <button type="button" onClick={() => setFileError(null)} className="w-full mt-4 bg-primary hover:bg-primary-dark text-tmain font-semibold py-2.5 rounded-xl text-sm transition">
+                เข้าใจแล้ว
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </AppLayout>
   );
 }

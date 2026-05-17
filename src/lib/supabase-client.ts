@@ -22,6 +22,21 @@ export function createClient(): BrowserClient {
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     );
+
+    // @supabase/ssr reads sessions from cookies but does NOT auto-push the
+    // JWT into the realtime client. Without this, any page that subscribes
+    // to postgres_changes (booking detail, chat, etc.) joins as anon and
+    // RLS silently drops every event. Bind once on first init.
+    _client.auth.getSession().then(({ data: { session } }) => {
+      if (session?.access_token) {
+        _client!.realtime.setAuth(session.access_token);
+      }
+    });
+    _client.auth.onAuthStateChange((_event, session) => {
+      if (session?.access_token) {
+        _client!.realtime.setAuth(session.access_token);
+      }
+    });
   }
   return _client;
 }

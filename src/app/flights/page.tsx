@@ -47,11 +47,16 @@ export default function FlightsPage() {
   // Without the right format aviasales falls back to "no date" and shows
   // no flights for the route.
   const toDDMM = (yyyymmdd: string) => {
+    if (!yyyymmdd) return '';
     const [, mm, dd] = yyyymmdd.split('-');
+    if (!mm || !dd) return '';
     return `${dd}${mm}`;
   };
   const buildLink = (from: string, to: string) => {
-    const depart = toDDMM(departDate || todayStr);
+    // Inline today computation guarantees a valid DDMM even before useEffect
+    // populates state (e.g. user clicks a card during the SSG→hydration gap).
+    const inlineToday = new Date().toISOString().split('T')[0];
+    const depart = toDDMM(departDate || todayStr || inlineToday);
     const ret = returnDate ? toDDMM(returnDate) : '';
     let url = `https://www.aviasales.com/search/${from}${depart}${to}${ret}${passengers}`;
     if (MARKER) url += `?marker=${MARKER}`;

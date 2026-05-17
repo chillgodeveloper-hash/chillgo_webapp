@@ -47,60 +47,48 @@ export async function POST(request: NextRequest) {
         const bookingId = paymentIntent.metadata.bookingId;
         if (!bookingId) break;
 
-        await supabase
-          .from('bookings')
-          .update({ status: 'paid', stripe_payment_intent_id: paymentIntent.id })
-          .eq('id', bookingId);
-
+        // Single UPDATE...RETURNING gets the booking row and flips status in one round-trip.
         const { data: booking } = await supabase
           .from('bookings')
-          .select('*, post:posts!bookings_post_id_fkey(title)')
+          .update({ status: 'paid', stripe_payment_intent_id: paymentIntent.id })
           .eq('id', bookingId)
+          .select('*, post:posts!bookings_post_id_fkey(title)')
           .single();
 
         if (!booking) break;
 
+        // Parallel profile fetch. (Stripe paymentMethods.retrieve removed — was a
+        // 300-500ms extra round-trip just to label the receipt. The PI already
+        // tells us which payment_method_types are allowed.)
         const [{ data: customer }, { data: partner }] = await Promise.all([
           supabase.from('profiles').select('full_name, email').eq('id', booking.customer_id).single(),
           supabase.from('profiles').select('full_name, email').eq('id', booking.partner_id).single(),
         ]);
 
-        let paymentMethodType = 'card';
-        if (paymentIntent.payment_method) {
-          try {
-            const pm = await stripe.paymentMethods.retrieve(paymentIntent.payment_method as string);
-            paymentMethodType = pm.type || 'card';
-          } catch {}
-        }
+        const paymentMethodType = paymentIntent.payment_method_types?.[0] || 'card';
 
-        const { data: existingReceipt } = await supabase
-          .from('receipts')
-          .select('id')
-          .eq('booking_id', bookingId)
-          .maybeSingle();
-
-        if (!existingReceipt) {
-          const { error: receiptErr } = await supabase.from('receipts').insert({
-            booking_id: bookingId,
-            receipt_number: generateReceiptNumber(),
-            customer_id: booking.customer_id,
-            partner_id: booking.partner_id,
-            customer_name: customer?.full_name || '',
-            customer_email: customer?.email || '',
-            partner_name: partner?.full_name || '',
-            partner_email: partner?.email || '',
-            service_title: booking.post?.title || '',
-            booking_date: booking.booking_date,
-            booking_end_date: booking.booking_end_date,
-            guests: booking.guests,
-            amount: booking.total_price || 0,
-            payment_method: paymentMethodType,
-            stripe_payment_intent_id: paymentIntent.id,
-            status: 'paid',
-          });
-          if (receiptErr && receiptErr.code !== '23505') {
-            console.error('Receipt insert error:', receiptErr);
-          }
+        // Single INSERT — let the unique constraint on booking_id reject duplicates.
+        // (Was SELECT-then-INSERT, two round-trips for the common no-conflict case.)
+        const { error: receiptErr } = await supabase.from('receipts').insert({
+          booking_id: bookingId,
+          receipt_number: generateReceiptNumber(),
+          customer_id: booking.customer_id,
+          partner_id: booking.partner_id,
+          customer_name: customer?.full_name || '',
+          customer_email: customer?.email || '',
+          partner_name: partner?.full_name || '',
+          partner_email: partner?.email || '',
+          service_title: booking.post?.title || '',
+          booking_date: booking.booking_date,
+          booking_end_date: booking.booking_end_date,
+          guests: booking.guests,
+          amount: booking.total_price || 0,
+          payment_method: paymentMethodType,
+          stripe_payment_intent_id: paymentIntent.id,
+          status: 'paid',
+        });
+        if (receiptErr && receiptErr.code !== '23505') {
+          console.error('Receipt insert error:', receiptErr);
         }
 
         const serviceName = booking.post?.title || 'บริการ';
