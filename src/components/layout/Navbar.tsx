@@ -56,6 +56,24 @@ export default function Navbar() {
           return [newItem, ...prev].slice(0, 20);
         });
       })
+      // Chat notifications now merge into an existing unread row instead of
+      // inserting a new one per message (avoids a 200-message bell flood), so
+      // also listen for UPDATEs and refresh the preview.
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'notifications', filter: `user_id=eq.${user.id}` }, (payload) => {
+        const updated = payload.new as any;
+        setNotifications((prev) => {
+          const idx = prev.findIndex((n) => n.id === updated.id);
+          if (idx === -1) {
+            if (!updated.is_read) return [updated, ...prev].slice(0, 20);
+            return prev;
+          }
+          const next = [...prev];
+          next[idx] = updated;
+          // Resort so the freshly-bumped item floats to top.
+          next.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+          return next;
+        });
+      })
       .subscribe();
 
     return () => {

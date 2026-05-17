@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import AppLayout from '@/components/layout/AppLayout';
 import { Plane, Search, Calendar, ExternalLink, MapPin, Users, ArrowRight, Globe } from 'lucide-react';
 import FlatpickrInput from '@/components/ui/FlatpickrInput';
@@ -29,11 +29,20 @@ const popularRoutes = [
 ];
 
 export default function FlightsPage() {
-  const todayStr = new Date().toISOString().split('T')[0];
   const [searchText, setSearchText] = useState('');
-  const [departDate, setDepartDate] = useState(todayStr);
+  // Compute today on the client in useEffect — `new Date()` at module init
+  // gets baked into the SSG HTML at build time, so a Vercel build on May 16
+  // would still ship "2026-05-16" as the default to a user visiting on May 20.
+  const [departDate, setDepartDate] = useState('');
+  const [todayStr, setTodayStr] = useState('');
   const [returnDate, setReturnDate] = useState('');
   const [passengers, setPassengers] = useState(1);
+
+  useEffect(() => {
+    const today = new Date().toISOString().split('T')[0];
+    setTodayStr(today);
+    setDepartDate((prev) => prev || today);
+  }, []);
   // Aviasales encodes dates as DDMM (4 digits) in the URL slug — not YYYYMMDD.
   // Without the right format aviasales falls back to "no date" and shows
   // no flights for the route.

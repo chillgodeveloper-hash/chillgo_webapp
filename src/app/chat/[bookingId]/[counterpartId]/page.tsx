@@ -172,9 +172,9 @@ export default function ChatRoomPage() {
                   {!isMe && (
                     <p className="text-xs text-tmuted mb-1 ml-1">{msg.sender?.full_name}</p>
                   )}
-                  <div className={`px-4 py-2.5 rounded-2xl text-sm ${
+                  <div className={`w-fit px-4 py-2.5 rounded-2xl text-sm whitespace-pre-wrap break-words ${
                     isMe
-                      ? 'bg-primary text-dark-DEFAULT rounded-br-md'
+                      ? 'ml-auto bg-primary text-dark-DEFAULT rounded-br-md'
                       : 'bg-white text-tmain border border-primary-dark/20 rounded-bl-md'
                   }`}>
                     {msg.message}
