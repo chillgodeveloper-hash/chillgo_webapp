@@ -21,52 +21,67 @@ export default function ChatPage() {
   const supabase = createClient();
 
   useEffect(() => {
-    // Gate on `user` so the supabase-js auth session has populated the
-    // realtime client with a JWT — without it the WS connects as anon,
-    // RLS on chat_messages (customer_id = auth.uid()) blocks every event,
-    // and the channel silently delivers nothing.
     if (!bookingId || !user) return;
 
-    const fetchMessages = async () => {
+    let channel: ReturnType<typeof supabase.channel> | null = null;
+    let cancelled = false;
+
+    const setup = async () => {
+      // @supabase/ssr reads the session from cookies but does NOT push the
+      // JWT into the realtime client — so the WS channel joins as anon and
+      // RLS on chat_messages (bookings.customer_id = auth.uid()) drops every
+      // event. Explicitly forward the token before subscribing.
+      const { data: { session } } = await supabase.auth.getSession();
+      if (cancelled) return;
+      if (session?.access_token) {
+        supabase.realtime.setAuth(session.access_token);
+      }
+
       const { data, error } = await supabase
         .from('chat_messages')
         .select('*, sender:profiles(*)')
         .eq('booking_id', bookingId)
         .order('created_at', { ascending: true });
+      if (cancelled) return;
       if (error) console.error('[chat] fetch error:', error);
       setMessages(data || []);
+
+      channel = supabase
+        .channel(`chat:${bookingId}:${user.id}:${Math.random().toString(36).slice(2, 8)}`)
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'chat_messages',
+            filter: `booking_id=eq.${bookingId}`,
+          },
+          async (payload) => {
+            const { data } = await supabase
+              .from('chat_messages')
+              .select('*, sender:profiles(*)')
+              .eq('id', payload.new.id)
+              .single();
+            if (data) {
+              setMessages((prev) => prev.some((m) => m.id === data.id) ? prev : [...prev, data]);
+            }
+          }
+        )
+        .subscribe((status, err) => {
+          if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+            console.error('[chat] realtime status:', status, err);
+          }
+        });
     };
 
-    fetchMessages();
-
-    const channel = supabase
-      .channel(`chat:${bookingId}:${user.id}:${Math.random().toString(36).slice(2, 8)}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'chat_messages',
-          filter: `booking_id=eq.${bookingId}`,
-        },
-        async (payload) => {
-          const { data } = await supabase
-            .from('chat_messages')
-            .select('*, sender:profiles(*)')
-            .eq('id', payload.new.id)
-            .single();
-          if (data) {
-            setMessages((prev) => prev.some((m) => m.id === data.id) ? prev : [...prev, data]);
-          }
-        }
-      )
-      .subscribe();
+    setup();
 
     return () => {
+      cancelled = true;
       // Defer removal so the WS finishes its join handshake before teardown —
       // silences the dev "WebSocket is closed before the connection is
       // established" warning that React Strict Mode triggers.
-      setTimeout(() => { supabase.removeChannel(channel); }, 0);
+      setTimeout(() => { if (channel) supabase.removeChannel(channel); }, 0);
     };
   }, [bookingId, user]);
 
