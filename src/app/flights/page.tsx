@@ -29,11 +29,11 @@ const popularRoutes = [
 ];
 
 export default function FlightsPage() {
+  const todayStr = new Date().toISOString().split('T')[0];
   const [searchText, setSearchText] = useState('');
-  const [departDate, setDepartDate] = useState('');
+  const [departDate, setDepartDate] = useState(todayStr);
   const [returnDate, setReturnDate] = useState('');
   const [passengers, setPassengers] = useState(1);
-  const todayStr = new Date().toISOString().split('T')[0];
   // Aviasales encodes dates as DDMM (4 digits) in the URL slug — not YYYYMMDD.
   // Without the right format aviasales falls back to "no date" and shows
   // no flights for the route.

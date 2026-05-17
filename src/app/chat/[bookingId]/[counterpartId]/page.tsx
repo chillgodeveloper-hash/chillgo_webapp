@@ -42,7 +42,7 @@ export default function ChatRoomPage() {
       const [{ data: msgs }, { data: cp }] = await Promise.all([
         supabase
           .from('chat_messages')
-          .select('*, sender:profiles(*)')
+          .select('*, sender:profiles!sender_id(*)')
           .eq('booking_id', bookingId)
           .or(
             `and(sender_id.eq.${user.id},receiver_id.eq.${counterpartId}),` +
@@ -76,7 +76,7 @@ export default function ChatRoomPage() {
 
             const { data } = await supabase
               .from('chat_messages')
-              .select('*, sender:profiles(*)')
+              .select('*, sender:profiles!sender_id(*)')
               .eq('id', m.id)
               .single();
             if (data) {
@@ -118,7 +118,7 @@ export default function ChatRoomPage() {
         receiver_id: counterpartId,
         message: newMessage.trim(),
       })
-      .select('*, sender:profiles(*)')
+      .select('*, sender:profiles!sender_id(*)')
       .single();
 
     if (error) {
