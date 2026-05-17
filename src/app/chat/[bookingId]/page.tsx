@@ -24,11 +24,12 @@ export default function ChatPage() {
     if (!bookingId) return;
 
     const fetchMessages = async () => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('chat_messages')
         .select('*, sender:profiles(*)')
         .eq('booking_id', bookingId)
         .order('created_at', { ascending: true });
+      if (error) console.error('[chat] fetch error:', error);
       setMessages(data || []);
     };
 
