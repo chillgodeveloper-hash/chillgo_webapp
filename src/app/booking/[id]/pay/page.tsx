@@ -22,6 +22,7 @@ export default function PaymentPage() {
   const [paid, setPaid] = useState(false);
   const [error, setError] = useState('');
   const [receipt, setReceipt] = useState<any>(null);
+  const [verifyError, setVerifyError] = useState('');
   const [activeTab, setActiveTab] = useState<PaymentTab>('card');
   const [clientSecret, setClientSecret] = useState('');
   const [stripe, setStripe] = useState<Stripe | null>(null);
@@ -223,11 +224,18 @@ export default function PaymentPage() {
           const res = await fetch('/api/payments/verify', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ bookingId: booking.id }),
+            body: JSON.stringify({
+              bookingId: booking.id,
+              paymentIntentId: result.paymentIntent.id,
+            }),
           });
           const data = await res.json().catch(() => null);
           if (!res.ok) {
             console.error('[pay] verify HTTP error', res.status, data);
+            setVerifyError(data?.error || `Verify failed: HTTP ${res.status}`);
+          } else if (data?.receiptError) {
+            console.error('[pay] receipt insert error from verify', data.receiptError);
+            setVerifyError(`สร้างใบเสร็จไม่สำเร็จ: ${data.receiptError.message || data.receiptError.code}`);
           }
           if (data?.receipt) {
             setReceipt(data.receipt);
@@ -236,6 +244,7 @@ export default function PaymentPage() {
           }
         } catch (e) {
           console.error('[pay] verify failed', e);
+          setVerifyError('เชื่อมต่อเซิร์ฟเวอร์ไม่ได้');
           pollReceipt(booking.id);
         }
       } else if (result?.paymentIntent?.status === 'requires_action') {
@@ -382,6 +391,13 @@ export default function PaymentPage() {
                 <p className="text-tmuted text-sm mb-4">กำลังสร้างใบเสร็จ...</p>
                 <div className="w-8 h-8 border-2 border-primary-dark/30 border-t-secondary rounded-full animate-spin mx-auto" />
                 <p className="text-xs text-tmuted mt-3">กำลังตรวจสอบกับเซิร์ฟเวอร์ อาจใช้เวลาสักครู่</p>
+                {verifyError && (
+                  <div className="mt-4 mx-auto max-w-sm bg-danger/10 border border-danger/20 rounded-xl p-3 text-left">
+                    <p className="text-xs font-semibold text-danger mb-1">เกิดข้อผิดพลาด</p>
+                    <p className="text-xs text-tmain break-words">{verifyError}</p>
+                    <p className="text-[10px] text-tmuted mt-2">การชำระเงินสำเร็จแล้วในระบบ Stripe — แอดมินสามารถออกใบเสร็จได้</p>
+                  </div>
+                )}
                 <button
                   onClick={async () => {
                     if (!booking?.id) return;

@@ -214,12 +214,14 @@ export default function ChatRoomPage() {
             <p className="font-semibold text-sm text-tmain truncate">{counterpartLabel}</p>
             <p className="text-xs text-tmuted">การจอง #{String(bookingId).slice(0, 8)}</p>
           </div>
-          <Link
+          <a
             href={`/booking/${bookingId}`}
+            target="_blank"
+            rel="noopener noreferrer"
             className="flex items-center gap-1 bg-primary/20 hover:bg-primary/30 text-tmain text-xs font-medium px-3 py-2 rounded-lg transition flex-shrink-0"
           >
             <ClipboardList size={14} /> ดูการจอง
-          </Link>
+          </a>
         </div>
 
         <div className="flex-1 overflow-y-auto bg-primary-light p-4 space-y-3">

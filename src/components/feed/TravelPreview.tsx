@@ -20,13 +20,26 @@ const hotelDestinations = [
 ];
 
 export default function TravelPreview() {
+  // Both Aviasales and Hotellook show "no results" when dates are missing.
+  // Default to today (+ tomorrow for check-out) so the link always works.
+  const today = new Date();
+  const tomorrow = new Date(today.getTime() + 86_400_000);
+  const pad = (n: number) => String(n).padStart(2, '0');
+  const ddmm = (d: Date) => `${pad(d.getDate())}${pad(d.getMonth() + 1)}`;
+  const iso = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  const departDDMM = ddmm(today);
+  const checkInISO = iso(today);
+  const checkOutISO = iso(tomorrow);
+
   const buildFlightLink = (from: string, to: string) => {
-    let url = `https://www.aviasales.com/search/${from}${to}1`;
+    // Format: BKK{DDMM}CNX{pax} — without the date Aviasales lands on an empty
+    // search form. (Final "1" is one passenger, default.)
+    let url = `https://www.aviasales.com/search/${from}${departDDMM}${to}1`;
     if (MARKER) url += `?marker=${MARKER}`;
     return url;
   };
   const buildHotelLink = (cityNameEn: string) => {
-    let url = `https://search.hotellook.com/hotels?destination=${encodeURIComponent(cityNameEn)}&adults=2`;
+    let url = `https://search.hotellook.com/hotels?destination=${encodeURIComponent(cityNameEn)}&checkIn=${checkInISO}&checkOut=${checkOutISO}&adults=2`;
     if (MARKER) url += `&marker=${MARKER}`;
     return url;
   };

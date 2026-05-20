@@ -34,10 +34,13 @@ export default function HotelsPage() {
   const [checkOut, setCheckOut] = useState('');
   const [adults, setAdults] = useState(2);
   const todayStr = new Date().toISOString().split('T')[0];
+  const tomorrowStr = new Date(Date.now() + 86_400_000).toISOString().split('T')[0];
   const buildLink = (cityNameEn: string) => {
-    let url = `https://search.hotellook.com/hotels?destination=${encodeURIComponent(cityNameEn)}&adults=${adults}`;
-    if (checkIn) url += `&checkIn=${checkIn}`;
-    if (checkOut) url += `&checkOut=${checkOut}`;
+    // Hotellook needs both dates to render results — fall back to today/tomorrow
+    // when the user clicks a destination without filling in the form.
+    const ci = checkIn || todayStr;
+    const co = checkOut || tomorrowStr;
+    let url = `https://search.hotellook.com/hotels?destination=${encodeURIComponent(cityNameEn)}&checkIn=${ci}&checkOut=${co}&adults=${adults}`;
     if (MARKER) url += `&marker=${MARKER}`;
     return url;
   };

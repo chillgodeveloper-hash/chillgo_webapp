@@ -85,16 +85,29 @@ export default function PostDetailPage() {
   ];
   const categoryLabel = post.category === 'guide' ? '🗺️ ไกด์' : post.category === 'driver' ? '🚗 คนขับรถ' : '🌐 ล่าม';
 
-  // Pull "@lat,lng" out of a Google Maps URL for embedding; goo.gl shortlinks
-  // don't have coords, so we fall back to a text query.
+  // Try a sequence of patterns common in pasted Google Maps URLs.
+  // Shortlinks (maps.app.goo.gl) carry no info; we can only fall back to
+  // location text in that case. If we have nothing usable we return null and
+  // hide the iframe (otherwise Google renders a zoomed-out world map).
   const buildMapEmbedSrc = (): string | null => {
-    if (post.google_maps_link) {
-      const m = post.google_maps_link.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
-      if (m) return `https://www.google.com/maps?q=${m[1]},${m[2]}&z=15&output=embed`;
-      const q = post.google_maps_link.match(/[?&]q=([^&]+)/);
-      if (q) return `https://www.google.com/maps?q=${q[1]}&output=embed`;
+    const url = (post.google_maps_link || '').trim();
+    if (url) {
+      // /maps/place/<name>/@lat,lng or /maps/@lat,lng
+      const at = url.match(/@(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/);
+      if (at) return `https://maps.google.com/maps?q=${at[1]},${at[2]}&z=16&hl=th&output=embed`;
+      // ?q=lat,lng or ?q=place or ?query=
+      const q = url.match(/[?&](?:q|query)=([^&]+)/);
+      if (q) return `https://maps.google.com/maps?q=${q[1]}&z=15&hl=th&output=embed`;
+      // /place/<name>/ (no @lat,lng) — use the slug as a search query
+      const place = url.match(/\/place\/([^/?@]+)/);
+      if (place) return `https://maps.google.com/maps?q=${place[1]}&z=15&hl=th&output=embed`;
+      // ll=lat,lng (older format)
+      const ll = url.match(/[?&]ll=(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/);
+      if (ll) return `https://maps.google.com/maps?q=${ll[1]},${ll[2]}&z=15&hl=th&output=embed`;
     }
-    if (post.location) return `https://www.google.com/maps?q=${encodeURIComponent(post.location)}&output=embed`;
+    if (post.location) {
+      return `https://maps.google.com/maps?q=${encodeURIComponent(post.location)}&z=14&hl=th&output=embed`;
+    }
     return null;
   };
   const mapEmbedSrc = buildMapEmbedSrc();

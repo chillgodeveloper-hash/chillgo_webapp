@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { stripe, createPaymentIntent } from '@/lib/stripe';
-import { createServerSupabase } from '@/lib/supabase-server';
+import { createServerSupabase, createServiceRoleClient } from '@/lib/supabase-server';
 
 export async function POST(request: NextRequest) {
   try {
@@ -59,10 +59,18 @@ export async function POST(request: NextRequest) {
 
     const paymentIntent = await createPaymentIntent(booking.total_price, bookingId, customerEmail);
 
-    await supabase
+    // Service role bypasses RLS — earlier this used the user's session and any
+    // policy/trigger quirk would make the update silently no-op, leaving the
+    // booking without a PI ID. Verify then can't find it and the receipt page
+    // hangs on "กำลังสร้างใบเสร็จ".
+    const admin = createServiceRoleClient();
+    const { error: updateErr } = await admin
       .from('bookings')
       .update({ stripe_payment_intent_id: paymentIntent.id })
       .eq('id', bookingId);
+    if (updateErr) {
+      console.error('[payments] failed to save PI id', updateErr);
+    }
 
     return NextResponse.json({
       clientSecret: paymentIntent.client_secret,

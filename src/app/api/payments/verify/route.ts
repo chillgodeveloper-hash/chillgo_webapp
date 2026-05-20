@@ -22,7 +22,7 @@ function generateReceiptNumber() {
 
 export async function POST(request: NextRequest) {
   try {
-    const { bookingId } = await request.json();
+    const { bookingId, paymentIntentId } = await request.json();
     if (!bookingId) {
       return NextResponse.json({ error: 'bookingId required' }, { status: 400 });
     }
@@ -39,15 +39,30 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'booking not found' }, { status: 404 });
     }
 
-    if (!booking.stripe_payment_intent_id) {
+    // Prefer the PI id the client just confirmed against Stripe — that's the
+    // only reliable signal in dev where the webhook isn't reachable AND the
+    // /api/payments update may have raced.
+    const piId = paymentIntentId || booking.stripe_payment_intent_id;
+    if (!piId) {
       return NextResponse.json({ verified: false, reason: 'no payment intent', status: booking.status });
     }
 
     // Source of truth: Stripe. Even if the webhook didn't fire, this tells us
     // whether the money actually moved.
-    const pi = await stripe.paymentIntents.retrieve(booking.stripe_payment_intent_id);
+    const pi = await stripe.paymentIntents.retrieve(piId);
     if (pi.status !== 'succeeded') {
       return NextResponse.json({ verified: false, paymentStatus: pi.status, status: booking.status });
+    }
+
+    // Sanity-check: PI's metadata.bookingId must match (defense against a
+    // client passing in someone else's PI id).
+    if (pi.metadata?.bookingId && pi.metadata.bookingId !== bookingId) {
+      return NextResponse.json({ error: 'payment intent does not belong to this booking' }, { status: 400 });
+    }
+
+    // Backfill if missing on the row.
+    if (!booking.stripe_payment_intent_id) {
+      await supabase.from('bookings').update({ stripe_payment_intent_id: pi.id }).eq('id', bookingId);
     }
 
     // Flip booking to paid only on the first verify (.neq filter makes this
