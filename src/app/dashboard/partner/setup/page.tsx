@@ -288,7 +288,7 @@ export default function PartnerSetupPage() {
     <div className="min-h-screen bg-primary-light flex items-center justify-center p-4">
       <div className="max-w-lg w-full">
         <div className="flex items-center justify-between mb-4">
-          <button onClick={handleSwitchToCustomer} className="flex items-center gap-1.5 text-sm text-tmuted hover:bg-white/50 transition px-3 py-2 rounded-xl"><ArrowLeft size={16} /> เปลี่ยนเป็นลูกค้า</button>
+          <button onClick={() => router.back()} className="flex items-center gap-1.5 text-sm text-tmuted hover:bg-white/50 transition px-3 py-2 rounded-xl"><ArrowLeft size={16} /> ย้อนกลับ</button>
           <button onClick={handleLogout} className="flex items-center gap-1.5 text-sm text-danger hover:bg-danger/5 transition px-3 py-2 rounded-xl"><LogOut size={16} /> ออกจากระบบ</button>
         </div>
 

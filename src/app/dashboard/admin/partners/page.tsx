@@ -1,15 +1,17 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase-client';
 import AppLayout from '@/components/layout/AppLayout';
-import { UserCheck, Ban, Search, Star, Map, Car } from 'lucide-react';
+import { UserCheck, Ban, Search, Star, ChevronRight } from 'lucide-react';
 
 export default function AdminPartnersPage() {
   const [partners, setPartners] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const supabase = createClient();
+  const router = useRouter();
 
   const fetchPartners = async () => {
     setLoading(true);
@@ -72,11 +74,19 @@ export default function AdminPartnersPage() {
         ) : (
           <div className="space-y-3">
             {filtered.map((partner) => (
-              <div key={partner.id} className="bg-white rounded-2xl p-4 border border-primary-dark/20 shadow-sm">
+              <div
+                key={partner.id}
+                onClick={(e) => {
+                  const target = e.target as HTMLElement;
+                  if (target.closest('button')) return;
+                  router.push(`/dashboard/admin/partners/${partner.id}`);
+                }}
+                className="bg-white rounded-2xl p-4 border border-primary-dark/20 shadow-sm cursor-pointer hover:border-primary hover:shadow-md transition"
+              >
                 <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 rounded-full bg-primary/20 flex items-center justify-center text-primary-text font-bold text-lg flex-shrink-0">
+                  <div className="w-14 h-14 rounded-full bg-primary/20 flex items-center justify-center text-primary-text font-bold text-lg flex-shrink-0 overflow-hidden">
                     {partner.profile?.avatar_url ? (
-                      <img src={partner.profile.avatar_url} alt="" className="w-full h-full rounded-full object-cover" />
+                      <img src={partner.profile.avatar_url} alt="" className="w-full h-full object-cover" />
                     ) : (
                       partner.profile?.full_name?.charAt(0)
                     )}
@@ -106,7 +116,7 @@ export default function AdminPartnersPage() {
                       </span>
                     </div>
                   </div>
-                  <div className="flex gap-2 flex-shrink-0">
+                  <div className="flex items-center gap-2 flex-shrink-0">
                     <button
                       onClick={() => toggleVerify(partner.id, partner.is_verified)}
                       className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium transition ${
@@ -121,6 +131,7 @@ export default function AdminPartnersPage() {
                         <><UserCheck size={14} /> ยืนยัน</>
                       )}
                     </button>
+                    <ChevronRight size={18} className="text-tmuted" />
                   </div>
                 </div>
               </div>

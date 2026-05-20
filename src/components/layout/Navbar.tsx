@@ -4,8 +4,18 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase-client';
 import { useAuthStore } from '@/hooks/useAuthStore';
-import { LogOut, ChevronDown, User, CalendarCheck, MessageCircle, Tag, LayoutDashboard, Bell, CreditCard, Settings, Check } from 'lucide-react';
+import { LogOut, ChevronDown, User, CalendarCheck, MessageCircle, Tag, LayoutDashboard, Bell, CreditCard, Settings, Check, Shield, HelpCircle, RefreshCw } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
+import {
+  EditCustomerProfileModal,
+  SecurityModal,
+  NotificationsModal,
+  HelpModal,
+  SwitchRoleModal,
+  SwitchPartnerModal,
+} from '@/components/profile/ProfileModals';
+
+type ProfileModal = 'edit' | 'security' | 'notifications' | 'help' | 'switch-role' | 'switch-partner' | null;
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -18,6 +28,7 @@ export default function Navbar() {
   const [notifOpen, setNotifOpen] = useState(false);
   const [notifications, setNotifications] = useState<any[]>([]);
   const [notifLoading, setNotifLoading] = useState(false);
+  const [activeProfileModal, setActiveProfileModal] = useState<ProfileModal>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const notifRef = useRef<HTMLDivElement>(null);
 
@@ -287,15 +298,19 @@ export default function Navbar() {
                   onClick={() => setProfileOpen(!profileOpen)}
                   className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/60 hover:bg-white/80 transition"
                 >
-                  <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-tmain font-bold text-sm">
-                    {user.full_name?.charAt(0) || '?'}
+                  <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-tmain font-bold text-sm overflow-hidden">
+                    {user.avatar_url ? (
+                      <img src={user.avatar_url} alt="" className="w-full h-full object-cover" />
+                    ) : (
+                      user.full_name?.charAt(0) || '?'
+                    )}
                   </div>
                   <span className="text-sm font-medium text-tmain hidden sm:inline">{user.full_name}</span>
                   <ChevronDown size={14} className="text-tmain" />
                 </button>
 
                 {profileOpen && (
-                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl border border-primary-dark/20 shadow-lg py-2 animate-fade-in">
+                  <div className="absolute right-0 mt-2 w-60 bg-white rounded-xl border border-primary-dark/20 shadow-lg py-2 animate-fade-in max-h-[80vh] overflow-y-auto">
                     <div className="px-4 py-2 border-b border-primary-dark/10">
                       <p className="text-sm font-medium text-tmain">{user.full_name}</p>
                       <p className="text-xs text-tmuted">{user.email}</p>
@@ -306,27 +321,73 @@ export default function Navbar() {
                         </span>
                       )}
                     </div>
-                    <Link
-                      href="/dashboard/customer"
-                      className="flex items-center gap-2 px-4 py-2.5 text-sm text-tmain hover:bg-primary-light transition"
-                      onClick={() => setProfileOpen(false)}
+
+                    <button
+                      onClick={() => {
+                        setProfileOpen(false);
+                        if (user.role === 'partner') {
+                          router.push('/dashboard/partner/edit');
+                        } else {
+                          setActiveProfileModal('edit');
+                        }
+                      }}
+                      className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-tmain hover:bg-primary-light transition text-left"
                     >
-                      <User size={16} /> โปรไฟล์
-                    </Link>
-                    <Link
-                      href="/booking"
-                      className="flex items-center gap-2 px-4 py-2.5 text-sm text-tmain hover:bg-primary-light transition"
-                      onClick={() => setProfileOpen(false)}
+                      <User size={16} /> แก้ไขโปรไฟล์
+                    </button>
+                    <button
+                      onClick={() => { setProfileOpen(false); setActiveProfileModal('notifications'); }}
+                      className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-tmain hover:bg-primary-light transition text-left"
                     >
-                      <CalendarCheck size={16} /> การจองของฉัน
-                    </Link>
-                    <Link
-                      href="/chat"
-                      className="flex items-center gap-2 px-4 py-2.5 text-sm text-tmain hover:bg-primary-light transition"
-                      onClick={() => setProfileOpen(false)}
+                      <Bell size={16} /> ตั้งค่าการแจ้งเตือน
+                    </button>
+                    <button
+                      onClick={() => { setProfileOpen(false); setActiveProfileModal('security'); }}
+                      className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-tmain hover:bg-primary-light transition text-left"
                     >
-                      <MessageCircle size={16} /> ข้อความ
-                    </Link>
+                      <Shield size={16} /> ความปลอดภัย
+                    </button>
+                    <button
+                      onClick={() => { setProfileOpen(false); setActiveProfileModal('help'); }}
+                      className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-tmain hover:bg-primary-light transition text-left"
+                    >
+                      <HelpCircle size={16} /> ช่วยเหลือ
+                    </button>
+
+                    <div className="border-t border-primary-dark/10 mt-1 pt-1">
+                      <Link
+                        href="/booking"
+                        className="flex items-center gap-2 px-4 py-2.5 text-sm text-tmain hover:bg-primary-light transition"
+                        onClick={() => setProfileOpen(false)}
+                      >
+                        <CalendarCheck size={16} /> การจองของฉัน
+                      </Link>
+                      <Link
+                        href="/chat"
+                        className="flex items-center gap-2 px-4 py-2.5 text-sm text-tmain hover:bg-primary-light transition"
+                        onClick={() => setProfileOpen(false)}
+                      >
+                        <MessageCircle size={16} /> ข้อความ
+                      </Link>
+                    </div>
+
+                    <div className="border-t border-primary-dark/10 mt-1 pt-1">
+                      <button
+                        onClick={() => { setProfileOpen(false); setActiveProfileModal('switch-role'); }}
+                        className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-tmain hover:bg-primary-light transition text-left"
+                      >
+                        <RefreshCw size={16} /> {user.role === 'partner' ? 'เปลี่ยนเป็นลูกค้า' : 'เปลี่ยนเป็นพาร์ทเนอร์'}
+                      </button>
+                      {user.role === 'partner' && (
+                        <button
+                          onClick={() => { setProfileOpen(false); setActiveProfileModal('switch-partner'); }}
+                          className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-tmain hover:bg-primary-light transition text-left"
+                        >
+                          <RefreshCw size={16} /> เปลี่ยน Partner
+                        </button>
+                      )}
+                    </div>
+
                     <div className="border-t border-primary-dark/10 mt-1 pt-1">
                       <button
                         onClick={handleLogout}
@@ -381,6 +442,13 @@ export default function Navbar() {
           </div>
         )}
       </div>
+
+      {activeProfileModal === 'edit' && <EditCustomerProfileModal onClose={() => setActiveProfileModal(null)} />}
+      {activeProfileModal === 'security' && <SecurityModal onClose={() => setActiveProfileModal(null)} />}
+      {activeProfileModal === 'notifications' && <NotificationsModal onClose={() => setActiveProfileModal(null)} />}
+      {activeProfileModal === 'help' && <HelpModal onClose={() => setActiveProfileModal(null)} />}
+      {activeProfileModal === 'switch-role' && <SwitchRoleModal onClose={() => setActiveProfileModal(null)} />}
+      {activeProfileModal === 'switch-partner' && <SwitchPartnerModal onClose={() => setActiveProfileModal(null)} />}
     </nav>
   );
 }
