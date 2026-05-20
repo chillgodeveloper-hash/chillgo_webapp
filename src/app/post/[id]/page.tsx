@@ -270,7 +270,10 @@ export default function PostDetailPage() {
             {relatedPosts.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {relatedPosts.map((rp: any) => {
-                  const rpImage = rp.media_urls?.[0];
+                  const rpUrls: string[] = rp.media_urls || [];
+                  const rpTypes: string[] = rp.media_types || [];
+                  const rpImgIdx = rpUrls.findIndex((_, i) => (rpTypes[i] ?? 'image') === 'image');
+                  const rpImage = rpImgIdx >= 0 ? rpUrls[rpImgIdx] : null;
                   const rpPartner = rp.partner_profile;
                   return (
                     <Link key={rp.id} href={`/post/${rp.id}`} className="bg-white rounded-xl border border-primary-dark/20 overflow-hidden hover:border-primary hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">

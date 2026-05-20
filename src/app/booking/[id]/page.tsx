@@ -80,7 +80,10 @@ export default function BookingDetailPage() {
 
   const status = statusMap[booking.status] || { label: booking.status, color: 'bg-gray-100 text-gray-700' };
   const post = booking.post;
-  const image = post?.media_urls?.[0];
+  const _urls: string[] = post?.media_urls || [];
+  const _types: string[] = post?.media_types || [];
+  const _imgIdx = _urls.findIndex((_, i) => (_types[i] ?? 'image') === 'image');
+  const image = _imgIdx >= 0 ? _urls[_imgIdx] : null;
 
   const backUrl = user?.role === 'admin' ? '/dashboard/admin/bookings' : '/booking';
 
