@@ -119,9 +119,9 @@ export default function ChatListPage() {
   };
 
   const roleLabel = (role: string | null) => {
-    if (role === 'admin') return 'แอดมิน';
-    if (role === 'partner') return 'พาร์ทเนอร์';
-    if (role === 'customer') return 'ลูกค้า';
+    if (role === 'admin') return 'Admin';
+    if (role === 'partner') return 'Partner';
+    if (role === 'customer') return 'Customer';
     return '';
   };
 
@@ -170,7 +170,7 @@ export default function ChatListPage() {
                     <div className="flex items-center justify-between gap-2">
                       <p className="font-semibold text-tmain truncate">
                         {room.counterpartName}
-                        {role && <span className="ml-1 text-[10px] font-normal text-tmuted">· {role}</span>}
+                        {role && <span className="ml-1 text-xs font-normal text-tmuted">({role})</span>}
                       </p>
                       <p className="text-[11px] text-tmuted flex-shrink-0">{getTimeAgo(room.lastTime)}</p>
                     </div>

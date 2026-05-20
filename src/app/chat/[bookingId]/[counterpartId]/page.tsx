@@ -6,12 +6,24 @@ import { createClient } from '@/lib/supabase-client';
 import { useAuthStore } from '@/hooks/useAuthStore';
 import { checkContentViolation, validateFile } from '@/lib/moderation';
 import AppLayout from '@/components/layout/AppLayout';
-import { Send, ImagePlus, ArrowLeft, AlertTriangle, X } from 'lucide-react';
+import { Send, ImagePlus, ArrowLeft, AlertTriangle, X, ClipboardList } from 'lucide-react';
 import { ChatMessage, Profile } from '@/types';
 import Link from 'next/link';
 
 const VIDEO_RE = /\.(mp4|webm|mov|quicktime)(\?|$)/i;
 const isVideoUrl = (url: string) => VIDEO_RE.test(url);
+
+const roleLabel = (role: string | null | undefined): string => {
+  if (role === 'admin') return 'Admin';
+  if (role === 'partner') return 'Partner';
+  if (role === 'customer') return 'Customer';
+  return '';
+};
+const withRole = (name: string | null | undefined, role: string | null | undefined): string => {
+  const r = roleLabel(role);
+  const n = name || (role === 'admin' ? 'แอดมิน' : 'ผู้ใช้');
+  return r ? `${n} (${r})` : n;
+};
 
 export default function ChatRoomPage() {
   const params = useParams();
@@ -185,9 +197,8 @@ export default function ChatRoomPage() {
     }
   };
 
-  const counterpartLabel = counterpart?.full_name
-    || (counterpart?.role === 'admin' ? 'แอดมิน' : 'ผู้ใช้');
-  const counterpartInitial = counterpartLabel.charAt(0) || '?';
+  const counterpartLabel = withRole(counterpart?.full_name, counterpart?.role);
+  const counterpartInitial = (counterpart?.full_name || (counterpart?.role === 'admin' ? 'แอดมิน' : 'ผู้ใช้')).charAt(0) || '?';
 
   return (
     <AppLayout>
@@ -199,10 +210,16 @@ export default function ChatRoomPage() {
           <div className="w-9 h-9 rounded-full bg-primary/20 flex items-center justify-center text-primary-text font-bold text-sm">
             {counterpartInitial}
           </div>
-          <div>
-            <p className="font-semibold text-sm text-tmain">{counterpartLabel}</p>
+          <div className="flex-1 min-w-0">
+            <p className="font-semibold text-sm text-tmain truncate">{counterpartLabel}</p>
             <p className="text-xs text-tmuted">การจอง #{String(bookingId).slice(0, 8)}</p>
           </div>
+          <Link
+            href={`/booking/${bookingId}`}
+            className="flex items-center gap-1 bg-primary/20 hover:bg-primary/30 text-tmain text-xs font-medium px-3 py-2 rounded-lg transition flex-shrink-0"
+          >
+            <ClipboardList size={14} /> ดูการจอง
+          </Link>
         </div>
 
         <div className="flex-1 overflow-y-auto bg-primary-light p-4 space-y-3">
@@ -219,7 +236,7 @@ export default function ChatRoomPage() {
               <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
                 <div className={`max-w-[75%] ${isMe ? 'order-1' : 'order-2'}`}>
                   {!isMe && (
-                    <p className="text-xs text-tmuted mb-1 ml-1">{msg.sender?.full_name}</p>
+                    <p className="text-xs text-tmuted mb-1 ml-1">{withRole(msg.sender?.full_name, (msg.sender as any)?.role)}</p>
                   )}
                   <div className={`w-fit px-4 py-2.5 rounded-2xl text-sm whitespace-pre-wrap break-words ${
                     isMe

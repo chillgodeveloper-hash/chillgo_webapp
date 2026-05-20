@@ -28,6 +28,7 @@ export default function BookingPage() {
   const [reviewBooking, setReviewBooking] = useState<Booking | null>(null);
   const [reviewedIds, setReviewedIds] = useState<string[]>([]);
   const [startingJob, setStartingJob] = useState<string | null>(null);
+  const [adminId, setAdminId] = useState<string | null>(null);
   const { user } = useAuthStore();
   const supabase = createClient();
   const router = useRouter();
@@ -79,6 +80,11 @@ export default function BookingPage() {
 
   useEffect(() => {
     if (!user) return;
+    if (user.role === 'customer') {
+      supabase.from('profiles').select('id').eq('role', 'admin').limit(1).maybeSingle().then(({ data }) => {
+        if (data?.id) setAdminId(data.id);
+      });
+    }
     fetchBookings();
 
     const channel = supabase
@@ -233,6 +239,14 @@ export default function BookingPage() {
                       >
                         <XCircle size={16} /> ยกเลิกการจอง
                       </button>
+                    )}
+                    {user?.role === 'customer' && adminId && (
+                      <Link
+                        href={`/chat/${booking.id}/${adminId}`}
+                        className="flex-1 bg-secondary/15 text-tmain font-medium py-2 rounded-xl text-sm text-center flex items-center justify-center gap-1.5 hover:bg-secondary/25 transition"
+                      >
+                        <MessageCircle size={16} /> แชทกับ Admin
+                      </Link>
                     )}
                     {['confirmed', 'paid', 'in_progress'].includes(booking.status) && (
                       <Link

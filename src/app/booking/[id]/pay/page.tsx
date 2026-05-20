@@ -30,6 +30,26 @@ export default function PaymentPage() {
   const { user } = useAuthStore();
   const supabase = createClient();
 
+  // Belt-and-suspenders: after verify, poll the receipts table directly until
+  // a row appears (webhook may still be racing in, or verify may have logged
+  // an insert error). Stops on success, page unmount, or after maxTries.
+  const pollReceipt = async (bookingId: string, maxTries = 10, intervalMs = 1500) => {
+    for (let i = 0; i < maxTries; i++) {
+      const { data } = await supabase
+        .from('receipts')
+        .select('*')
+        .eq('booking_id', bookingId)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (data) {
+        setReceipt(data);
+        return;
+      }
+      await new Promise((r) => setTimeout(r, intervalMs));
+    }
+  };
+
   useEffect(() => {
     const init = async () => {
       const s = await stripePromise;
@@ -199,20 +219,24 @@ export default function PaymentPage() {
 
       if (result?.paymentIntent?.status === 'succeeded') {
         setPaid(true);
-        // Server-side verify: idempotently flips booking → paid and creates
-        // the receipt. Works even if the webhook is misconfigured (wrong URL,
-        // missing secret, etc.) instead of leaving the UI stuck on "creating
-        // receipt" forever.
         try {
           const res = await fetch('/api/payments/verify', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ bookingId: booking.id }),
           });
-          const data = await res.json();
-          if (data?.receipt) setReceipt(data.receipt);
+          const data = await res.json().catch(() => null);
+          if (!res.ok) {
+            console.error('[pay] verify HTTP error', res.status, data);
+          }
+          if (data?.receipt) {
+            setReceipt(data.receipt);
+          } else {
+            pollReceipt(booking.id);
+          }
         } catch (e) {
           console.error('[pay] verify failed', e);
+          pollReceipt(booking.id);
         }
       } else if (result?.paymentIntent?.status === 'requires_action') {
         setPaying(false);
@@ -228,20 +252,27 @@ export default function PaymentPage() {
     const params = new URLSearchParams(window.location.search);
     if (params.get('status') === 'complete') {
       setPaid(true);
-      // Same server-side verify as the inline path — covers PromptPay /
-      // redirect flows where the client doesn't immediately know success
-      // until Stripe bounces the user back here.
       (async () => {
+        const bookingId = String(id || '');
+        if (!bookingId) return;
         try {
           const res = await fetch('/api/payments/verify', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ bookingId: id }),
+            body: JSON.stringify({ bookingId }),
           });
-          const data = await res.json();
-          if (data?.receipt) setReceipt(data.receipt);
+          const data = await res.json().catch(() => null);
+          if (!res.ok) {
+            console.error('[pay] verify HTTP error', res.status, data);
+          }
+          if (data?.receipt) {
+            setReceipt(data.receipt);
+          } else {
+            pollReceipt(bookingId);
+          }
         } catch (e) {
           console.error('[pay] verify failed', e);
+          pollReceipt(bookingId);
         }
       })();
     }
@@ -350,11 +381,31 @@ export default function PaymentPage() {
               <div className="p-6 text-center">
                 <p className="text-tmuted text-sm mb-4">กำลังสร้างใบเสร็จ...</p>
                 <div className="w-8 h-8 border-2 border-primary-dark/30 border-t-secondary rounded-full animate-spin mx-auto" />
-                <p className="text-xs text-tmuted mt-3">Webhook กำลังประมวลผล อาจใช้เวลาสักครู่</p>
+                <p className="text-xs text-tmuted mt-3">กำลังตรวจสอบกับเซิร์ฟเวอร์ อาจใช้เวลาสักครู่</p>
                 <button
                   onClick={async () => {
-                    const { data } = await supabase.from('receipts').select('*').eq('booking_id', booking?.id).maybeSingle();
-                    if (data) setReceipt(data);
+                    if (!booking?.id) return;
+                    const { data } = await supabase
+                      .from('receipts')
+                      .select('*')
+                      .eq('booking_id', booking.id)
+                      .order('created_at', { ascending: false })
+                      .limit(1)
+                      .maybeSingle();
+                    if (data) {
+                      setReceipt(data);
+                      return;
+                    }
+                    // No row yet — kick off the server-side verify again.
+                    try {
+                      const res = await fetch('/api/payments/verify', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ bookingId: booking.id }),
+                      });
+                      const j = await res.json().catch(() => null);
+                      if (j?.receipt) setReceipt(j.receipt);
+                    } catch (e) { console.error('[pay] manual retry failed', e); }
                   }}
                   className="mt-3 text-sm text-tmuted hover:text-tmain hover:bg-primary/20 px-4 py-1.5 rounded-lg transition"
                 >

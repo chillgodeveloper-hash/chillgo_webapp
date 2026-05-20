@@ -15,7 +15,10 @@ interface PostListItemProps {
 export default function PostListItem({ post, onBook }: PostListItemProps) {
   const [liked, setLiked] = useState(false);
   const partner = post.partner_profile;
-  const image = post.media_urls?.[0];
+  const mediaUrls = post.media_urls || [];
+  const mediaTypes = post.media_types || [];
+  const firstImageIdx = mediaUrls.findIndex((_, i) => (mediaTypes[i] ?? 'image') === 'image');
+  const image = firstImageIdx >= 0 ? mediaUrls[firstImageIdx] : undefined;
   const categoryLabel = post.category === 'guide' ? '🗺️ ไกด์' : post?.category === 'driver' ? '🚗 คนขับรถ' : '🌐 ล่าม';
   const router = useRouter();
 

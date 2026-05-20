@@ -8,7 +8,7 @@ import AppLayout from '@/components/layout/AppLayout';
 import BookingModal from '@/components/booking/BookingModal';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowLeft, MapPin, Star, ChevronLeft, ChevronRight, Share2, Globe } from 'lucide-react';
+import { ArrowLeft, MapPin, Star, ChevronLeft, ChevronRight, Share2, Globe, ExternalLink } from 'lucide-react';
 
 export default function PostDetailPage() {
   const { id } = useParams();
@@ -74,9 +74,30 @@ export default function PostDetailPage() {
     );
   }
 
-  const images = (post.media_urls || []).filter((_: string, i: number) => post.media_types?.[i] === 'image');
-  const videos = (post.media_urls || []).filter((_: string, i: number) => post.media_types?.[i] === 'video');
+  // Mix images first, then videos — videos were previously ignored when any image existed.
+  const mediaUrls: string[] = post.media_urls || [];
+  const mediaTypes: string[] = post.media_types || [];
+  const images = mediaUrls.filter((_: string, i: number) => (mediaTypes[i] ?? 'image') === 'image');
+  const videos = mediaUrls.filter((_: string, i: number) => mediaTypes[i] === 'video');
+  const gallery: { url: string; type: 'image' | 'video' }[] = [
+    ...images.map((url) => ({ url, type: 'image' as const })),
+    ...videos.map((url) => ({ url, type: 'video' as const })),
+  ];
   const categoryLabel = post.category === 'guide' ? '🗺️ ไกด์' : post.category === 'driver' ? '🚗 คนขับรถ' : '🌐 ล่าม';
+
+  // Pull "@lat,lng" out of a Google Maps URL for embedding; goo.gl shortlinks
+  // don't have coords, so we fall back to a text query.
+  const buildMapEmbedSrc = (): string | null => {
+    if (post.google_maps_link) {
+      const m = post.google_maps_link.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+      if (m) return `https://www.google.com/maps?q=${m[1]},${m[2]}&z=15&output=embed`;
+      const q = post.google_maps_link.match(/[?&]q=([^&]+)/);
+      if (q) return `https://www.google.com/maps?q=${q[1]}&output=embed`;
+    }
+    if (post.location) return `https://www.google.com/maps?q=${encodeURIComponent(post.location)}&output=embed`;
+    return null;
+  };
+  const mapEmbedSrc = buildMapEmbedSrc();
 
   return (
     <AppLayout>
@@ -86,35 +107,39 @@ export default function PostDetailPage() {
         </Link>
 
         <div className="space-y-4">
-          {(images.length > 0 || videos.length > 0) && (
+          {gallery.length > 0 && (
             <div className="relative aspect-[16/9] bg-primary/10 rounded-2xl overflow-hidden">
-              {images.length > 0 && (
-                <>
-                  <img src={images[currentImage]} alt={post.title} className="w-full h-full object-cover" />
-                  {images.length > 1 && (
-                    <>
-                      <button onClick={() => setCurrentImage(p => Math.max(0, p - 1))} className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/30 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-black/50 transition"><ChevronLeft size={22} /></button>
-                      <button onClick={() => setCurrentImage(p => Math.min(images.length - 1, p + 1))} className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/30 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-black/50 transition"><ChevronRight size={22} /></button>
-                      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
-                        {images.map((_: string, i: number) => (
-                          <button key={i} onClick={() => setCurrentImage(i)} className={`w-2.5 h-2.5 rounded-full transition ${i === currentImage ? 'bg-white scale-110' : 'bg-white/40'}`} />
-                        ))}
-                      </div>
-                    </>
-                  )}
-                </>
+              {gallery[currentImage].type === 'video' ? (
+                <video key={gallery[currentImage].url} src={gallery[currentImage].url} controls className="w-full h-full object-contain bg-black" />
+              ) : (
+                <img src={gallery[currentImage].url} alt={post.title} className="w-full h-full object-cover" />
               )}
-              {videos.length > 0 && images.length === 0 && (
-                <video src={videos[0]} controls className="w-full h-full object-cover" />
+              {gallery.length > 1 && (
+                <>
+                  <button onClick={() => setCurrentImage(p => Math.max(0, p - 1))} className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/30 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-black/50 transition"><ChevronLeft size={22} /></button>
+                  <button onClick={() => setCurrentImage(p => Math.min(gallery.length - 1, p + 1))} className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/30 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-black/50 transition"><ChevronRight size={22} /></button>
+                  <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
+                    {gallery.map((_, i: number) => (
+                      <button key={i} onClick={() => setCurrentImage(i)} className={`w-2.5 h-2.5 rounded-full transition ${i === currentImage ? 'bg-white scale-110' : 'bg-white/40'}`} />
+                    ))}
+                  </div>
+                </>
               )}
             </div>
           )}
 
-          {images.length > 1 && (
+          {gallery.length > 1 && (
             <div className="flex gap-2 overflow-x-auto pb-1">
-              {images.map((url: string, i: number) => (
-                <button key={i} onClick={() => setCurrentImage(i)} className={`flex-shrink-0 w-16 h-16 rounded-xl overflow-hidden border-2 transition ${i === currentImage ? 'border-secondary' : 'border-transparent opacity-60 hover:opacity-100'}`}>
-                  <img src={url} alt="" className="w-full h-full object-cover" />
+              {gallery.map((m, i: number) => (
+                <button key={i} onClick={() => setCurrentImage(i)} className={`relative flex-shrink-0 w-16 h-16 rounded-xl overflow-hidden border-2 transition bg-black ${i === currentImage ? 'border-secondary' : 'border-transparent opacity-60 hover:opacity-100'}`}>
+                  {m.type === 'video' ? (
+                    <>
+                      <video src={m.url} className="w-full h-full object-cover" muted />
+                      <span className="absolute inset-0 flex items-center justify-center bg-black/30 text-white text-xs">▶</span>
+                    </>
+                  ) : (
+                    <img src={m.url} alt="" className="w-full h-full object-cover" />
+                  )}
                 </button>
               ))}
             </div>
@@ -188,6 +213,34 @@ export default function PostDetailPage() {
                 <span className="text-xs text-secondary font-medium">ดูโปรไฟล์ →</span>
               </div>
             </Link>
+          )}
+
+          {mapEmbedSrc && (
+            <div className="bg-white rounded-2xl border border-primary-dark/20 overflow-hidden">
+              <div className="flex items-center justify-between p-4 border-b border-primary-dark/10">
+                <div className="flex items-center gap-2">
+                  <MapPin size={18} className="text-secondary" />
+                  <p className="font-semibold text-tmain">ตำแหน่งบนแผนที่</p>
+                </div>
+                {post.google_maps_link && (
+                  <a
+                    href={post.google_maps_link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1 text-xs text-secondary hover:underline"
+                  >
+                    เปิดในแอป <ExternalLink size={12} />
+                  </a>
+                )}
+              </div>
+              <iframe
+                src={mapEmbedSrc}
+                className="w-full h-64 border-0"
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                title="Google Maps"
+              />
+            </div>
           )}
 
           {user?.role === 'customer' && (

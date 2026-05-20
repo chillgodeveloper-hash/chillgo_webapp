@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase-client';
 import { useAuthStore } from '@/hooks/useAuthStore';
 import AppLayout from '@/components/layout/AppLayout';
@@ -15,6 +16,7 @@ export default function PartnerDashboard() {
   const [editingPost, setEditingPost] = useState<Post | null>(null);
   const { user, partnerProfile } = useAuthStore();
   const supabase = createClient();
+  const router = useRouter();
 
   const fetchData = async () => {
     if (!partnerProfile) return;
@@ -134,10 +136,22 @@ export default function PartnerDashboard() {
         ) : (
           <div className="space-y-3">
             {posts.map((post) => (
-              <div key={post.id} className="bg-white rounded-2xl p-4 border border-primary-dark/20 flex items-center gap-4">
-                {post.media_urls[0] && (
-                  <img src={post.media_urls[0]} alt="" className="w-16 h-16 rounded-xl object-cover flex-shrink-0" />
-                )}
+              <div
+                key={post.id}
+                onClick={(e) => {
+                  const target = e.target as HTMLElement;
+                  if (target.closest('button') || target.closest('a')) return;
+                  router.push(`/post/${post.id}`);
+                }}
+                className="bg-white rounded-2xl p-4 border border-primary-dark/20 flex items-center gap-4 cursor-pointer hover:border-primary hover:shadow-md transition"
+              >
+                {(() => {
+                  const urls = post.media_urls || [];
+                  const types = post.media_types || [];
+                  const idx = urls.findIndex((_, i) => (types[i] ?? 'image') === 'image');
+                  const thumb = idx >= 0 ? urls[idx] : null;
+                  return thumb ? <img src={thumb} alt="" className="w-16 h-16 rounded-xl object-cover flex-shrink-0" /> : null;
+                })()}
                 <div className="flex-1 min-w-0">
                   <h3 className="font-semibold text-tmain truncate">{post.title}</h3>
                   <p className="text-sm text-tmuted truncate">{post.content}</p>

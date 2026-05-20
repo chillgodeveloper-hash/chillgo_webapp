@@ -103,7 +103,13 @@ export async function POST(request: NextRequest) {
           .from('receipts').select('*').eq('booking_id', bookingId).single();
         receipt = justInserted;
       } else if (insErr) {
-        console.error('verify: receipt insert error', insErr);
+        console.error('verify: receipt insert error', { code: insErr.code, message: insErr.message, details: insErr.details, hint: insErr.hint });
+        return NextResponse.json({
+          verified: true,
+          status: 'paid',
+          receipt: null,
+          receiptError: { code: insErr.code, message: insErr.message },
+        });
       } else {
         receipt = inserted;
       }

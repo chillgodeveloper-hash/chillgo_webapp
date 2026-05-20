@@ -110,7 +110,7 @@ export default function BookingModal({ post, onClose }: BookingModalProps) {
             title: 'คำขอจองใหม่รออนุมัติ',
             message: `${user.full_name} จอง "${post.title}" กรุณาตรวจสอบ`,
             type: 'booking',
-            link: '/dashboard/admin',
+            link: '/dashboard/admin/bookings',
           });
         });
       }

@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { createClient } from '@/lib/supabase-client';
 import { useAuthStore } from '@/hooks/useAuthStore';
 import { checkContentViolation, validateFile } from '@/lib/moderation';
-import { ImagePlus, X, Send, AlertTriangle, MapPin, Search, Link2 } from 'lucide-react';
+import { ImagePlus, X, Send, AlertTriangle, Link2, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface Props {
   onSuccess?: () => void;
@@ -18,20 +18,15 @@ export default function CreatePostForm({ onSuccess, editPost, onCancelEdit, isMo
   const [title, setTitle] = useState(editPost?.title || '');
   const [content, setContent] = useState(editPost?.content || '');
   const [price, setPrice] = useState(editPost?.price_min?.toString() || '');
-  const [locationName, setLocationName] = useState(existingLocation.split(' — ')[0] || '');
-  const [mapLocation, setMapLocation] = useState(existingLocation.split(' — ')[1] || '');
+  const [locationName, setLocationName] = useState(existingLocation.split(' — ')[0] || existingLocation);
   const [googleMapsLink, setGoogleMapsLink] = useState(editPost?.google_maps_link || '');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [showMap, setShowMap] = useState(false);
   const [files, setFiles] = useState<{ file: File; type: 'image' | 'video'; preview: string }[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [violation, setViolation] = useState('');
   const [fileError, setFileError] = useState<string | null>(null);
+  const [lightboxIdx, setLightboxIdx] = useState<number | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
-  const mapRef = useRef<HTMLDivElement>(null);
-  const mapInstanceRef = useRef<any>(null);
-  const markerRef = useRef<any>(null);
   const { user, partnerProfile } = useAuthStore();
   const supabase = createClient();
 
@@ -59,58 +54,6 @@ export default function CreatePostForm({ onSuccess, editPost, onCancelEdit, isMo
     setFiles((prev) => { URL.revokeObjectURL(prev[i].preview); return prev.filter((_, idx) => idx !== i); });
   };
 
-  const initMap = () => {
-    const L = (window as any).L;
-    if (!L || !mapRef.current || mapInstanceRef.current) return;
-    const map = L.map(mapRef.current).setView([13.7563, 100.5018], 6);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OSM' }).addTo(map);
-    mapInstanceRef.current = map;
-
-    map.on('click', (e: any) => {
-      if (markerRef.current) map.removeLayer(markerRef.current);
-      markerRef.current = L.marker([e.latlng.lat, e.latlng.lng]).addTo(map);
-      setMapLocation(`${e.latlng.lat.toFixed(4)}, ${e.latlng.lng.toFixed(4)}`);
-    });
-  };
-
-  const handleSearch = async () => {
-    if (!searchQuery.trim()) return;
-    try {
-      const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(searchQuery)}&format=json&limit=1&accept-language=th`);
-      const data = await res.json();
-      if (data.length > 0) {
-        const { lat, lon, display_name } = data[0];
-        const L = (window as any).L;
-        const map = mapInstanceRef.current;
-        if (map && L) {
-          map.setView([parseFloat(lat), parseFloat(lon)], 14);
-          if (markerRef.current) map.removeLayer(markerRef.current);
-          markerRef.current = L.marker([parseFloat(lat), parseFloat(lon)]).addTo(map);
-          setMapLocation(`${parseFloat(lat).toFixed(4)}, ${parseFloat(lon).toFixed(4)}`);
-          if (!locationName) setLocationName(display_name.split(',')[0]);
-        }
-      } else {
-        setError('ไม่พบสถานที่ที่ค้นหา');
-      }
-    } catch {
-      setError('ค้นหาสถานที่ไม่สำเร็จ');
-    }
-  };
-
-  useEffect(() => {
-    if (!showMap || !mapRef.current) return;
-    if ((window as any).L) { initMap(); return; }
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
-    document.head.appendChild(link);
-    const script = document.createElement('script');
-    script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
-    script.onload = initMap;
-    document.head.appendChild(script);
-    return () => { mapInstanceRef.current = null; markerRef.current = null; };
-  }, [showMap]);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user || !partnerProfile) return;
@@ -133,7 +76,7 @@ export default function CreatePostForm({ onSuccess, editPost, onCancelEdit, isMo
         mediaTypes = [...mediaTypes, type];
       }
 
-      const finalLocation = [locationName, mapLocation].filter(Boolean).join(' — ');
+      const finalLocation = locationName || null;
       const postData: any = {
         title, content, media_urls: mediaUrls, media_types: mediaTypes,
         category: partnerProfile.category,
@@ -149,7 +92,7 @@ export default function CreatePostForm({ onSuccess, editPost, onCancelEdit, isMo
         await supabase.from('posts').insert({ ...postData, partner_id: partnerProfile.id });
       }
 
-      setTitle(''); setContent(''); setPrice(''); setLocationName(''); setMapLocation(''); setGoogleMapsLink(''); setFiles([]);
+      setTitle(''); setContent(''); setPrice(''); setLocationName(''); setGoogleMapsLink(''); setFiles([]);
       onSuccess?.();
       if (isModal) onCancelEdit?.();
     } catch (err: any) {
@@ -184,8 +127,8 @@ export default function CreatePostForm({ onSuccess, editPost, onCancelEdit, isMo
         </div>
       </div>
 
-      <div className="mb-3">
-        <label className="text-xs text-tmuted mb-1 block">ลิงก์ Google Maps (ไม่บังคับ)</label>
+      <div className="mb-4">
+        <label className="text-xs text-tmuted mb-1 block">ลิงก์ Google Maps</label>
         <div className="flex gap-2">
           <div className="flex-1 relative">
             <Link2 size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-tmuted" />
@@ -194,31 +137,95 @@ export default function CreatePostForm({ onSuccess, editPost, onCancelEdit, isMo
         </div>
       </div>
 
-      <div className="mb-4">
-        <label className="text-xs text-tmuted mb-1 block">ตำแหน่งบนแผนที่</label>
-        <div className="flex gap-2">
-          <input type="text" value={mapLocation} readOnly placeholder="กดเลือกจากแผนที่ หรือค้นหาสถานที่" className="flex-1 min-w-0 h-12 px-3 rounded-xl border border-primary-dark/30 text-sm text-tmain bg-primary-light/50" />
-          <button type="button" onClick={() => setShowMap(true)} className="h-12 px-4 bg-primary/20 hover:bg-primary/30 rounded-xl text-sm text-tmain font-medium transition flex items-center gap-1.5">
-            <MapPin size={16} /> เลือก
-          </button>
-        </div>
-      </div>
-
-      {(files.length > 0 || editPost?.media_urls?.length > 0) && (
-        <div className="flex gap-2 overflow-x-auto pb-3 mb-4">
-          {editPost?.media_urls?.map((url: string, i: number) => (
-            <div key={`e-${i}`} className="relative flex-shrink-0 w-24 h-24 rounded-xl overflow-hidden bg-primary/10">
-              {editPost.media_types?.[i] === 'video' ? <video src={url} className="w-full h-full object-cover" /> : <img src={url} alt="" className="w-full h-full object-cover" />}
-            </div>
-          ))}
-          {files.map((f, i) => (
-            <div key={i} className="relative flex-shrink-0 w-24 h-24 rounded-xl overflow-hidden bg-primary/10">
-              {f.type === 'image' ? <img src={f.preview} alt="" className="w-full h-full object-cover" /> : <video src={f.preview} className="w-full h-full object-cover" />}
-              <button type="button" onClick={() => removeFile(i)} className="absolute top-1 right-1 w-5 h-5 bg-black/50 rounded-full flex items-center justify-center text-primary-light"><X size={12} /></button>
-            </div>
-          ))}
-        </div>
-      )}
+      {(files.length > 0 || editPost?.media_urls?.length > 0) && (() => {
+        const existing: { url: string; type: 'image' | 'video' }[] = (editPost?.media_urls || []).map((url: string, i: number) => ({
+          url, type: editPost.media_types?.[i] === 'video' ? 'video' : 'image',
+        }));
+        const news = files.map((f) => ({ url: f.preview, type: f.type }));
+        const combined = [...existing, ...news];
+        return (
+          <div className="flex gap-2 overflow-x-auto pb-3 mb-4">
+            {existing.map((m, i) => (
+              <button
+                key={`e-${i}`}
+                type="button"
+                onClick={() => setLightboxIdx(i)}
+                className="relative flex-shrink-0 w-24 h-24 rounded-xl overflow-hidden bg-primary/10 cursor-zoom-in"
+              >
+                {m.type === 'video' ? (
+                  <>
+                    <video src={m.url} className="w-full h-full object-cover" />
+                    <span className="absolute inset-0 flex items-center justify-center bg-black/30 text-white text-xs">▶</span>
+                  </>
+                ) : (
+                  <img src={m.url} alt="" className="w-full h-full object-cover" />
+                )}
+              </button>
+            ))}
+            {files.map((f, i) => (
+              <div key={i} className="relative flex-shrink-0 w-24 h-24 rounded-xl overflow-hidden bg-primary/10">
+                <button
+                  type="button"
+                  onClick={() => setLightboxIdx(existing.length + i)}
+                  className="block w-full h-full cursor-zoom-in"
+                >
+                  {f.type === 'image' ? (
+                    <img src={f.preview} alt="" className="w-full h-full object-cover" />
+                  ) : (
+                    <>
+                      <video src={f.preview} className="w-full h-full object-cover" />
+                      <span className="absolute inset-0 flex items-center justify-center bg-black/30 text-white text-xs">▶</span>
+                    </>
+                  )}
+                </button>
+                <button type="button" onClick={() => removeFile(i)} className="absolute top-1 right-1 w-5 h-5 bg-black/50 rounded-full flex items-center justify-center text-primary-light"><X size={12} /></button>
+              </div>
+            ))}
+            {lightboxIdx !== null && combined[lightboxIdx] && (
+              <div className="fixed inset-0 z-[80] flex items-center justify-center" onClick={() => setLightboxIdx(null)}>
+                <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" />
+                <button
+                  type="button"
+                  onClick={(e) => { e.stopPropagation(); setLightboxIdx(null); }}
+                  className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/15 hover:bg-white/25 text-white flex items-center justify-center z-10"
+                >
+                  <X size={20} />
+                </button>
+                {combined.length > 1 && lightboxIdx > 0 && (
+                  <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); setLightboxIdx(lightboxIdx - 1); }}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/15 hover:bg-white/25 text-white flex items-center justify-center z-10"
+                  >
+                    <ChevronLeft size={22} />
+                  </button>
+                )}
+                {combined.length > 1 && lightboxIdx < combined.length - 1 && (
+                  <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); setLightboxIdx(lightboxIdx + 1); }}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/15 hover:bg-white/25 text-white flex items-center justify-center z-10"
+                  >
+                    <ChevronRight size={22} />
+                  </button>
+                )}
+                <div className="relative max-w-[92vw] max-h-[88vh] flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
+                  {combined[lightboxIdx].type === 'video' ? (
+                    <video src={combined[lightboxIdx].url} controls autoPlay className="max-w-[92vw] max-h-[88vh]" />
+                  ) : (
+                    <img src={combined[lightboxIdx].url} alt="" className="max-w-[92vw] max-h-[88vh] object-contain" />
+                  )}
+                </div>
+                {combined.length > 1 && (
+                  <span className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white/80 text-sm bg-black/40 px-3 py-1 rounded-full">
+                    {lightboxIdx + 1} / {combined.length}
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
+        );
+      })()}
 
       <div className="flex items-center justify-between pt-3 border-t border-primary-dark/15">
         <div>
@@ -260,30 +267,6 @@ export default function CreatePostForm({ onSuccess, editPost, onCancelEdit, isMo
         </div>
       )}
 
-      {showMap && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center">
-          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowMap(false)} />
-          <div className="relative bg-white w-full max-w-2xl mx-4 rounded-2xl overflow-hidden">
-            <div className="p-4 border-b border-primary-dark/15">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="font-bold text-tmain">เลือกตำแหน่งสถานที่</h3>
-                <button type="button" onClick={() => setShowMap(false)} className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-tmain"><X size={18} /></button>
-              </div>
-              <div className="flex gap-2">
-                <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleSearch())} placeholder="ค้นหาสถานที่ เช่น วัดพระแก้ว, เชียงใหม่" className="flex-1 h-10 px-3 rounded-lg border border-primary-dark/30 text-sm outline-none focus:border-primary" />
-                <button type="button" onClick={handleSearch} className="h-10 px-4 bg-secondary hover:bg-secondary/90 text-tmain rounded-lg text-sm font-medium transition flex items-center gap-1.5">
-                  <Search size={16} /> ค้นหา
-                </button>
-              </div>
-            </div>
-            <div ref={mapRef} className="w-full h-[400px]" />
-            <div className="p-4 flex items-center justify-between">
-              <p className="text-sm text-tmuted">{mapLocation || 'ค้นหาหรือกดบนแผนที่เพื่อเลือกตำแหน่ง'}</p>
-              <button type="button" onClick={() => setShowMap(false)} className="bg-primary hover:bg-primary-dark text-tmain font-semibold px-6 py-2 rounded-xl text-sm transition">ยืนยัน</button>
-            </div>
-          </div>
-        </div>
-      )}
     </>
   );
 
