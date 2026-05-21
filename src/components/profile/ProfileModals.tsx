@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase-client';
 import { useAuthStore } from '@/hooks/useAuthStore';
@@ -330,8 +330,16 @@ export function SwitchPartnerModal({ onClose }: { onClose: () => void }) {
   const supabase = createClient();
   const [selectedCategory, setSelectedCategory] = useState<'guide' | 'driver' | 'translator' | null>(null);
   const [loading, setLoading] = useState(false);
+  const [allProfiles, setAllProfiles] = useState<any[]>([]);
 
   const currentCategory = partnerProfile?.category;
+
+  useEffect(() => {
+    if (!user) return;
+    supabase.from('partner_profiles').select('*').eq('user_id', user.id).then(({ data }) => {
+      setAllProfiles(data || []);
+    });
+  }, [user?.id]);
 
   const handleSwitch = async () => {
     if (!user || !selectedCategory) return;
@@ -381,6 +389,14 @@ export function SwitchPartnerModal({ onClose }: { onClose: () => void }) {
           ].map(cat => {
             const isCurrent = cat.key === currentCategory;
             const isSelected = cat.key === selectedCategory;
+            const profile = allProfiles.find(p => p.category === cat.key);
+            const registered = !!(profile && profile.portfolio_images && profile.portfolio_images.length > 0);
+            const statusLabel = isCurrent ? 'ปัจจุบัน' : registered ? 'ลงทะเบียนแล้ว' : 'ยังไม่ได้ลงทะเบียน';
+            const statusClass = isCurrent
+              ? 'bg-primary/30 text-tmain'
+              : registered
+              ? 'bg-success/15 text-success'
+              : 'bg-warning/15 text-warning';
             return (
               <button
                 key={cat.key}
@@ -396,7 +412,9 @@ export function SwitchPartnerModal({ onClose }: { onClose: () => void }) {
               >
                 <span className="text-2xl block mb-1">{cat.icon}</span>
                 <p className="font-semibold text-xs text-tmain">{cat.label}</p>
-                {isCurrent && <span className="text-[10px] text-tmuted block mt-1">ปัจจุบัน</span>}
+                <span className={`text-[9px] font-medium px-1.5 py-0.5 rounded-full inline-block mt-1.5 ${statusClass}`}>
+                  {statusLabel}
+                </span>
               </button>
             );
           })}
