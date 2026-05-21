@@ -355,23 +355,6 @@ export default function Navbar() {
                     </button>
 
                     <div className="border-t border-primary-dark/10 mt-1 pt-1">
-                      <Link
-                        href="/booking"
-                        className="flex items-center gap-2 px-4 py-2.5 text-sm text-tmain hover:bg-primary-light transition"
-                        onClick={() => setProfileOpen(false)}
-                      >
-                        <CalendarCheck size={16} /> การจองของฉัน
-                      </Link>
-                      <Link
-                        href="/chat"
-                        className="flex items-center gap-2 px-4 py-2.5 text-sm text-tmain hover:bg-primary-light transition"
-                        onClick={() => setProfileOpen(false)}
-                      >
-                        <MessageCircle size={16} /> ข้อความ
-                      </Link>
-                    </div>
-
-                    <div className="border-t border-primary-dark/10 mt-1 pt-1">
                       <button
                         onClick={() => { setProfileOpen(false); setActiveProfileModal('switch-role'); }}
                         className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-tmain hover:bg-primary-light transition text-left"
