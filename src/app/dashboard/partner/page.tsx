@@ -65,7 +65,17 @@ export default function PartnerDashboard() {
 
   const handleDeletePost = async (postId: string) => {
     if (!confirm('ต้องการลบโพสต์นี้?')) return;
-    await supabase.from('posts').delete().eq('id', postId);
+    const { error } = await supabase.from('posts').delete().eq('id', postId);
+    if (error) {
+      // 23503 = foreign_key_violation: โพสต์มีการจอง/ประวัติงานอ้างอยู่ ลบถาวรไม่ได้
+      // เพราะจะทำให้ประวัติการจองและการจ่ายเงินหาย จึง soft-delete (ซ่อน) แทน
+      if (error.code === '23503') {
+        await supabase.from('posts').update({ status: 'removed' }).eq('id', postId);
+        alert('โพสต์นี้มีประวัติการจองอยู่ จึงลบถาวรไม่ได้ ระบบได้ซ่อนโพสต์ออกจากหน้าค้นหาแทนแล้ว');
+      } else {
+        alert('ไม่สามารถลบโพสต์ได้: ' + error.message);
+      }
+    }
     fetchData();
   };
 

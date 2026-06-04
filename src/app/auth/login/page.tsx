@@ -84,6 +84,9 @@ export default function LoginPage() {
                   <input type={showPassword ? 'text' : 'password'} value={password} onChange={(e) => setPassword(e.target.value)} className="w-full h-12 px-4 rounded-xl border border-primary-dark/30 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none text-sm text-tmain pr-12" placeholder="••••••••" required />
                   <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-tmuted">{showPassword ? <EyeOff size={20} /> : <Eye size={20} />}</button>
                 </div>
+                <div className="text-right mt-1">
+                  <Link href="/auth/forgot-password" className="text-xs text-secondary font-medium hover:underline">ลืมรหัสผ่าน?</Link>
+                </div>
               </div>
               <button type="submit" disabled={loading} className="w-full h-12 bg-primary hover:bg-primary-dark text-tmain font-semibold rounded-xl transition flex items-center justify-center gap-2 disabled:opacity-50 shadow-lg shadow-primary/30">
                 {loading ? <div className="w-5 h-5 border-2 border-tmain/30 border-t-tmain rounded-full animate-spin" /> : <><LogIn size={18} /> เข้าสู่ระบบ</>}

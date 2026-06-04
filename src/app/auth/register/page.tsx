@@ -52,7 +52,7 @@ export default function RegisterPage() {
 
     setLoading(true);
 
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -62,7 +62,20 @@ export default function RegisterPage() {
     });
 
     if (error) {
-      setError(error.message);
+      // Supabase ส่งข้อความนี้เมื่ออีเมลถูกใช้ลงทะเบียนแล้ว
+      if (/already registered|already been registered|user already exists/i.test(error.message)) {
+        setError('อีเมลนี้เคยลงทะเบียนแล้ว');
+      } else {
+        setError(error.message);
+      }
+      setLoading(false);
+      return;
+    }
+
+    // กรณีเปิด email confirmation: Supabase ไม่ส่ง error เพื่อกัน email enumeration
+    // แต่จะคืน user ที่มี identities ว่างเมื่ออีเมลนั้นมีบัญชีอยู่แล้ว
+    if (data.user && (data.user.identities?.length ?? 0) === 0) {
+      setError('อีเมลนี้เคยลงทะเบียนแล้ว');
       setLoading(false);
       return;
     }
