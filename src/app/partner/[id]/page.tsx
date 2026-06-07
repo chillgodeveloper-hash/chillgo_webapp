@@ -108,7 +108,7 @@ export default function PartnerProfilePage() {
                 <p className="text-sm text-tmain/70">{partner.profile?.full_name}</p>
                 <div className="flex items-center gap-3 mt-1">
                   <span className="text-xs bg-white/30 px-2 py-0.5 rounded-full text-tmain">
-                    {partner.category === 'guide' ? '🗺️ ไกด์' : partner.category === 'driver' ? '🚗 คนขับรถ' : '🌐 ล่าม'}
+                    {partner.category === 'driver' ? '🚗 คนขับรถ' : '🗺️ ไกด์'}
                   </span>
                   {partner.rating > 0 && (
                     <span className="flex items-center gap-1 text-sm text-tmain">
@@ -185,27 +185,6 @@ export default function PartnerProfilePage() {
               </div>
             )}
 
-            {partner.category === 'translator' && partner.translation_specializations && partner.translation_specializations.length > 0 && (
-              <div>
-                <h3 className="font-semibold text-tmain text-sm mt-3 mb-1">หมวดงานที่เชี่ยวชาญ</h3>
-                <div className="flex flex-wrap gap-1.5">
-                  {partner.translation_specializations.map((s: string) => (
-                    <span key={s} className="text-xs bg-purple-100 text-purple-700 px-2.5 py-1 rounded-full font-medium">{s}</span>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {partner.category === 'translator' && partner.translation_pairs && partner.translation_pairs.length > 0 && (
-              <div>
-                <h3 className="font-semibold text-tmain text-sm mt-3 mb-1">คู่ภาษาที่แปลได้</h3>
-                <div className="space-y-1">
-                  {partner.translation_pairs.map((p: any, i: number) => (
-                    <p key={i} className="text-sm text-tmuted">{p.source} → {p.target} ({p.level}) — {p.mode} {p.experience && `| ${p.experience} ปี`}</p>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
 
           <div className="flex border-b border-primary-dark/10">
@@ -262,7 +241,7 @@ export default function PartnerProfilePage() {
                         <div className="flex-1 min-w-0">
                           <p className="font-medium text-tmain text-sm">{wh.post?.title}</p>
                           <div className="flex flex-wrap gap-2 text-xs text-tmuted mt-1">
-                            <span>{wh.post?.category === 'guide' ? '🗺️ ไกด์' : wh.post?.category === 'driver' ? '🚗 คนขับรถ' : '🌐 ล่าม'}</span>
+                            <span>{wh.post?.category === 'driver' ? '🚗 คนขับรถ' : '🗺️ ไกด์'}</span>
                             {wh.post?.location && <span className="flex items-center gap-0.5"><MapPin size={10} /> {wh.post.location}</span>}
                             <span className="flex items-center gap-0.5"><Calendar size={10} /> {new Date(wh.completed_at).toLocaleDateString('th-TH')}</span>
                           </div>

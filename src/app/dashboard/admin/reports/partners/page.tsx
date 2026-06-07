@@ -47,7 +47,6 @@ export default function PartnersReportPage() {
 
   const guideCount = partners.filter((p) => p.category === 'guide').length;
   const carCount = partners.filter((p) => p.category === 'driver').length;
-  const translatorCount = partners.filter((p) => p.category === 'translator').length;
   const totalRevenue = partners.reduce((sum, p) => sum + p.totalRevenue, 0);
 
   return (
@@ -70,11 +69,6 @@ export default function PartnersReportPage() {
             <Car size={20} className="text-info mb-2" />
             <p className="text-2xl font-bold text-tmain">{carCount}</p>
             <p className="text-xs text-tmuted">คนขับรถ</p>
-          </div>
-          <div className="bg-white rounded-2xl p-5 border border-primary-dark/20">
-            <Users size={20} className="text-purple-500 mb-2" />
-            <p className="text-2xl font-bold text-tmain">{translatorCount}</p>
-            <p className="text-xs text-tmuted">ล่าม</p>
           </div>
           <div className="bg-white rounded-2xl p-5 border border-primary-dark/20">
             <TrendingUp size={20} className="text-success mb-2" />
@@ -126,7 +120,7 @@ export default function PartnersReportPage() {
                         <span className={`text-xs px-2 py-0.5 rounded-full ${
                           p.category === 'guide' ? 'bg-secondary/20 text-tmain' : 'bg-info/20 text-tmain'
                         }`}>
-                          {p.category === 'guide' ? '🗺️ ไกด์' : p.category === 'driver' ? '🚗 คนขับรถ' : '🌐 ล่าม'}
+                          {p.category === 'driver' ? '🚗 คนขับรถ' : '🗺️ ไกด์'}
                         </span>
                       </td>
                       <td className="py-3 px-4 text-center">

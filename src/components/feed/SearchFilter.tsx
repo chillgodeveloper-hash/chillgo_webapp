@@ -52,7 +52,6 @@ export default function SearchFilter({ filters, onChange, onReset }: SearchFilte
           <button onClick={() => update('category', '')} className={`flex-1 h-10 rounded-lg text-xs font-medium transition ${filters.category === '' ? 'bg-secondary text-tmain' : 'bg-primary/20 text-tmain hover:bg-primary/30'}`}>ทั้งหมด</button>
           <button onClick={() => update('category', 'guide')} className={`flex-1 h-10 rounded-lg text-xs font-medium transition ${filters.category === 'guide' ? 'bg-secondary text-tmain' : 'bg-primary/20 text-tmain hover:bg-primary/30'}`}>🗺️ ไกด์</button>
           <button onClick={() => update('category', 'driver')} className={`flex-1 h-10 rounded-lg text-xs font-medium transition ${filters.category === 'driver' ? 'bg-secondary text-tmain' : 'bg-primary/20 text-tmain hover:bg-primary/30'}`}>🚗 คนขับรถ</button>
-          <button onClick={() => update('category', 'translator')} className={`flex-1 h-10 rounded-lg text-xs font-medium transition ${filters.category === 'translator' ? 'bg-secondary text-tmain' : 'bg-primary/20 text-tmain hover:bg-primary/30'}`}>🌐 ล่าม</button>
         </div>
       </div>
 

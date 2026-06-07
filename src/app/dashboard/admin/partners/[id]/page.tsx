@@ -80,7 +80,7 @@ export default function AdminPartnerDetail() {
   }
 
   const cat = partner.category;
-  const catLabel = cat === 'guide' ? '🗺️ ไกด์' : cat === 'driver' ? '🚗 คนขับรถ' : '🌐 ล่าม / นักแปล';
+  const catLabel = cat === 'driver' ? '🚗 คนขับรถ' : '🗺️ ไกด์';
   const profile = partner.profile;
 
   return (
@@ -249,54 +249,6 @@ export default function AdminPartnerDetail() {
                 <Field label="วันสิ้นสุด พ.ร.บ." value={partner.vehicle_insurance_compulsory_expiry} />
                 <Field label="ประกันภัยภาคสมัครใจ" value={partner.vehicle_insurance_voluntary} />
               </div>
-            </Section>
-          )}
-
-          {cat === 'translator' && (
-            <Section icon={FileText} title="ข้อมูลการแปลและคุณวุฒิ">
-              <div className="grid grid-cols-2 gap-3">
-                <Field label="Passport No." value={partner.passport_no} />
-                <Field label="ระดับการศึกษา" value={partner.education_level} />
-                <Field label="สาขาวิชา" value={partner.education_major} />
-                <Field label="ปริมาณงาน/วัน" value={partner.daily_capacity} />
-                <Field label="ค่าจ้าง/คำ" value={partner.rate_per_word} />
-                <Field label="เวลาทำงาน" value={partner.working_hours} />
-                <Field label="รับงานด่วน" value={partner.rush_job_available ? 'ใช่' : 'ไม่'} />
-              </div>
-              {partner.translation_specializations?.length > 0 && (
-                <div>
-                  <p className="text-[11px] text-tmuted uppercase tracking-wide mb-2">หมวดงานที่เชี่ยวชาญ</p>
-                  <div className="flex flex-wrap gap-2">
-                    {partner.translation_specializations.map((s: string, i: number) => <span key={i} className="text-xs bg-secondary/15 text-tmain px-2.5 py-1 rounded-full">{s}</span>)}
-                  </div>
-                </div>
-              )}
-              {partner.translation_pairs?.length > 0 && (
-                <div>
-                  <p className="text-[11px] text-tmuted uppercase tracking-wide mb-2">คู่ภาษา</p>
-                  <div className="space-y-2">
-                    {partner.translation_pairs.map((p: any, i: number) => (
-                      <div key={i} className="bg-primary-light rounded-xl p-3 text-sm">
-                        <p className="font-medium text-tmain">{p.source} → {p.target}</p>
-                        <p className="text-tmuted text-xs">{p.level} · {p.mode} {p.experience && `· ${p.experience} ปี`}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-              {partner.test_scores?.length > 0 && (
-                <div>
-                  <p className="text-[11px] text-tmuted uppercase tracking-wide mb-2">ใบรับรอง</p>
-                  <div className="space-y-2">
-                    {partner.test_scores.map((t: any, i: number) => (
-                      <div key={i} className="bg-primary-light rounded-xl p-3 text-sm">
-                        <p className="font-medium text-tmain">{t.test_name} · {t.score}</p>
-                        <p className="text-tmuted text-xs">{t.institution} {t.year && `· ${t.year}`} {t.expiry && `· หมดอายุ ${t.expiry}`}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
             </Section>
           )}
 

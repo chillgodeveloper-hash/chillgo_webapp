@@ -24,7 +24,7 @@ export default function FeedPage() {
 
       <div className="max-w-7xl mx-auto px-4 py-12 animate-blur-in">
         <h2 className="font-display text-2xl font-bold text-tmain mb-6 text-center">บริการยอดนิยม</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <button
             onClick={() => goToSearch({ category: 'guide', location: '', date: '', time: '' })}
             className="bg-white rounded-2xl border border-primary-dark/20 p-5 text-center cursor-pointer hover:border-primary hover:shadow-md transition-all"
@@ -40,14 +40,6 @@ export default function FeedPage() {
             <div className="text-4xl mb-2">🚗</div>
             <h3 className="font-bold text-tmain text-sm">คนขับรถ</h3>
             <p className="text-xs text-tmuted mt-1">คนขับรถมืออาชีพทั่วประเทศ</p>
-          </button>
-          <button
-            onClick={() => goToSearch({ category: 'translator', location: '', date: '', time: '' })}
-            className="bg-white rounded-2xl border border-primary-dark/20 p-5 text-center cursor-pointer hover:border-primary hover:shadow-md transition-all"
-          >
-            <div className="text-4xl mb-2">🌐</div>
-            <h3 className="font-bold text-tmain text-sm">ล่าม / นักแปล</h3>
-            <p className="text-xs text-tmuted mt-1">แปลเอกสาร ล่ามสด ซับไตเติ้ล</p>
           </button>
           <button
             onClick={() => goToSearch({ category: '', location: '', date: '', time: '' })}

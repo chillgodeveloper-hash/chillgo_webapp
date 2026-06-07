@@ -21,7 +21,7 @@ export default function PostCard({ post, onBook }: PostCardProps) {
   const images = mediaUrls.filter((_, i) => mediaTypes[i] === 'image');
   const videos = mediaUrls.filter((_, i) => mediaTypes[i] === 'video');
 
-  const categoryLabel = post.category === 'guide' ? '🗺️ ไกด์' : post?.category === 'driver' ? '🚗 คนขับรถ' : '🌐 ล่าม';
+  const categoryLabel = post?.category === 'driver' ? '🚗 คนขับรถ' : '🗺️ ไกด์';
   const categoryColor = post.category === 'guide' ? 'bg-secondary/10 text-secondary' : 'bg-info/10 text-info';
 
   return (

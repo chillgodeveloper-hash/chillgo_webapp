@@ -19,7 +19,7 @@ export default function PostListItem({ post, onBook }: PostListItemProps) {
   const mediaTypes = post.media_types || [];
   const firstImageIdx = mediaUrls.findIndex((_, i) => (mediaTypes[i] ?? 'image') === 'image');
   const image = firstImageIdx >= 0 ? mediaUrls[firstImageIdx] : undefined;
-  const categoryLabel = post.category === 'guide' ? '🗺️ ไกด์' : post?.category === 'driver' ? '🚗 คนขับรถ' : '🌐 ล่าม';
+  const categoryLabel = post?.category === 'driver' ? '🚗 คนขับรถ' : '🗺️ ไกด์';
   const router = useRouter();
 
   const handleCardClick = (e: React.MouseEvent) => {

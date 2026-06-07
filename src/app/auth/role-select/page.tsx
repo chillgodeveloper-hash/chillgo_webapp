@@ -4,11 +4,11 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase-client';
 import { useAuthStore } from '@/hooks/useAuthStore';
-import { Map, Car, ShoppingBag, ArrowRight, LogOut, Languages } from 'lucide-react';
+import { Map, Car, ShoppingBag, ArrowRight, LogOut } from 'lucide-react';
 
 export default function RoleSelectionPage() {
   const [selectedRole, setSelectedRole] = useState<'customer' | 'partner' | null>(null);
-  const [selectedCategory, setSelectedCategory] = useState<'guide' | 'driver' | 'translator' | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<'guide' | 'driver' | null>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const supabase = createClient();
@@ -53,7 +53,6 @@ export default function RoleSelectionPage() {
   const categories = [
     { key: 'guide' as const, icon: Map, label: 'ไกด์นำเที่ยว', desc: 'นำเที่ยว ให้ข้อมูล ดูแลลูกค้า', color: 'text-secondary' },
     { key: 'driver' as const, icon: Car, label: 'คนขับรถ', desc: 'ขับรถนำเที่ยว รับ-ส่ง ลูกค้า', color: 'text-info' },
-    { key: 'translator' as const, icon: Languages, label: 'ล่าม / นักแปล', desc: 'แปลเอกสาร ล่ามสด ซับไตเติ้ล', color: 'text-purple-500' },
   ];
 
   return (
@@ -90,7 +89,7 @@ export default function RoleSelectionPage() {
               </div>
               <div>
                 <h3 className="text-lg font-bold text-tmain">ลูกค้า (Customer)</h3>
-                <p className="text-sm text-tmuted">ค้นหาและจองบริการไกด์ คนขับรถ ล่าม</p>
+                <p className="text-sm text-tmuted">ค้นหาและจองบริการไกด์ คนขับรถ</p>
               </div>
             </div>
           </button>
@@ -111,7 +110,7 @@ export default function RoleSelectionPage() {
               </div>
               <div>
                 <h3 className="text-lg font-bold text-tmain">พาร์ทเนอร์ (Partner)</h3>
-                <p className="text-sm text-tmuted">เสนอบริการไกด์ คนขับรถ หรือล่าม</p>
+                <p className="text-sm text-tmuted">เสนอบริการไกด์ คนขับรถ</p>
               </div>
             </div>
           </button>

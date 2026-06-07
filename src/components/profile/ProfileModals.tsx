@@ -231,7 +231,7 @@ export function HelpModal({ onClose }: { onClose: () => void }) {
 export function SwitchRoleModal({ onClose }: { onClose: () => void }) {
   const { user, setUser, setPartnerProfile } = useAuthStore();
   const supabase = createClient();
-  const [selectedCategory, setSelectedCategory] = useState<'guide' | 'driver' | 'translator' | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<'guide' | 'driver' | null>(null);
   const [loading, setLoading] = useState(false);
 
   const isPartner = user?.role === 'partner';
@@ -307,8 +307,8 @@ export function SwitchRoleModal({ onClose }: { onClose: () => void }) {
               <p className="text-tmain font-semibold mb-2">เปลี่ยนเป็นโหมดพาร์ทเนอร์</p>
               <p className="text-sm text-tmuted">เลือกประเภทบริการที่ต้องการ</p>
             </div>
-            <div className="grid grid-cols-3 gap-3">
-              {([['guide', '🗺️', 'ไกด์'], ['driver', '🚗', 'คนขับรถ'], ['translator', '🌐', 'ล่าม']] as const).map(([key, icon, label]) => (
+            <div className="grid grid-cols-2 gap-3">
+              {([['guide', '🗺️', 'ไกด์'], ['driver', '🚗', 'คนขับรถ']] as const).map(([key, icon, label]) => (
                 <button key={key} onClick={() => setSelectedCategory(key)} className={`p-4 rounded-xl border-2 text-center transition-all ${selectedCategory === key ? 'border-primary bg-primary/20' : 'border-primary-dark/30 hover:bg-primary/10'}`}>
                   <span className="text-2xl block mb-1">{icon}</span>
                   <p className="font-semibold text-xs text-tmain">{label}</p>
@@ -328,7 +328,7 @@ export function SwitchRoleModal({ onClose }: { onClose: () => void }) {
 export function SwitchPartnerModal({ onClose }: { onClose: () => void }) {
   const { user, partnerProfile, setPartnerProfile } = useAuthStore();
   const supabase = createClient();
-  const [selectedCategory, setSelectedCategory] = useState<'guide' | 'driver' | 'translator' | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<'guide' | 'driver' | null>(null);
   const [loading, setLoading] = useState(false);
   const [allProfiles, setAllProfiles] = useState<any[]>([]);
 
@@ -381,11 +381,10 @@ export function SwitchPartnerModal({ onClose }: { onClose: () => void }) {
     <ModalWrapper title="เปลี่ยนประเภทพาร์ทเนอร์" onClose={onClose}>
       <div className="space-y-4">
         <p className="text-sm font-medium text-tmain">เลือกประเภทที่ต้องการ</p>
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-2 gap-3">
           {[
             { key: 'guide' as const, icon: '🗺️', label: 'ไกด์' },
             { key: 'driver' as const, icon: '🚗', label: 'คนขับรถ' },
-            { key: 'translator' as const, icon: '🌐', label: 'ล่าม/นักแปล' },
           ].map(cat => {
             const isCurrent = cat.key === currentCategory;
             const isSelected = cat.key === selectedCategory;

@@ -83,7 +83,7 @@ export default function PostDetailPage() {
     ...images.map((url) => ({ url, type: 'image' as const })),
     ...videos.map((url) => ({ url, type: 'video' as const })),
   ];
-  const categoryLabel = post.category === 'guide' ? '🗺️ ไกด์' : post.category === 'driver' ? '🚗 คนขับรถ' : '🌐 ล่าม';
+  const categoryLabel = post.category === 'driver' ? '🚗 คนขับรถ' : '🗺️ ไกด์';
 
   // Try a sequence of patterns common in pasted Google Maps URLs.
   // Shortlinks (maps.app.goo.gl) carry no info; we can only fall back to

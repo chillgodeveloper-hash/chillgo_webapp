@@ -317,7 +317,7 @@ export default function Navbar() {
                       <span className="inline-block mt-1 text-xs bg-primary-light text-primary-text px-2 py-0.5 rounded-full capitalize">{user.role}</span>
                       {user.role === 'partner' && partnerProfile?.category && (
                         <span className="inline-block mt-1 ml-1 text-xs bg-secondary/20 text-tmain px-2 py-0.5 rounded-full">
-                          {partnerProfile.category === 'guide' ? 'ไกด์' : partnerProfile.category === 'driver' ? 'คนขับรถ' : 'ล่าม'}
+                          {partnerProfile.category === 'driver' ? 'คนขับรถ' : 'ไกด์'}
                         </span>
                       )}
                     </div>

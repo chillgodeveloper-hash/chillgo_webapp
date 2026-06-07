@@ -85,7 +85,7 @@ export default function SearchHero({ onSearch, compact = false }: SearchHeroProp
           จัดทริปง่าย ๆ สไตล์คุณ
         </h1>
         <p className="text-tmuted text-sm md:text-lg mb-6 md:mb-8">
-          ค้นหาไกด์ คนขับรถ และล่ามมืออาชีพ สำหรับทริปในฝัน
+          ค้นหาไกด์ คนขับรถมืออาชีพ สำหรับทริปในฝัน
         </p>
 
         <div className="bg-white rounded-2xl p-4 md:p-6 shadow-xl border border-primary-dark/20 w-full">
@@ -106,14 +106,6 @@ export default function SearchHero({ onSearch, compact = false }: SearchHeroProp
                 }`}
               >
                 <Car size={16} /> คนขับรถ
-              </button>
-              <button
-                onClick={() => setCategory('translator')}
-                className={`px-4 md:px-6 py-2 md:py-2.5 rounded-lg text-sm font-semibold transition-all flex items-center gap-1.5 ${
-                  category === 'translator' ? 'bg-secondary text-tmain shadow-sm' : 'text-tmain hover:bg-primary/30'
-                }`}
-              >
-                🌐 ล่าม
               </button>
             </div>
           </div>

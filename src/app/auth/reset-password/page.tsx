@@ -12,6 +12,7 @@ export default function ResetPasswordPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
+  const [invalidReason, setInvalidReason] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const supabase = createClient();
@@ -21,24 +22,45 @@ export default function ResetPasswordPage() {
     const init = async () => {
       try {
         const url = new URL(window.location.href);
+        const hash = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+
+        // 1) ถ้า Supabase แนบ error มากับ URL (เช่น ลิงก์หมดอายุ/ถูกใช้แล้ว) ให้แสดงเหตุผลจริง
+        const urlError =
+          url.searchParams.get('error_description') || hash.get('error_description') ||
+          url.searchParams.get('error') || hash.get('error');
+        if (urlError) {
+          setInvalidReason(decodeURIComponent(urlError.replace(/\+/g, ' ')));
+          setStatus('invalid');
+          return;
+        }
+
+        // 2) ฟอร์แมตอีเมลเริ่มต้นรุ่นใหม่: ?token_hash=...&type=recovery (ใช้ข้ามเบราว์เซอร์/อุปกรณ์ได้)
+        const token_hash = url.searchParams.get('token_hash');
+        const type = url.searchParams.get('type');
+        if (token_hash && type) {
+          const { error } = await supabase.auth.verifyOtp({
+            type: type as 'recovery',
+            token_hash,
+          });
+          if (!error) { setStatus('ready'); return; }
+        }
+
+        // 3) PKCE flow: ?code=...
         const code = url.searchParams.get('code');
         if (code) {
           const { error } = await supabase.auth.exchangeCodeForSession(code);
           if (!error) { setStatus('ready'); return; }
         }
 
-        const hash = window.location.hash.substring(1);
-        if (hash) {
-          const params = new URLSearchParams(hash);
-          const access_token = params.get('access_token');
-          const refresh_token = params.get('refresh_token');
-          if (access_token && refresh_token) {
-            const { error } = await supabase.auth.setSession({ access_token, refresh_token });
-            if (!error) { setStatus('ready'); return; }
-          }
+        // 4) Implicit flow: #access_token & #refresh_token
+        const access_token = hash.get('access_token');
+        const refresh_token = hash.get('refresh_token');
+        if (access_token && refresh_token) {
+          const { error } = await supabase.auth.setSession({ access_token, refresh_token });
+          if (!error) { setStatus('ready'); return; }
         }
 
-        // เผื่อ supabase-js ตั้ง session ให้อัตโนมัติแล้ว
+        // 5) เผื่อ supabase-js (detectSessionInUrl) ตั้ง session ให้อัตโนมัติแล้ว
         const { data: { session } } = await supabase.auth.getSession();
         if (session) { setStatus('ready'); return; }
 
@@ -93,6 +115,9 @@ export default function ResetPasswordPage() {
         <div className="bg-white rounded-3xl shadow-xl p-8 max-w-md w-full text-center">
           <h2 className="text-2xl font-bold text-tmain mb-2">ลิงก์ไม่ถูกต้อง</h2>
           <p className="text-tmuted mb-6">ลิงก์อาจหมดอายุหรือถูกใช้ไปแล้ว กรุณาขอลิงก์รีเซ็ตรหัสผ่านใหม่อีกครั้ง</p>
+          {invalidReason && (
+            <p className="text-tmuted/70 text-xs mb-6 -mt-4">({invalidReason})</p>
+          )}
           <Link
             href="/auth/forgot-password"
             className="inline-block bg-primary hover:bg-primary-dark text-tmain font-semibold px-8 py-3 rounded-xl transition shadow-lg shadow-primary/30"
