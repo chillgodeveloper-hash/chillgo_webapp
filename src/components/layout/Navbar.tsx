@@ -223,7 +223,7 @@ export default function Navbar() {
                   </button>
 
                   {notifOpen && (
-                    <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-xl border border-primary-dark/20 shadow-xl animate-fade-in z-50 max-h-[70vh] flex flex-col">
+                    <div className="fixed left-3 right-3 top-[76px] sm:absolute sm:left-auto sm:right-0 sm:top-auto sm:mt-2 sm:w-96 bg-white rounded-xl border border-primary-dark/20 shadow-xl animate-fade-in z-50 max-h-[70vh] flex flex-col">
                       <div className="px-4 py-3 border-b border-primary-dark/10 flex items-center justify-between flex-shrink-0">
                         <h3 className="font-bold text-tmain text-sm">การแจ้งเตือน</h3>
                         {unreadCount > 0 && (

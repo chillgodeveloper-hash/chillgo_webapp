@@ -3,7 +3,7 @@
 import { useRef, useState } from 'react';
 import { createClient } from '@/lib/supabase-client';
 import { validateFile } from '@/lib/moderation';
-import { Camera, ImagePlus, X, Star, Loader2, Save } from 'lucide-react';
+import { Camera, ImagePlus, X, Star, Loader2, Save, AlertTriangle } from 'lucide-react';
 
 export type PartnerCategory = 'guide' | 'driver';
 
@@ -145,6 +145,7 @@ export default function PartnerProfileForm({ category, profile, userId, currentA
   const [newPortfolio, setNewPortfolio] = useState<{ file: File; preview: string }[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [missing, setMissing] = useState<string[]>([]);
 
   const avatarRef = useRef<HTMLInputElement>(null);
   const portfolioRef = useRef<HTMLInputElement>(null);
@@ -178,7 +179,54 @@ export default function PartnerProfileForm({ category, profile, userId, currentA
 
   const numOrNull = (v: string) => (v ? parseInt(v) : null);
 
+  // Per-section required-field validation. Returns the list of what's missing.
+  const validate = (): string[] => {
+    const m: string[] = [];
+    const photoCount = existingPortfolio.length + newPortfolio.length;
+
+    // รูปและวีดีโอ
+    if (!avatarPreview) m.push(isGuide ? 'รูปโปรไฟล์' : 'รูปโปรไฟล์คนขับ');
+    if (photoCount === 0) m.push(isGuide ? 'รูปขณะนำเที่ยว (อย่างน้อย 1 รูป)' : 'รูปรถ (อย่างน้อย 1 รูป)');
+    // ข้อมูลโปรไฟล์
+    if (!form.business_name?.trim()) m.push('ชื่อโปรไฟล์ / ชื่อบริการ');
+
+    if (isGuide) {
+      if (!form.nickname?.trim()) m.push('ชื่อเล่น / ฉายา');
+      if (form.languages_spoken.length === 0) m.push('ภาษาที่สื่อสารได้');
+      if (form.specialties.length === 0) m.push('ความถนัดพิเศษ');
+      if (form.guide_styles.length === 0) m.push('สไตล์การนำเที่ยว');
+      if (!form.coverage_area?.trim()) m.push('พื้นที่ที่ถนัด');
+      if (form.client_types.length === 0) m.push('รับลูกค้าประเภท');
+      if (!form.experience_years) m.push('ประสบการณ์นำเที่ยว');
+    } else {
+      if (!form.vehicle_brand?.trim()) m.push('ยี่ห้อรถ');
+      if (!form.vehicle_model?.trim()) m.push('รุ่นรถ');
+      if (!form.vehicle_seats) m.push('จำนวนที่นั่งสูงสุด');
+      if (form.amenities.length === 0) m.push('สิ่งอำนวยความสะดวก');
+      if (!form.pets_policy) m.push('การรับสัตว์เลี้ยง');
+      if (!form.public_license) m.push('ใบขับขี่สาธารณะ');
+      if (!form.insurance_class) m.push('ประกันภัยรถ');
+      if (!form.driving_experience_years) m.push('ประสบการณ์ขับรถ');
+    }
+
+    // วันที่พร้อมให้บริการ
+    if (form.available_days.length === 0) m.push('วันที่พร้อมให้บริการ');
+    // บัญชีธนาคาร
+    if (!form.bank_name?.trim()) m.push('ชื่อธนาคาร');
+    if (!form.account_name?.trim()) m.push('ชื่อบัญชี');
+    if (!form.account_number?.trim()) m.push('เลขที่บัญชี');
+    // ยอมรับเงื่อนไข
+    if (!form.terms_accepted) m.push('ยอมรับเงื่อนไขการให้บริการ');
+
+    return m;
+  };
+
   const handleSubmit = async () => {
+    const miss = validate();
+    if (miss.length > 0) {
+      setMissing(miss);
+      return;
+    }
     setLoading(true);
     setError('');
     try {
@@ -471,11 +519,41 @@ export default function PartnerProfileForm({ category, profile, userId, currentA
       <button
         type="button"
         onClick={handleSubmit}
-        disabled={loading || !form.business_name || !form.terms_accepted}
+        disabled={loading}
         className="w-full bg-primary hover:bg-primary-dark text-dark-DEFAULT font-bold py-3.5 rounded-2xl transition flex items-center justify-center gap-2 shadow-lg shadow-primary/30 disabled:opacity-40"
       >
         {loading ? <Loader2 size={20} className="animate-spin" /> : <><Save size={18} /> {submitLabel}</>}
       </button>
+
+      {/* Incomplete-form popup */}
+      {missing.length > 0 && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setMissing([])} />
+          <div className="relative bg-white w-full max-w-sm rounded-3xl p-6 animate-slide-up">
+            <div className="w-14 h-14 bg-warning/15 rounded-full flex items-center justify-center mx-auto mb-3">
+              <AlertTriangle size={28} className="text-warning" />
+            </div>
+            <h3 className="text-lg font-bold text-tmain text-center mb-1">กรอกข้อมูลไม่ครบ</h3>
+            <p className="text-sm text-tmuted text-center mb-4">กรุณากรอกข้อมูลต่อไปนี้ให้ครบก่อนลงทะเบียน</p>
+            <div className="bg-warning/5 border border-warning/20 rounded-xl p-3 max-h-52 overflow-y-auto">
+              <ul className="space-y-1.5">
+                {missing.map((item) => (
+                  <li key={item} className="text-sm text-tmain flex items-start gap-2">
+                    <span className="text-warning mt-0.5">•</span> {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <button
+              type="button"
+              onClick={() => setMissing([])}
+              className="w-full mt-4 bg-primary hover:bg-primary-dark text-dark-DEFAULT font-semibold py-3 rounded-2xl transition"
+            >
+              เข้าใจแล้ว
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

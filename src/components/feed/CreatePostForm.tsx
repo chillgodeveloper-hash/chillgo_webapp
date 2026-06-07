@@ -275,10 +275,7 @@ export default function CreatePostForm({ onSuccess, editPost, onCancelEdit, isMo
   return (
     <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-sm border border-primary-dark/20 p-4 lg:p-6">
       <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary-text font-bold text-sm">{user?.full_name?.charAt(0)}</div>
-          <p className="font-semibold text-tmain">{editPost ? 'แก้ไขโพสต์' : 'สร้างโพสต์ใหม่'}</p>
-        </div>
+        <p className="font-semibold text-tmain">{editPost ? 'แก้ไขโพสต์' : 'สร้างโพสต์ใหม่'}</p>
         {editPost && <button type="button" onClick={onCancelEdit} className="text-sm text-tmuted hover:bg-primary/20 px-3 py-1 rounded-lg transition">ยกเลิก</button>}
       </div>
       {formBody}

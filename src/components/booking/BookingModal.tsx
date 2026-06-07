@@ -72,7 +72,7 @@ export default function BookingModal({ post, onClose }: BookingModalProps) {
   // Booking essentials
   const [date, setDate] = useState('');
   const [endDate, setEndDate] = useState('');
-  const [guests, setGuests] = useState(1);
+  const [guests, setGuests] = useState('');
 
   // Section 1 — Traveler info
   const [travelerName, setTravelerName] = useState(user?.full_name || '');
@@ -148,7 +148,8 @@ export default function BookingModal({ post, onClose }: BookingModalProps) {
       return;
     }
 
-    const totalPrice = (post.price_min || 0) * (guests || 1);
+    const guestCount = parseInt(guests) || 1;
+    const totalPrice = (post.price_min || 0) * guestCount;
     const cleanMembers = groupMembers.filter((m) => m.name.trim());
 
     const bookingData = {
@@ -157,7 +158,7 @@ export default function BookingModal({ post, onClose }: BookingModalProps) {
       post_id: post.id,
       booking_date: date,
       booking_end_date: endDate || null,
-      guests,
+      guests: guestCount,
       status: 'pending',
       total_price: totalPrice,
       note: specialExpectations || null,
@@ -266,7 +267,7 @@ export default function BookingModal({ post, onClose }: BookingModalProps) {
               </div>
               <div>
                 <label className="text-sm font-medium text-tmain mb-1 flex items-center gap-1.5"><Users size={14} /> จำนวนผู้เดินทาง</label>
-                <input type="number" value={guests} onChange={(e) => setGuests(parseInt(e.target.value) || 1)} min={1} max={50} className="w-full px-4 py-3 rounded-xl border border-primary-dark/30 focus:border-primary outline-none text-sm" />
+                <input type="number" value={guests} onChange={(e) => setGuests(e.target.value)} min={1} max={50} placeholder="จำนวนผู้เดินทาง" className="w-full px-4 py-3 rounded-xl border border-primary-dark/30 focus:border-primary outline-none text-sm" />
               </div>
             </Section>
 
